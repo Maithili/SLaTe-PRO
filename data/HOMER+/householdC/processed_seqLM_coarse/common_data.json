@@ -1,0 +1,755 @@
+{
+    "dt": 10,
+    "start_time": 360,
+    "end_time": 1440,
+    "activity_stdev":{
+		"wake_up":0.000000,
+		"brushing_teeth":0.102241,
+		"sleep":0.143765,
+		"take_out_trash":0.215017,
+		"wash_dishes_dinner":0.391306,
+		"dinner":0.437026,
+		"nap":0.504847,
+		"going_to_the_bathroom":0.695439,
+		"playing_music":0.704146,
+		"reading":0.770003,
+		"taking_medication":0.788673,
+		"socializing":1.020017,
+		"showering":1.046367,
+		"cleaning":1.181185,
+		"computer_work":1.191946,
+		"watching_tv":1.905529
+    },
+    "inconsistent_activities":[
+        "cleaning", 
+        "computer_work", 
+        "going_to_the_bathroom", 
+        "playing_music", 
+        "reading", 
+        "showering", 
+        "socializing", 
+        "watching_tv"
+    ],
+    "node_classes": [
+        "home",
+        "bathroom",
+        "bathroom_cabinet",
+        "bathroom_counter",
+        "dining_room",
+        "trashcan",
+        "mat",
+        "table",
+        "cupboard",
+        "kitchen_counter",
+        "sink",
+        "kitchen_counter",
+        "kitchen_counter",
+        "bookshelf",
+        "coffe_maker",
+        "microwave",
+        "bedroom",
+        "chair",
+        "bookshelf",
+        "sofa",
+        "filing_cabinet",
+        "home_office",
+        "sofa",
+        "table",
+        "desk",
+        "tvstand",
+        "bookshelf",
+        "outside",
+        "stove",
+        "kitchen_cabinet",
+        "fridge",
+        "toothbrush_holder",
+        "book",
+        "bowl",
+        "cd",
+        "cd_player",
+        "chessboard",
+        "cleaning_solution",
+        "coffee",
+        "coffee_cup",
+        "coffee_filter",
+        "cookingpot",
+        "cup",
+        "cutting_board",
+        "deck_of_cards",
+        "dry_pasta",
+        "food_apple",
+        "food_cereal",
+        "food_cheese",
+        "food_chicken",
+        "food_donut",
+        "food_oatmeal",
+        "food_rice",
+        "food_vegetable",
+        "fork",
+        "fryingpan",
+        "ground_coffee",
+        "hairbrush",
+        "hairdryer",
+        "headset",
+        "juice",
+        "milk",
+        "mug",
+        "notebook",
+        "oil",
+        "pen",
+        "plate",
+        "radio",
+        "spoon",
+        "tea",
+        "tooth_paste",
+        "toothbrush",
+        "trashbag",
+        "vacuum_cleaner",
+        "washcloth",
+        "wine",
+        "wine_glass",
+        "knifeblock",
+        "chair",
+        "food_bread",
+        "food_jam",
+        "food_peanut_butter",
+        "instrument_guitar",
+        "knife",
+        "razor",
+        "remote_control",
+        "shaving_cream",
+        "dresser",
+        "clothes_jacket",
+        "groceries",
+        "mail",
+        "drinking_glass",
+        "painkillers"
+    ],
+    "node_categories": [
+        "home",
+        "Rooms",
+        "Furniture",
+        "Furniture",
+        "Rooms",
+        "Props",
+        "Decor",
+        "Furniture",
+        "Furniture",
+        "Furniture",
+        "Furniture",
+        "Furniture",
+        "Furniture",
+        "Furniture",
+        "Appliances",
+        "Appliances",
+        "Rooms",
+        "Furniture",
+        "Furniture",
+        "Furniture",
+        "Furniture",
+        "Rooms",
+        "Furniture",
+        "Furniture",
+        "Furniture",
+        "Furniture",
+        "Furniture",
+        "Rooms",
+        "Appliances",
+        "Furniture",
+        "Appliances",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "Props",
+        "Furniture",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "Furniture",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects"
+    ],
+    "activities": [
+        "Unknown",
+        "Idle",
+        "nap",
+        "getting_dressed",
+        "sleep",
+        "socializing",
+        "wash_dishes_lunch",
+        "playing_music",
+        "breakfast",
+        "lunch",
+        "watching_tv",
+        "wake_up",
+        "leave_home",
+        "wash_dishes_dinner",
+        "computer_work",
+        "take_out_trash",
+        "come_home",
+        "cleaning",
+        "taking_medication",
+        "listening_to_music",
+        "reading",
+        "dinner",
+        "wash_dishes_breakfast",
+        "going_to_the_bathroom",
+        "showering",
+        "brushing_teeth"
+    ],
+    "activity_conversion": {
+        "to_coarse": {
+            "wake_up": "wake_up",
+            "brushing_teeth": "brushing_teeth",
+            "socializing": "socializing",
+            "take_out_trash": "take_out_trash",
+            "computer_work": "computer_work",
+            "breakfast": "breakfast",
+            "wash_dishes_breakfast": "wash_dishes_breakfast",
+            "cleaning": "cleaning",
+            "reading": "reading",
+            "going_to_the_bathroom": "going_to_the_bathroom",
+            "nap": "nap",
+            "listening_to_music": "listening_to_music",
+            "showering": "showering",
+            "dinner": "dinner",
+            "wash_dishes_dinner": "wash_dishes_dinner",
+            "sleep": "sleep",
+            "getting_dressed": "getting_dressed",
+            "watching_tv": "watching_tv",
+            "lunch": "lunch",
+            "wash_dishes_lunch": "wash_dishes_lunch",
+            "playing_music": "playing_music",
+            "leave_home": "leave_home",
+            "come_home": "come_home",
+            "taking_medication": "taking_medication"
+        },
+        "to_fine": {
+            "wake_up": [
+                "Wakeup"
+            ],
+            "brushing_teeth": [
+                "Brush teeth"
+            ],
+            "socializing": [
+                "Cleanup",
+                "Cleanup wine",
+                "Greet friends",
+                "Socialize",
+                "Prepare dessert",
+                "Prepare games",
+                "Prepare coffee",
+                "Return games",
+                "Prepare wine",
+                "Prepare tea",
+                "Cleanup dessert"
+            ],
+            "take_out_trash": [
+                "Throw trash",
+                "Throw away apple"
+            ],
+            "computer_work": [
+                "Desk work"
+            ],
+            "breakfast": [
+                "Eat Oatmeal",
+                "Set coffee on table",
+                "Eat Cereal",
+                "Prepare Oatmeal",
+                "Prepare Coffee",
+                "Putaway Oatmeal",
+                "Putaway Things",
+                "Eat Oatmeal and Drink Juice",
+                "Return Coffee",
+                "Grab juice",
+                "Prepare Cereal",
+                "Putaway Cereal"
+            ],
+            "wash_dishes_breakfast": [
+                "Wash filter",
+                "Wash Bowl and Spoon",
+                "Wash mug"
+            ],
+            "cleaning": [
+                "Disinfect Surfaces",
+                "Clean kitchen cabinets",
+                "Vaccuum Clean"
+            ],
+            "reading": [
+                "Get Book",
+                "Putaway Book",
+                "Read"
+            ],
+            "going_to_the_bathroom": [
+                "Use bathroom"
+            ],
+            "nap": [
+                "Take a Nap",
+                "Wakeup"
+            ],
+            "listening_to_music": [
+                "Listen to radio",
+                "Putaway CD Player",
+                "Setup CD Player",
+                "Listen to music"
+            ],
+            "showering": [
+                "Dry hair",
+                "Take Shower"
+            ],
+            "dinner": [
+                "Heat up pans",
+                "Eat dinner",
+                "Cook Dinner",
+                "Cleanup table",
+                "Prepare Dinner Ingredients",
+                "Set Dinner Table"
+            ],
+            "wash_dishes_dinner": [
+                "Wash Dishes"
+            ],
+            "sleep": [
+                "Sleeping"
+            ],
+            "getting_dressed": [
+                "Shave",
+                "Put deodorant"
+            ],
+            "watching_tv": [
+                "Watch TV",
+                "Sit to watch TV",
+                "Putaway TV remote"
+            ],
+            "lunch": [
+                "Set table",
+                "Eat",
+                "Prepare Lunch",
+                "Cleanup Table"
+            ],
+            "wash_dishes_lunch": [
+                "Wash Dishes"
+            ],
+            "playing_music": [
+                "Play Guitar"
+            ],
+            "leave_home": [
+                "Wash face",
+                "Puton Jacket",
+                "Leave Home",
+                "Leave"
+            ],
+            "come_home": [
+                "Putaway Mail and Groceries",
+                "Return Home",
+                "Come Home",
+                "Takeoff Jacket"
+            ],
+            "taking_medication": [
+                "Putaway Medicines",
+                "Prepare Medicines",
+                "Take Medicines"
+            ]
+        }
+    },
+    "edge_keys": [
+        "ON",
+        "INSIDE"
+    ],
+    "static_nodes": [
+        17,
+        18,
+        114,
+        117,
+        119,
+        120,
+        122,
+        123,
+        124,
+        194,
+        196,
+        198,
+        200,
+        269,
+        270,
+        272,
+        273,
+        275,
+        1004,
+        271,
+        1008
+    ],
+    "ignored_node_classes": [
+        "wall",
+        "light",
+        "ceiling",
+        "floor",
+        "curtain",
+        "maindoor"
+    ],
+    "static_node_categories": [
+        "Rooms",
+        "Furniture",
+        "Decor",
+        "Appliances",
+        "Home"
+    ],
+    "dataset_type": "HOMER",
+    "multiple_activities": false,
+    "index_list": {
+        "train": [
+            [
+                "057.pt",
+                109
+            ],
+            [
+                "044.pt",
+                109
+            ],
+            [
+                "045.pt",
+                109
+            ],
+            [
+                "030.pt",
+                109
+            ],
+            [
+                "043.pt",
+                109
+            ],
+            [
+                "046.pt",
+                109
+            ],
+            [
+                "020.pt",
+                109
+            ],
+            [
+                "052.pt",
+                109
+            ],
+            [
+                "035.pt",
+                109
+            ],
+            [
+                "003.pt",
+                109
+            ],
+            [
+                "048.pt",
+                109
+            ],
+            [
+                "017.pt",
+                109
+            ],
+            [
+                "059.pt",
+                109
+            ],
+            [
+                "037.pt",
+                109
+            ],
+            [
+                "036.pt",
+                109
+            ],
+            [
+                "060.pt",
+                109
+            ],
+            [
+                "006.pt",
+                109
+            ],
+            [
+                "034.pt",
+                109
+            ],
+            [
+                "011.pt",
+                109
+            ],
+            [
+                "058.pt",
+                109
+            ],
+            [
+                "041.pt",
+                109
+            ],
+            [
+                "025.pt",
+                109
+            ],
+            [
+                "039.pt",
+                109
+            ],
+            [
+                "049.pt",
+                109
+            ],
+            [
+                "054.pt",
+                109
+            ],
+            [
+                "015.pt",
+                109
+            ],
+            [
+                "007.pt",
+                109
+            ],
+            [
+                "055.pt",
+                109
+            ],
+            [
+                "004.pt",
+                109
+            ],
+            [
+                "040.pt",
+                109
+            ],
+            [
+                "022.pt",
+                109
+            ],
+            [
+                "018.pt",
+                109
+            ],
+            [
+                "032.pt",
+                109
+            ],
+            [
+                "028.pt",
+                109
+            ],
+            [
+                "056.pt",
+                109
+            ],
+            [
+                "063.pt",
+                109
+            ],
+            [
+                "016.pt",
+                109
+            ],
+            [
+                "061.pt",
+                109
+            ],
+            [
+                "027.pt",
+                109
+            ],
+            [
+                "024.pt",
+                109
+            ],
+            [
+                "019.pt",
+                109
+            ],
+            [
+                "000.pt",
+                109
+            ],
+            [
+                "047.pt",
+                109
+            ],
+            [
+                "001.pt",
+                109
+            ],
+            [
+                "026.pt",
+                109
+            ],
+            [
+                "033.pt",
+                109
+            ],
+            [
+                "038.pt",
+                109
+            ],
+            [
+                "029.pt",
+                109
+            ],
+            [
+                "012.pt",
+                109
+            ],
+            [
+                "051.pt",
+                109
+            ],
+            [
+                "014.pt",
+                109
+            ],
+            [
+                "010.pt",
+                109
+            ],
+            [
+                "042.pt",
+                109
+            ],
+            [
+                "053.pt",
+                109
+            ],
+            [
+                "064.pt",
+                109
+            ],
+            [
+                "031.pt",
+                109
+            ],
+            [
+                "009.pt",
+                109
+            ],
+            [
+                "002.pt",
+                109
+            ],
+            [
+                "008.pt",
+                109
+            ],
+            [
+                "021.pt",
+                109
+            ],
+            [
+                "062.pt",
+                109
+            ],
+            [
+                "005.pt",
+                109
+            ],
+            [
+                "023.pt",
+                109
+            ],
+            [
+                "050.pt",
+                109
+            ],
+            [
+                "013.pt",
+                109
+            ]
+        ],
+        "test": [
+            [
+                "003.pt",
+                109
+            ],
+            [
+                "006.pt",
+                109
+            ],
+            [
+                "007.pt",
+                109
+            ],
+            [
+                "004.pt",
+                109
+            ],
+            [
+                "000.pt",
+                109
+            ],
+            [
+                "001.pt",
+                109
+            ],
+            [
+                "009.pt",
+                109
+            ],
+            [
+                "002.pt",
+                109
+            ],
+            [
+                "008.pt",
+                109
+            ],
+            [
+                "005.pt",
+                109
+            ]
+        ]
+    }
+}
