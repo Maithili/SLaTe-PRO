@@ -133,5 +133,4 @@ dmypy.json
 lightning_logs/
 wandb/
 logs/
-data/
 slurm*

@@ -27,11 +27,8 @@ def get_eval_file(m, output_dir, leniency=LENIENCY):
     eval_dir = eval_dirs[0]
     for file in os.listdir(eval_dir):
         if file.startswith('test_evaluation') and \
-        'clarification' not in file and \
-        'post' in file and \
-        f'{leniency}leniency' in file and \
+        'splits' in file and \
         os.path.exists(os.path.join(eval_dir,file)):
-        # 'all' in file and \
             return json.load(open(os.path.join(eval_dir,file)))
     else:
         return None

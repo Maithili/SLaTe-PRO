@@ -5,11 +5,11 @@
 
 To run a previously trained model
 
->`python ./run.py --coarse --activity_availability=$act --path=$dataset --logs_dir=./logs --ckpt_dir=$ckpt_dir --read_ckpt`
+>`python ./run.py --coarse --activity_availability=100 --path=data/HouseholdVariations/householdA --logs_dir=./logs --ckpt_dir=logs/householdA/default_100 --read_ckpt`
 
 To train a model
 
->`python ./run.py --coarse --activity_availability=$act --path=$dataset --logs_dir=./logs`
+>`python ./run.py --coarse --activity_availability=100 --path=data/HouseholdVariations/householdA --logs_dir=./logs`
 
 
 

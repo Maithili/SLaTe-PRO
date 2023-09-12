@@ -158,7 +158,7 @@ def collate(tensor_tuple):
 
 
 class DataSplit():
-    def __init__(self, routines_dir, time_encoder, filerange=(None, None), node_embedder=lambda x:x, activity_embedder=lambda x:x, activity_dropout=0.0, activity_dropout_type='inaccurate', activity_idx_by_visibility=[], objects_by_activity=None):
+    def __init__(self, routines_dir, time_encoder, filerange=(None, None), node_embedder=lambda x:x, activity_embedder=lambda x:x, activity_dropout=0.0, activity_idx_by_visibility=[], objects_by_activity=None):
         self.time_encoder = time_encoder
         self.routines_dir = routines_dir
         self.collate_fn = collate
@@ -170,13 +170,7 @@ class DataSplit():
             self.files = self.files[filerange[0]:]
         self.node_embedder = node_embedder
         self.activity_embedder = activity_embedder
-        self.activity_dropout_type = activity_dropout_type
-        if activity_dropout_type == 'inaccurate':
-            self.activity_masks = [None for _ in self.files]
-        elif activity_dropout_type == 'narrow':
-            self.activity_masks = activity_idx_by_visibility < ((len(activity_idx_by_visibility)-1)*(1-activity_dropout))
-        else:
-            raise Exception(f"activity_dropout_type {activity_dropout_type} not recognized")
+        self.activity_masks = [None for _ in self.files]
         self.activity_dropout = activity_dropout
         self.objects_by_activity = objects_by_activity
 
@@ -214,12 +208,9 @@ class DataSplit():
         time_feature = self.time_encoder(data['times'])
         time = data['times']
         dynamic_edges_mask = data['active_edges'].unsqueeze(0).repeat(data['times'].size()[0],1,1)
-        if self.activity_dropout_type == 'inaccurate':
-            if self.activity_masks[idx] is None:
-                self.activity_masks[idx] = (torch.rand_like(activity_id.float()) < self.activity_dropout).to(bool)
-            activity_mask_datapoint = self.activity_masks[idx]
-        else:
-            activity_mask_datapoint = (F.one_hot(activity_id, num_classes=self.activity_masks.size()[0]).float() @ self.activity_masks.float()).to(bool)
+        if self.activity_masks[idx] is None:
+            self.activity_masks[idx] = (torch.rand_like(activity_id.float()) < self.activity_dropout).to(bool)
+        activity_mask_datapoint = self.activity_masks[idx]
 
         datapoint = {
             'edges': edges, 
@@ -245,8 +236,7 @@ class RoutinesDataset():
                  batch_size = 1,
                  use_conceptnet = False,
                  use_bert = False,
-                 activity_dropout = 0.0,
-                 activity_dropout_type = 'inaccurate'):
+                 activity_dropout = 0.0):
 
         with open(os.path.join(data_path, 'common_data.json')) as f:
             self.common_data = json.load(f)
@@ -280,9 +270,9 @@ class RoutinesDataset():
         
         # Generate train and test loaders
 
-        self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,-5), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, activity_dropout_type=activity_dropout_type, activity_idx_by_visibility=activity_idx_by_visibility, objects_by_activity=self.get_objects_in_activity())
-        self.val = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(-5,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, activity_dropout_type=activity_dropout_type, activity_idx_by_visibility=activity_idx_by_visibility, objects_by_activity=self.get_objects_in_activity())
-        self.test = DataSplit(os.path.join(data_path,'test'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, activity_dropout_type=activity_dropout_type, activity_idx_by_visibility=activity_idx_by_visibility, objects_by_activity=self.get_objects_in_activity())
+        self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,-5), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, activity_idx_by_visibility=activity_idx_by_visibility, objects_by_activity=self.get_objects_in_activity())
+        self.val = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(-5,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, activity_idx_by_visibility=activity_idx_by_visibility, objects_by_activity=self.get_objects_in_activity())
+        self.test = DataSplit(os.path.join(data_path,'test'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, activity_idx_by_visibility=activity_idx_by_visibility, objects_by_activity=self.get_objects_in_activity())
         print('Train split has ',len(self.train),' routines')
         print('Test split has ',len(self.test),' routines')
 

@@ -1,43 +1,31 @@
-#! /srv/rail-lab/flash5/mpatel377/anaconda3/envs/pyml/bin/python
-
-#SBATCH -o slurm/output_%j.txt
-#SBATCH -e slurm/err_%j.txt
-#SBATCH --gres gpu:1
-#SBATCH --constraint a40
-#SBATCH --cpus-per-task 12
-#SBATCH -J unnamed
-#SBATCH -p short
-
 import shutil
 import traceback
 import sys
-sys.path.append('helpers')
 import yaml
 import json
 import os
-import glob
 import argparse
 import time
+sys.path.append('helpers')
+sys.path.append('models')
 
-import dill as pickle
 from adict import adict
 import torch
+import wandb
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
-import wandb
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping
 
 from MultiModalUserTracking import MultiModalUserTrackingModule
 from ObjectActivityCoembedding import ObjectActivityCoembeddingModule
-from breakdown_evaluations_simple import evaluate
 from loader_sequential import RoutinesDataset
 from loader_object_activity import ActivitiesDataset
 from encoders import TimeEncodingOptions
 
 import random
-random.seed(23435)
 from numpy import random as nrandom
+random.seed(23435)
 nrandom.seed(23435)
 
 def compare_models(model_1, model_2, num_params_expected=None):
@@ -159,23 +147,15 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
         for query_usefulness_metric in ['information_gain']: #, 'expected_changes']:
             print(f"Starting evaluation for with {query_usefulness_metric} metric")
             model.cfg.query_usefulness_metric = query_usefulness_metric
-            if model.cfg.query_opportunity == 'last':
-                os.makedirs(eval_dir, exist_ok=True)
-                model.cfg.query_usefullness_thresh = cfg['query_usefullness_thresh'][query_usefulness_metric]
-                test_n_tries(trainer, model, data.get_test_loader())
-                model.write_results(eval_dir,
-                                    common_data = data.common_data,
-                                    suffix=query_usefulness_metric,
-                                    )
-            elif model.cfg.query_opportunity == 'inline':
-                for thresh in cfg['query_usefullness_thresh'][query_usefulness_metric]:
-                    model.cfg.query_usefullness_thresh = thresh
-                    test_n_tries(trainer, model, data.get_test_loader())
-                    model.write_results(eval_dir,
-                                    common_data = data.common_data,
-                                    suffix=query_usefulness_metric+"_"+str(thresh),
-                                    )
 
+            os.makedirs(eval_dir, exist_ok=True)
+            model.cfg.query_usefullness_thresh = cfg['query_usefullness_thresh'][query_usefulness_metric]
+            test_n_tries(trainer, model, data.get_test_loader())
+            model.write_results(eval_dir,
+                                common_data = data.common_data,
+                                suffix=query_usefulness_metric,
+                                )
+          
 
 
 
@@ -211,45 +191,18 @@ if __name__ == '__main__':
     parser.add_argument('--query_step', type=int)
     parser.add_argument('--leniency', type=int)
     parser.add_argument('--prediction_overshoot', type=int)
-    parser.add_argument('--funky_graph_loss', type=bool)
     parser.add_argument('--addtnl_time_context', type=bool)
-    parser.add_argument('--variational', type=bool)
     parser.add_argument('--transformer', type=bool)
     parser.add_argument('--no_transformer', type=bool)
     parser.add_argument('--query_usefullness_metric', type=str)
     parser.add_argument('--query_negative_at_all_steps', type=bool)
     parser.add_argument('--query_trust', type=float)
     parser.add_argument('--query_thresh', type=float)
-    parser.add_argument('--random_queries', type=bool)
-    parser.add_argument('--activity_dropout_type', type=str)
     parser.add_argument('--learn_latent_magnitude', type=bool)
     parser.add_argument('--only_confused_queries', type=bool)
     parser.add_argument('--movement_inertia', type=float)
-    # parser.add_argument('--latent_correction_weight', type=str)
-    # parser.add_argument('--confidence_margin', type=str)
-    # parser.add_argument('--loss_object_cross', type=str)
-    # parser.add_argument('--loss_activity_cross', type=str)
-    # parser.add_argument('--loss_object_combined', type=str)
-    # parser.add_argument('--loss_activity_combined', type=str)
-    # parser.add_argument('--loss_latent_similarity', type=str)
-    # parser.add_argument('--loss_latent_pred', type=str)
-    # parser.add_argument('--loss_object_pred', type=str)
-    # parser.add_argument('--loss_activity_pred', type=str)
 
     args = parser.parse_args()
-    # args.coarse = True
-    # args.read_ckpt = True
-    # # args.tags = 'eval,debug'
-    # # args.only_confused_queries = True
-    # # args.query_negative_at_all_steps = True
-    # # args.lookahead_steps = 6
-    # # args.query_step = 3
-    # # # args.query_trust = 0.0
-    # # args.query_thresh = 0.0
-    # # # args.original_model = True
-    
-    torch.cuda.empty_cache()
-    torch.cuda.empty_cache()
     torch.cuda.empty_cache()
     torch.autograd.set_detect_anomaly(True)
     
@@ -269,11 +222,6 @@ if __name__ == '__main__':
             cfg[k] = args.__dict__[k]
     if args.transformer: cfg['latent_predictor_type'] = 'transformer'
     if args.no_transformer: cfg['latent_predictor_type'] = 'lstm'
-    if cfg['variational']: 
-        if cfg['latent_regularization'] is not None:
-            cfg['latent_regularization'] = min(cfg['latent_regularization'], 0.5)
-        else:
-            cfg['latent_regularization'] = 0.5
     if args.activity_availability is not None:
         cfg['activity_dropout_prob'] = 1-(args.activity_availability/100)
 
@@ -293,14 +241,13 @@ if __name__ == '__main__':
         cfg['DATA_INFO'] = json.load(open(os.path.join(args.path, 'common_data.json')))
 
         time_options = TimeEncodingOptions(cfg['DATA_INFO']['weeekend_days'] if 'weeekend_days' in cfg['DATA_INFO'].keys() else None)
-        time_encoding = time_options(cfg['time_encoding'])
+        time_encoding = time_options('sine_informed')
 
         data = RoutinesDataset(data_path=args.path,
                                 time_encoder=time_encoding, 
                                 batch_size=cfg['batch_size'],
                                 use_bert=args.use_bert,
-                                activity_dropout=cfg['activity_dropout_prob'],
-                                activity_dropout_type=cfg['activity_dropout_type'])
+                                activity_dropout=cfg['activity_dropout_prob'])
         
     elif args.datatype.lower() == 'activities':
         if 'processed_obj_act' not in args.path.split('/')[-1]: args.path = os.path.join(args.path, 'processed_obj_act')

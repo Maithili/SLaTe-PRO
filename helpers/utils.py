@@ -261,7 +261,7 @@ color_map = {
 color_palette = sns.color_palette()+sns.color_palette(palette='dark')
 color_palette = color_palette * 10
 
-def get_metrics(results, leniency=2, node_classes=None, activity_consistencies=[], obj_time_inconsistency=None, split_objects_by=None):
+def get_metrics(results, node_classes=None, activity_consistencies=[], obj_time_inconsistency=None, split_objects_by=None):
 
     s_batch, s_sequence, s_obj = results['reference_locations'].size()
 
@@ -336,10 +336,10 @@ def get_metrics(results, leniency=2, node_classes=None, activity_consistencies=[
     metrics['relocation_clarified']['query_step'] = results.query_step
 
     # assert all([v==0 for v in results.num_queries[query_thresh_control].values()]), "Control query thresh should have no queries"
-    assert data_steps + leniency <= len(results.relocation_locations_gt), "Not enough ground truth steps"
+    assert data_steps <= len(results.relocation_locations_gt), "Not enough ground truth steps"
 
     for pred_step in range(data_steps):
-        gt_step = {'recall': max(0, pred_step - leniency), 'precision': pred_step + leniency}
+        gt_step = {'recall': pred_step, 'precision': pred_step}
         
         # split_objects_by in 'taking_out' ,'putting_away', None
         taking_out_mask = (results.reference_locations == results.reference_locations[:,0,:].unsqueeze(1))
