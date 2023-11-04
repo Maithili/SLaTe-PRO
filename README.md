@@ -4,7 +4,7 @@ SLaTe-PRO, presented in paper [Predicting Routine Object Usage for Proactive Rob
 
 This repository includes 
 - SLaTe-PRO model and training code
-- HOMER+ dataset, which is based on the [HOMER dataset](https://github.com/GT-RAIL/rail_tasksim/tree/homer/routines)
+- [HOMER+ dataset](https://github.com/Maithili/HOMER_PLUS), which is based on the [HOMER dataset](https://github.com/GT-RAIL/rail_tasksim/tree/homer/routines)
 - Checkpoints of SLaTe-PRO trained on the above HOMER+ dataset
 
 
