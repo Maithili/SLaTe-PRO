@@ -14,7 +14,8 @@ latent_evidence_weight: 1.0
 leniency: 0
 lookahead_steps: 6
 query_step: 3
-query_types: ['object','activity','both']
+# query_types: ['object','activity','both']
+query_types: []
 query_thresh: 0.5
 only_confused_queries: True
 query_negative_at_all_steps: False

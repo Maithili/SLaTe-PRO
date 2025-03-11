@@ -225,8 +225,10 @@ class MultiModalUserTrackingModule(LightningModule):
         graph_seq_edges = batch['edges'].float()
         assert not EXTRACAREFUL or torch.allclose(graph_seq_edges.sum(-1), torch.ones_like(graph_seq_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
         graph_dynamic_edges_mask = batch['dynamic_edges_mask']
-        activity_seq = batch['activity_features'][:,:-1,:]
-        activity_id_seq = batch['activity_ids'][:,:-1]
+        ## MHC changes: do not remove last element of activity_seq
+        # activity_seq = batch['activity_features'][:,:-1,:]
+        # activity_id_seq = batch['activity_ids'][:,:-1]
+        ## MHC changes end
         latent_mask = batch['activity_mask_drop'][:,:-1]
         
         time_context = batch.get('time_features', torch.zeros((batch['edges'].size()[0],batch['edges'].size()[1], batch['edges'].size()[2], self.cfg.c_len)))
@@ -449,259 +451,259 @@ class MultiModalUserTrackingModule(LightningModule):
         
         return results
 
-    def rollout_onestep_with_masks(self, latent_series, time_context_series, num_steps, graph_seq_edges, input_nodes_forward, time_context, graph_dyn_edges, graph_masks_old, activity_masks_old, query_time, query_type, query_mask, reference_activity, activity_embedding_matrix):
-        reference_edges = graph_seq_edges[:,0].argmax(-1).unsqueeze(1)
-        input_edges_forward = graph_seq_edges[:,0].unsqueeze(1).float()
-        relocations_best_prob = torch.zeros_like(reference_edges).float()
-        relocations_probs = torch.zeros_like(input_edges_forward).float()
-        query_prob = torch.zeros((query_mask.size()[0],1)).to('cuda') if query_mask is not None else None
-        pred_seq_len = 1
+    # def rollout_onestep_with_masks(self, latent_series, time_context_series, num_steps, graph_seq_edges, input_nodes_forward, time_context, graph_dyn_edges, graph_masks_old, activity_masks_old, query_time, query_type, query_mask, reference_activity, activity_embedding_matrix):
+    #     reference_edges = graph_seq_edges[:,0].argmax(-1).unsqueeze(1)
+    #     input_edges_forward = graph_seq_edges[:,0].unsqueeze(1).float()
+    #     relocations_best_prob = torch.zeros_like(reference_edges).float()
+    #     relocations_probs = torch.zeros_like(input_edges_forward).float()
+    #     query_prob = torch.zeros((query_mask.size()[0],1)).to('cuda') if query_mask is not None else None
+    #     pred_seq_len = 1
 
-        def correct_activity(pred_activity, activity_mask):
-            _activities = pred_activity * activity_mask
-            _activities_probs = _activities.sum(-1).clone().detach()
-            assert (_activities_probs > -0.0001).all() and (_activities_probs < 1.0001).all()
-            _corrected_pred_activity = _activities/_activities_probs.unsqueeze(-1)
-            _latent_correction_act = (self.object_activity_coembedding_module.activity_encoder((_corrected_pred_activity @ activity_embedding_matrix.T).clone().detach()))
-            assert not torch.isnan(_latent_correction_act.sample()).any()
-            return _corrected_pred_activity.clone().detach(), _latent_correction_act, _activities_probs.clone().detach()
+    #     def correct_activity(pred_activity, activity_mask):
+    #         _activities = pred_activity * activity_mask
+    #         _activities_probs = _activities.sum(-1).clone().detach()
+    #         assert (_activities_probs > -0.0001).all() and (_activities_probs < 1.0001).all()
+    #         _corrected_pred_activity = _activities/_activities_probs.unsqueeze(-1)
+    #         _latent_correction_act = (self.object_activity_coembedding_module.activity_encoder((_corrected_pred_activity @ activity_embedding_matrix.T).clone().detach()))
+    #         assert not torch.isnan(_latent_correction_act.sample()).any()
+    #         return _corrected_pred_activity.clone().detach(), _latent_correction_act, _activities_probs.clone().detach()
 
-        pred_activity_next_prob_reference = 1.
-        if not self.original_model:
-            latent_in = latent_series[:,-1,:] + time_context[:,:1] if self.cfg.addtnl_time_context else latent_series[:,-1,:]
-        else:
-            latent_in = time_context[:,:1]
-        reference_activity_probs = (self.object_activity_coembedding_module.decode_activity(latents=latent_in))[0]
-        reference_activity = reference_activity_probs.argmax(-1)
-        if len(reference_activity.size()) == 1: 
-            reference_activity = reference_activity.unsqueeze(1)
-            reference_activity_mask = F.one_hot(reference_activity, reference_activity_probs.size()[-1])
-            reference_activity_probs = reference_activity_probs.unsqueeze(1)
-        new_pred_activity = False
-        activity_probs = -torch.ones_like(reference_activity_probs).to('cuda')
-        activity_best_step = -1
-        pred_activity_inf = -1
+    #     pred_activity_next_prob_reference = 1.
+    #     if not self.original_model:
+    #         latent_in = latent_series[:,-1,:] + time_context[:,:1] if self.cfg.addtnl_time_context else latent_series[:,-1,:]
+    #     else:
+    #         latent_in = time_context[:,:1]
+    #     reference_activity_probs = (self.object_activity_coembedding_module.decode_activity(latents=latent_in))[0]
+    #     reference_activity = reference_activity_probs.argmax(-1)
+    #     if len(reference_activity.size()) == 1: 
+    #         reference_activity = reference_activity.unsqueeze(1)
+    #         reference_activity_mask = F.one_hot(reference_activity, reference_activity_probs.size()[-1])
+    #         reference_activity_probs = reference_activity_probs.unsqueeze(1)
+    #     new_pred_activity = False
+    #     activity_probs = -torch.ones_like(reference_activity_probs).to('cuda')
+    #     activity_best_step = -1
+    #     pred_activity_inf = -1
 
-        activity_mask_flag = False
-        if activity_masks_old is not None:
-            activity_mask = activity_masks_old[0]
-            act_query_applied = torch.zeros((activity_mask.size()[0], activity_mask.size()[1])).to(bool).to('cuda')
-            activity_mask_flag = True
-            query_time_act = activity_masks_old[1]
-            if reference_activity[0] == activity_mask.argmax(-1):
-                query_time_act = num_steps - 1
-        elif query_type == 'activity':
-            activity_mask = query_mask
-            act_query_applied = torch.zeros((activity_mask.size()[0], activity_mask.size()[1])).to(bool).to('cuda')
-            activity_mask_flag = True
-            query_prob = torch.zeros_like(act_query_applied).float().to('cuda')
-            query_time_act = query_time
+    #     activity_mask_flag = False
+    #     if activity_masks_old is not None:
+    #         activity_mask = activity_masks_old[0]
+    #         act_query_applied = torch.zeros((activity_mask.size()[0], activity_mask.size()[1])).to(bool).to('cuda')
+    #         activity_mask_flag = True
+    #         query_time_act = activity_masks_old[1]
+    #         if reference_activity[0] == activity_mask.argmax(-1):
+    #             query_time_act = num_steps - 1
+    #     elif query_type == 'activity':
+    #         activity_mask = query_mask
+    #         act_query_applied = torch.zeros((activity_mask.size()[0], activity_mask.size()[1])).to(bool).to('cuda')
+    #         activity_mask_flag = True
+    #         query_prob = torch.zeros_like(act_query_applied).float().to('cuda')
+    #         query_time_act = query_time
 
-        for step in range(num_steps):
-            expected_objects = graph_seq_edges[:,1+step].unsqueeze(1).argmax(-1)
-            assert not EXTRACAREFUL or torch.allclose(input_edges_forward.sum(-1), torch.ones_like(input_edges_forward.sum(-1)), atol=0.1), "Edges are not normalized!"
-            if not self.original_model:
-                latent_series, _ = self.predict(latent_series, time_context_series[:,step:-num_steps+step])
-                latents_forward = latent_series[:,-1:,:]
-            else:
-                latents_forward = LatentDeterministic(time_context[:,step+1:pred_seq_len+step+1], self.cfg.learn_latent_magnitude)
+    #     for step in range(num_steps):
+    #         expected_objects = graph_seq_edges[:,1+step].unsqueeze(1).argmax(-1)
+    #         assert not EXTRACAREFUL or torch.allclose(input_edges_forward.sum(-1), torch.ones_like(input_edges_forward.sum(-1)), atol=0.1), "Edges are not normalized!"
+    #         if not self.original_model:
+    #             latent_series, _ = self.predict(latent_series, time_context_series[:,step:-num_steps+step])
+    #             latents_forward = latent_series[:,-1:,:]
+    #         else:
+    #             latents_forward = LatentDeterministic(time_context[:,step+1:pred_seq_len+step+1], self.cfg.learn_latent_magnitude)
             
-            graph_mask_flag = graph_masks_old[step] is not None or query_type == 'graph'
-            assert not torch.isnan(latents_forward.sample()).any()
+    #         graph_mask_flag = graph_masks_old[step] is not None or query_type == 'graph'
+    #         assert not torch.isnan(latents_forward.sample()).any()
 
-            if activity_mask_flag and graph_mask_flag:
-                for correction_iteration in range(1):
-                    _latent_correction = LatentDeterministic(torch.zeros_like(latents_forward.sample()).to('cuda'), learn_magnitude=self.cfg.learn_latent_magnitude)
-                    ## Activity Prediction
-                    latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
-                    pred_activity, _, _ = self.object_activity_coembedding_module.decode_activity(latents=latent_in)
-                    ## Activity based Correction
-                    if activity_mask is not None and query_time_act == step:
-                        _pred_activity_correction, _latent_correction_act, _query_probs = correct_activity(pred_activity, activity_mask)
-                        if query_type == 'activity':
-                            query_prob = deepcopy(_query_probs)
-                        pred_activity = deepcopy(_pred_activity_correction)
-                        _latent_correction += _latent_correction_act
-                    if activity_mask is not None and step < query_time_act:
-                        _pred_activity_correction, _latent_correction_act, _ = correct_activity(pred_activity, reference_activity_mask)
-                        pred_activity = deepcopy(_pred_activity_correction)
-                        _latent_correction += _latent_correction_act
+    #         if activity_mask_flag and graph_mask_flag:
+    #             for correction_iteration in range(1):
+    #                 _latent_correction = LatentDeterministic(torch.zeros_like(latents_forward.sample()).to('cuda'), learn_magnitude=self.cfg.learn_latent_magnitude)
+    #                 ## Activity Prediction
+    #                 latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
+    #                 pred_activity, _, _ = self.object_activity_coembedding_module.decode_activity(latents=latent_in)
+    #                 ## Activity based Correction
+    #                 if activity_mask is not None and query_time_act == step:
+    #                     _pred_activity_correction, _latent_correction_act, _query_probs = correct_activity(pred_activity, activity_mask)
+    #                     if query_type == 'activity':
+    #                         query_prob = deepcopy(_query_probs)
+    #                     pred_activity = deepcopy(_pred_activity_correction)
+    #                     _latent_correction += _latent_correction_act
+    #                 if activity_mask is not None and step < query_time_act:
+    #                     _pred_activity_correction, _latent_correction_act, _ = correct_activity(pred_activity, reference_activity_mask)
+    #                     pred_activity = deepcopy(_pred_activity_correction)
+    #                     _latent_correction += _latent_correction_act
                
-                    ## Graph Prediction
-                    latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
-                    pred_edges, _, _ = self.object_activity_coembedding_module.decode_graph(latents=latent_in, 
-                                                                                            input_nodes=input_nodes_forward, 
-                                                                                            input_edges=input_edges_forward, 
-                                                                                            dynamic_edges_mask=graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:]
-                                                                                            )
-                    ## Graph based Correction
-                    assert not EXTRACAREFUL or torch.allclose(pred_edges.sum(-1), torch.ones_like(pred_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
-                    if graph_masks_old[step] is not None:
-                        _edges = ((pred_edges+1e-8)*graph_masks_old[step])
-                        _edges_sum = _edges.sum(-1).clone().detach()
-                        pred_edges = _edges.clone().detach()/(_edges_sum.unsqueeze(-1))
-                    if query_type == 'graph':
-                        _edges = ((pred_edges+1e-8)*query_mask)
-                        _edges_sum = _edges.sum(-1).clone().detach()
-                        if query_time is None:
-                            pred_edges = _edges.clone().detach()/(_edges_sum.unsqueeze(-1))
-                            assert torch.allclose(pred_edges*(1-query_mask), torch.tensor([0.]).to('cuda')), "Graph mask is not working!!"
-                        else:
-                            if correction_iteration == 0:
-                                query_prob[query_time==step] = _edges_sum.prod(-1)[query_time==step].float()
-                            pred_edges[query_time==step] = (_edges.clone().detach()/(_edges_sum.unsqueeze(-1)))[query_time==step]
-                            assert torch.allclose((pred_edges*(1-query_mask))[query_time==step], torch.tensor([0.]).to('cuda')), "Graph mask is not working!!"
-                    _latent_correction_graph = self.object_activity_coembedding_module.graph_encoder(nodes=input_nodes_forward, edges=(input_edges_forward,pred_edges), time_context=time_context[:,step+1:pred_seq_len+step+1])
-                    _latent_correction += _latent_correction_graph
+    #                 ## Graph Prediction
+    #                 latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
+    #                 pred_edges, _, _ = self.object_activity_coembedding_module.decode_graph(latents=latent_in, 
+    #                                                                                         input_nodes=input_nodes_forward, 
+    #                                                                                         input_edges=input_edges_forward, 
+    #                                                                                         dynamic_edges_mask=graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:]
+    #                                                                                         )
+    #                 ## Graph based Correction
+    #                 assert not EXTRACAREFUL or torch.allclose(pred_edges.sum(-1), torch.ones_like(pred_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
+    #                 if graph_masks_old[step] is not None:
+    #                     _edges = ((pred_edges+1e-8)*graph_masks_old[step])
+    #                     _edges_sum = _edges.sum(-1).clone().detach()
+    #                     pred_edges = _edges.clone().detach()/(_edges_sum.unsqueeze(-1))
+    #                 if query_type == 'graph':
+    #                     _edges = ((pred_edges+1e-8)*query_mask)
+    #                     _edges_sum = _edges.sum(-1).clone().detach()
+    #                     if query_time is None:
+    #                         pred_edges = _edges.clone().detach()/(_edges_sum.unsqueeze(-1))
+    #                         assert torch.allclose(pred_edges*(1-query_mask), torch.tensor([0.]).to('cuda')), "Graph mask is not working!!"
+    #                     else:
+    #                         if correction_iteration == 0:
+    #                             query_prob[query_time==step] = _edges_sum.prod(-1)[query_time==step].float()
+    #                         pred_edges[query_time==step] = (_edges.clone().detach()/(_edges_sum.unsqueeze(-1)))[query_time==step]
+    #                         assert torch.allclose((pred_edges*(1-query_mask))[query_time==step], torch.tensor([0.]).to('cuda')), "Graph mask is not working!!"
+    #                 _latent_correction_graph = self.object_activity_coembedding_module.graph_encoder(nodes=input_nodes_forward, edges=(input_edges_forward,pred_edges), time_context=time_context[:,step+1:pred_seq_len+step+1])
+    #                 _latent_correction += _latent_correction_graph
                     
-                    ## Latent Correction
-                    if isinstance(latents_forward, Latent): latents_forward = latents_forward.sample()
-                    if isinstance(_latent_correction, Latent): _latent_correction = _latent_correction.sample()
-                    _latents = deepcopy((1 - self.cfg.query_trust) * latents_forward + 
-                                        self.cfg.query_trust * _latent_correction)
-                    latents_forward = LatentDeterministic(_latents, learn_magnitude=self.cfg.learn_latent_magnitude)
+    #                 ## Latent Correction
+    #                 if isinstance(latents_forward, Latent): latents_forward = latents_forward.sample()
+    #                 if isinstance(_latent_correction, Latent): _latent_correction = _latent_correction.sample()
+    #                 _latents = deepcopy((1 - self.cfg.query_trust) * latents_forward + 
+    #                                     self.cfg.query_trust * _latent_correction)
+    #                 latents_forward = LatentDeterministic(_latents, learn_magnitude=self.cfg.learn_latent_magnitude)
 
-            elif activity_mask_flag:
-                ## Activity Prediction
-                latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
-                pred_activity, _, _ = self.object_activity_coembedding_module.decode_activity(latents=latent_in)
+    #         elif activity_mask_flag:
+    #             ## Activity Prediction
+    #             latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
+    #             pred_activity, _, _ = self.object_activity_coembedding_module.decode_activity(latents=latent_in)
 
-                ## Activity based Correction
-                if activity_mask is not None and query_time_act == step:
-                    _pred_activity_correction, _latent_correction_act, _query_probs = correct_activity(pred_activity, activity_mask)
-                    if query_type == 'activity':
-                        query_prob = deepcopy(_query_probs)
-                    pred_activity = deepcopy(_pred_activity_correction)
-                    latents_forward = latents_forward.sample()
-                    latents_forward = deepcopy((1 - self.cfg.query_trust) * latents_forward + self.cfg.query_trust * _latent_correction_act.sample())
-                    assert (pred_activity.argmax(-1) == activity_mask.argmax(-1)).all()
-                    assert not torch.isnan(latents_forward).any()
-                    latents_forward = LatentDeterministic(latents_forward, learn_magnitude=self.cfg.learn_latent_magnitude)
-                    latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
-                if activity_mask is not None and step < query_time_act:
-                    _pred_activity_correction, _latent_correction_act, _ = correct_activity(pred_activity, reference_activity_mask)
-                    pred_activity = deepcopy(_pred_activity_correction)
-                    latents_forward = latents_forward.sample()
-                    latents_forward = deepcopy((1 - self.cfg.query_trust) * latents_forward + self.cfg.query_trust * _latent_correction_act.sample())
-                    assert not torch.isnan(latents_forward).any()
-                    assert (pred_activity.argmax(-1) == reference_activity_mask.argmax(-1)).all()
-                    latents_forward = LatentDeterministic(latents_forward, learn_magnitude=self.cfg.learn_latent_magnitude)
-                    latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
+    #             ## Activity based Correction
+    #             if activity_mask is not None and query_time_act == step:
+    #                 _pred_activity_correction, _latent_correction_act, _query_probs = correct_activity(pred_activity, activity_mask)
+    #                 if query_type == 'activity':
+    #                     query_prob = deepcopy(_query_probs)
+    #                 pred_activity = deepcopy(_pred_activity_correction)
+    #                 latents_forward = latents_forward.sample()
+    #                 latents_forward = deepcopy((1 - self.cfg.query_trust) * latents_forward + self.cfg.query_trust * _latent_correction_act.sample())
+    #                 assert (pred_activity.argmax(-1) == activity_mask.argmax(-1)).all()
+    #                 assert not torch.isnan(latents_forward).any()
+    #                 latents_forward = LatentDeterministic(latents_forward, learn_magnitude=self.cfg.learn_latent_magnitude)
+    #                 latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
+    #             if activity_mask is not None and step < query_time_act:
+    #                 _pred_activity_correction, _latent_correction_act, _ = correct_activity(pred_activity, reference_activity_mask)
+    #                 pred_activity = deepcopy(_pred_activity_correction)
+    #                 latents_forward = latents_forward.sample()
+    #                 latents_forward = deepcopy((1 - self.cfg.query_trust) * latents_forward + self.cfg.query_trust * _latent_correction_act.sample())
+    #                 assert not torch.isnan(latents_forward).any()
+    #                 assert (pred_activity.argmax(-1) == reference_activity_mask.argmax(-1)).all()
+    #                 latents_forward = LatentDeterministic(latents_forward, learn_magnitude=self.cfg.learn_latent_magnitude)
+    #                 latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
                
-                ## Graph Prediction
-                pred_edges, _, _ = self.object_activity_coembedding_module.decode_graph(latents=latent_in, 
-                                                                                        input_nodes=input_nodes_forward, 
-                                                                                        input_edges=input_edges_forward, 
-                                                                                        dynamic_edges_mask=graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:]
-                                                                                        )
+    #             ## Graph Prediction
+    #             pred_edges, _, _ = self.object_activity_coembedding_module.decode_graph(latents=latent_in, 
+    #                                                                                     input_nodes=input_nodes_forward, 
+    #                                                                                     input_edges=input_edges_forward, 
+    #                                                                                     dynamic_edges_mask=graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:]
+    #                                                                                     )
                 
             
-            elif graph_mask_flag:
-                ## Graph Prediction
-                latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
-                pred_edges, _, _ = self.object_activity_coembedding_module.decode_graph(latents=latent_in, 
-                                                                                        input_nodes=input_nodes_forward, 
-                                                                                        input_edges=input_edges_forward, 
-                                                                                        dynamic_edges_mask=graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:]
-                                                                                        )
-                ## Graph based Correction
-                assert not EXTRACAREFUL or torch.allclose(pred_edges.sum(-1), torch.ones_like(pred_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
-                if graph_masks_old[step] is not None:
-                    _edges = ((pred_edges+1e-8)*graph_masks_old[step])
-                    _edges_sum = _edges.sum(-1).clone().detach()
-                    pred_edges = _edges.clone().detach()/(_edges_sum.unsqueeze(-1))
-                if query_type == 'graph':
-                    _edges = ((pred_edges+1e-8)*query_mask)
-                    _edges_sum = _edges.sum(-1).clone().detach()
-                    if query_time is None:
-                        pred_edges = _edges.clone().detach()/(_edges_sum.unsqueeze(-1))
-                        assert torch.allclose(pred_edges*(1-query_mask), torch.tensor([0.]).to('cuda')), "Graph mask is not working!!"
-                    else:
-                        query_prob[query_time==step] = _edges_sum.prod(-1)[query_time==step].float()
-                        pred_edges[query_time==step] = (_edges.clone().detach()/(_edges_sum.unsqueeze(-1)))[query_time==step]
-                        assert torch.allclose((pred_edges*(1-query_mask))[query_time==step], torch.tensor([0.]).to('cuda')), "Graph mask is not working!!"
-                if not self.original_model:
-                    _latent_correction_graph = self.object_activity_coembedding_module.graph_encoder(nodes=input_nodes_forward, edges=(input_edges_forward,pred_edges),
-                                                                                                     time_context=time_context[:,step+1:pred_seq_len+step+1])
-                    _latents = ((1 - self.cfg.query_trust) * latents_forward.sample() + self.cfg.query_trust * _latent_correction_graph.sample())
-                    latents_forward = _latents
-                    latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
+    #         elif graph_mask_flag:
+    #             ## Graph Prediction
+    #             latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
+    #             pred_edges, _, _ = self.object_activity_coembedding_module.decode_graph(latents=latent_in, 
+    #                                                                                     input_nodes=input_nodes_forward, 
+    #                                                                                     input_edges=input_edges_forward, 
+    #                                                                                     dynamic_edges_mask=graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:]
+    #                                                                                     )
+    #             ## Graph based Correction
+    #             assert not EXTRACAREFUL or torch.allclose(pred_edges.sum(-1), torch.ones_like(pred_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
+    #             if graph_masks_old[step] is not None:
+    #                 _edges = ((pred_edges+1e-8)*graph_masks_old[step])
+    #                 _edges_sum = _edges.sum(-1).clone().detach()
+    #                 pred_edges = _edges.clone().detach()/(_edges_sum.unsqueeze(-1))
+    #             if query_type == 'graph':
+    #                 _edges = ((pred_edges+1e-8)*query_mask)
+    #                 _edges_sum = _edges.sum(-1).clone().detach()
+    #                 if query_time is None:
+    #                     pred_edges = _edges.clone().detach()/(_edges_sum.unsqueeze(-1))
+    #                     assert torch.allclose(pred_edges*(1-query_mask), torch.tensor([0.]).to('cuda')), "Graph mask is not working!!"
+    #                 else:
+    #                     query_prob[query_time==step] = _edges_sum.prod(-1)[query_time==step].float()
+    #                     pred_edges[query_time==step] = (_edges.clone().detach()/(_edges_sum.unsqueeze(-1)))[query_time==step]
+    #                     assert torch.allclose((pred_edges*(1-query_mask))[query_time==step], torch.tensor([0.]).to('cuda')), "Graph mask is not working!!"
+    #             if not self.original_model:
+    #                 _latent_correction_graph = self.object_activity_coembedding_module.graph_encoder(nodes=input_nodes_forward, edges=(input_edges_forward,pred_edges),
+    #                                                                                                  time_context=time_context[:,step+1:pred_seq_len+step+1])
+    #                 _latents = ((1 - self.cfg.query_trust) * latents_forward.sample() + self.cfg.query_trust * _latent_correction_graph.sample())
+    #                 latents_forward = _latents
+    #                 latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
             
-                ## Activity Prediction
-                pred_activity, _, _ = self.object_activity_coembedding_module.decode_activity(latents=latent_in)
-                assert not EXTRACAREFUL or torch.allclose(pred_edges.sum(-1), torch.ones_like(pred_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
+    #             ## Activity Prediction
+    #             pred_activity, _, _ = self.object_activity_coembedding_module.decode_activity(latents=latent_in)
+    #             assert not EXTRACAREFUL or torch.allclose(pred_edges.sum(-1), torch.ones_like(pred_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
             
-            else:
-                latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
-                ## Activity Prediction
-                pred_activity, _, _ = self.object_activity_coembedding_module.decode_activity(latents=latent_in)
-                ## Graph Prediction
-                pred_edges, _, _ = self.object_activity_coembedding_module.decode_graph(latents=latent_in, 
-                                                                                        input_nodes=input_nodes_forward, 
-                                                                                        input_edges=input_edges_forward, 
-                                                                                        dynamic_edges_mask=graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:]
-                                                                                        )
+    #         else:
+    #             latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
+    #             ## Activity Prediction
+    #             pred_activity, _, _ = self.object_activity_coembedding_module.decode_activity(latents=latent_in)
+    #             ## Graph Prediction
+    #             pred_edges, _, _ = self.object_activity_coembedding_module.decode_graph(latents=latent_in, 
+    #                                                                                     input_nodes=input_nodes_forward, 
+    #                                                                                     input_edges=input_edges_forward, 
+    #                                                                                     dynamic_edges_mask=graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:]
+    #                                                                                     )
 
-            if query_type is None:
-                if not new_pred_activity:
-                    new_pred_activity = (pred_activity.argmax(-1) != reference_activity)
-                    if new_pred_activity:
-                        pred_activity_inf = pred_activity.argmax(-1)
-                if new_pred_activity and (pred_activity[0,0,reference_activity] > pred_activity_next_prob_reference or pred_activity_inf != pred_activity.argmax(-1)):
-                    pred_activity_next_prob_reference = 0
-                if pred_activity[0,0,reference_activity] < pred_activity_next_prob_reference:
-                    pred_activity_next_prob_reference = pred_activity[0,0,reference_activity]
-                    activity_best_step = step
-                    activity_probs = pred_activity
-            else:
-                mask = (activity_probs == -1) & (pred_activity.argmax(-1) != reference_activity).unsqueeze(1)
-                activity_probs[mask] = pred_activity[mask]
+    #         if query_type is None:
+    #             if not new_pred_activity:
+    #                 new_pred_activity = (pred_activity.argmax(-1) != reference_activity)
+    #                 if new_pred_activity:
+    #                     pred_activity_inf = pred_activity.argmax(-1)
+    #             if new_pred_activity and (pred_activity[0,0,reference_activity] > pred_activity_next_prob_reference or pred_activity_inf != pred_activity.argmax(-1)):
+    #                 pred_activity_next_prob_reference = 0
+    #             if pred_activity[0,0,reference_activity] < pred_activity_next_prob_reference:
+    #                 pred_activity_next_prob_reference = pred_activity[0,0,reference_activity]
+    #                 activity_best_step = step
+    #                 activity_probs = pred_activity
+    #         else:
+    #             mask = (activity_probs == -1) & (pred_activity.argmax(-1) != reference_activity).unsqueeze(1)
+    #             activity_probs[mask] = pred_activity[mask]
 
-            if step > 0:
-                new_changes_pred = deepcopy(torch.bitwise_and(pred_edges.argmax(-1) != reference_edges, torch.bitwise_not(changes_pred)))
-                dest_pred[new_changes_pred] = deepcopy(pred_edges.argmax(-1)[new_changes_pred])
-                changes_pred = deepcopy(torch.bitwise_or(changes_pred, new_changes_pred))
-                new_changes_gt = deepcopy(torch.bitwise_and(expected_objects != reference_edges, torch.bitwise_not(changes_gt)))
-                dest_gt[new_changes_gt] = deepcopy(expected_objects[new_changes_gt])
-                changes_gt = deepcopy(torch.bitwise_or(changes_gt, new_changes_gt))
-            else:
-                dest_pred = deepcopy(pred_edges.argmax(-1))
-                changes_pred = deepcopy(dest_pred != reference_edges)
-                changes_gt = deepcopy(expected_objects != reference_edges)
-                dest_gt = deepcopy(expected_objects)
-                new_changes_pred = deepcopy(changes_pred)
-                new_changes_gt = deepcopy(changes_gt)
+    #         if step > 0:
+    #             new_changes_pred = deepcopy(torch.bitwise_and(pred_edges.argmax(-1) != reference_edges, torch.bitwise_not(changes_pred)))
+    #             dest_pred[new_changes_pred] = deepcopy(pred_edges.argmax(-1)[new_changes_pred])
+    #             changes_pred = deepcopy(torch.bitwise_or(changes_pred, new_changes_pred))
+    #             new_changes_gt = deepcopy(torch.bitwise_and(expected_objects != reference_edges, torch.bitwise_not(changes_gt)))
+    #             dest_gt[new_changes_gt] = deepcopy(expected_objects[new_changes_gt])
+    #             changes_gt = deepcopy(torch.bitwise_or(changes_gt, new_changes_gt))
+    #         else:
+    #             dest_pred = deepcopy(pred_edges.argmax(-1))
+    #             changes_pred = deepcopy(dest_pred != reference_edges)
+    #             changes_gt = deepcopy(expected_objects != reference_edges)
+    #             dest_gt = deepcopy(expected_objects)
+    #             new_changes_pred = deepcopy(changes_pred)
+    #             new_changes_gt = deepcopy(changes_gt)
 
-            confidence_in_relocation = deepcopy((pred_edges * F.one_hot(dest_pred, num_classes = pred_edges.size()[-1])).sum(-1))
-            continued_changes_pred = pred_edges.argmax(-1) == dest_pred
-            better_confidence = torch.bitwise_or(torch.bitwise_and(confidence_in_relocation > relocations_best_prob, continued_changes_pred), new_changes_pred)
-            relocations_best_prob[better_confidence] = confidence_in_relocation[better_confidence]
-            relocations_probs[better_confidence] = deepcopy(pred_edges[better_confidence])
+    #         confidence_in_relocation = deepcopy((pred_edges * F.one_hot(dest_pred, num_classes = pred_edges.size()[-1])).sum(-1))
+    #         continued_changes_pred = pred_edges.argmax(-1) == dest_pred
+    #         better_confidence = torch.bitwise_or(torch.bitwise_and(confidence_in_relocation > relocations_best_prob, continued_changes_pred), new_changes_pred)
+    #         relocations_best_prob[better_confidence] = confidence_in_relocation[better_confidence]
+    #         relocations_probs[better_confidence] = deepcopy(pred_edges[better_confidence])
        
-            input_edges_forward = deepcopy(pred_edges).float()
+    #         input_edges_forward = deepcopy(pred_edges).float()
 
-            if not self.original_model:
-                latent_series_updated = latent_series.sample()
-                if isinstance(latents_forward, Latent):
-                    latent_series_updated[:,-1,:] = latents_forward.sample().squeeze(1)
-                else:
-                    latent_series_updated[:,-1,:] = latents_forward.squeeze(1)
-                latent_series = LatentDeterministic(latent_series_updated, latent_series.learn_magnitude)
-        if query_type == 'graph':
-            if query_time is not None:
-                changes_that_must_happen = query_mask.sum(-1).argmin(-1)
-                changes_actually_predicted = changes_pred.squeeze(1)
-            else:
-                changes_that_must_not_happen = query_mask.sum(-1).argmin(-1)
-                changes_actually_predicted = changes_pred.squeeze(1)
+    #         if not self.original_model:
+    #             latent_series_updated = latent_series.sample()
+    #             if isinstance(latents_forward, Latent):
+    #                 latent_series_updated[:,-1,:] = latents_forward.sample().squeeze(1)
+    #             else:
+    #                 latent_series_updated[:,-1,:] = latents_forward.squeeze(1)
+    #             latent_series = LatentDeterministic(latent_series_updated, latent_series.learn_magnitude)
+    #     if query_type == 'graph':
+    #         if query_time is not None:
+    #             changes_that_must_happen = query_mask.sum(-1).argmin(-1)
+    #             changes_actually_predicted = changes_pred.squeeze(1)
+    #         else:
+    #             changes_that_must_not_happen = query_mask.sum(-1).argmin(-1)
+    #             changes_actually_predicted = changes_pred.squeeze(1)
 
-        # if query_type is not None:
-        mask = (activity_probs == -1)
-        activity_probs[mask] = pred_activity[mask]
+    #     # if query_type is not None:
+    #     mask = (activity_probs == -1)
+    #     activity_probs[mask] = pred_activity[mask]
 
-        assert (changes_pred.to(int) == (reference_edges != relocations_probs.argmax(-1)).to(int)).all(), "Relocation probabilities and changes pred don't match!!"
+    #     assert (changes_pred.to(int) == (reference_edges != relocations_probs.argmax(-1)).to(int)).all(), "Relocation probabilities and changes pred don't match!!"
 
-        return relocations_probs, query_prob, activity_probs, changes_pred, activity_best_step
+    #     return relocations_probs, query_prob, activity_probs, changes_pred, activity_best_step
 
 
     def evaluate_prediction(self, batch, num_steps=1):
@@ -953,413 +955,415 @@ class MultiModalUserTrackingModule(LightningModule):
             # if step < num_steps-1:
             #     input_edges_forward = deepcopy(graph_seq_edges[:,1+step+1:-num_steps+step+1,:,:])
             
-            if len(self.cfg.query_types) > 0 and step == self.result_data['query_step']:
-                for query_type in self.cfg.query_types:
-                    self.cfg.query_type = query_type
-                    if self.cfg.query_type != 'object' and self.original_model: continue
-                    data_for_queries = {'batch': batch, 'num_steps': self.result_data['query_step']+1,
-                                    'pred_seq_len': pred_seq_len,
-                                    'input_nodes_forward': deepcopy(input_nodes_forward),
-                                    'input_edges_forward': deepcopy(graph_seq_edges[:,1:pred_seq_len+1,:,:].clone().detach()),
-                                    'reference_edges': deepcopy(reference_edges),
-                                    'initial_latents_forward' : deepcopy(initial_latents_forward), 
-                                    'activity_embedding_matrix' : deepcopy(activity_embedding_matrix),
-                                    'relocations_probs' : deepcopy(relocations_probs.clone().detach()),
-                                    'relocations_best_prob' : deepcopy(relocations_best_prob.detach()),
-                                    'relocations_best_step' : deepcopy(relocations_best_step.detach()),
-                                    'activity_probs' : deepcopy(activity_probs.detach()),
-                                    'activity_best_step' : deepcopy(activity_best_step.detach()),
-                                    'expected_activities' : deepcopy(expected_activities.detach()),
-                                    'changes_gt' : deepcopy(changes_gt.detach()),
-                                    'dest_gt' : deepcopy(dest_gt.detach()),
-                                    'changes_pred' : deepcopy(changes_pred.detach()),
-                                    'dest_pred' : deepcopy(dest_pred.detach()),
-                                    'pred_activities_all' : deepcopy(pred_activities_all[:,:,-1].detach()),
-                                    'snapshot_pred': deepcopy(snapshot_pred.detach())}
+            ## MHC changes : Remove queries for now
+            # if len(self.cfg.query_types) > 0 and step == self.result_data['query_step']:
+            #     for query_type in self.cfg.query_types:
+            #         self.cfg.query_type = query_type
+            #         if self.cfg.query_type != 'object' and self.original_model: continue
+            #         data_for_queries = {'batch': batch, 'num_steps': self.result_data['query_step']+1,
+            #                         'pred_seq_len': pred_seq_len,
+            #                         'input_nodes_forward': deepcopy(input_nodes_forward),
+            #                         'input_edges_forward': deepcopy(graph_seq_edges[:,1:pred_seq_len+1,:,:].clone().detach()),
+            #                         'reference_edges': deepcopy(reference_edges),
+            #                         'initial_latents_forward' : deepcopy(initial_latents_forward), 
+            #                         'activity_embedding_matrix' : deepcopy(activity_embedding_matrix),
+            #                         'relocations_probs' : deepcopy(relocations_probs.clone().detach()),
+            #                         'relocations_best_prob' : deepcopy(relocations_best_prob.detach()),
+            #                         'relocations_best_step' : deepcopy(relocations_best_step.detach()),
+            #                         'activity_probs' : deepcopy(activity_probs.detach()),
+            #                         'activity_best_step' : deepcopy(activity_best_step.detach()),
+            #                         'expected_activities' : deepcopy(expected_activities.detach()),
+            #                         'changes_gt' : deepcopy(changes_gt.detach()),
+            #                         'dest_gt' : deepcopy(dest_gt.detach()),
+            #                         'changes_pred' : deepcopy(changes_pred.detach()),
+            #                         'dest_pred' : deepcopy(dest_pred.detach()),
+            #                         'pred_activities_all' : deepcopy(pred_activities_all[:,:,-1].detach()),
+            #                         'snapshot_pred': deepcopy(snapshot_pred.detach())}
 
-                    self.evaluate_queries(adict(data_for_queries))
+            #         self.evaluate_queries(adict(data_for_queries))
+            ## MHC changes end
         
-    def evaluate_queries(self, data_in):
-        graph_seq_nodes = data_in.batch.get('node_features').float()
-        graph_seq_edges = data_in.batch.get('edges')
-        graph_dyn_edges = data_in.batch.get('dynamic_edges_mask')
-        activity_seq = data_in.batch.get('activity_features')[:,:-1,:]
-        activity_id_seq = data_in.batch['activity_ids'][:,:-1]
-        visible_activity_id_seq = deepcopy(activity_id_seq)
-        visible_activity_id_seq.masked_fill_(data_in.batch['activity_mask_drop'][:,:-1], -1)
+    # def evaluate_queries(self, data_in):
+    #     graph_seq_nodes = data_in.batch.get('node_features').float()
+    #     graph_seq_edges = data_in.batch.get('edges')
+    #     graph_dyn_edges = data_in.batch.get('dynamic_edges_mask')
+    #     activity_seq = data_in.batch.get('activity_features')[:,:-1,:]
+    #     activity_id_seq = data_in.batch['activity_ids'][:,:-1]
+    #     visible_activity_id_seq = deepcopy(activity_id_seq)
+    #     visible_activity_id_seq.masked_fill_(data_in.batch['activity_mask_drop'][:,:-1], -1)
 
-        pred_seq_len = data_in['pred_seq_len']
-        time_context = data_in.batch.get('time_features', torch.zeros((data_in.batch['edges'].size()[0],data_in.batch['edges'].size()[1], self.cfg.c_len)))[:,1:,:]
-        if time_context.size()[-1] > self.cfg.c_len:
-            time_context = time_context[:,:,:self.cfg.c_len]
-            print("Warning: time context is too long. Truncating it to the first {} values".format(self.cfg.c_len))
-            print()
-            print("THIS IS ONLY OKAY FOR DEBUGGING!!!!!! YOU ARE NOT TRAINING A MODEL THAT WILL WORK IN REALITY!!!!!")
-            print()
-        if time_context.size()[-1] < self.cfg.c_len:
-            time_context = torch.cat([time_context, torch.zeros((time_context.size()[0], time_context.size()[1], self.cfg.c_len - time_context.size()[2])).to('cuda')], dim=-1)
+    #     pred_seq_len = data_in['pred_seq_len']
+    #     time_context = data_in.batch.get('time_features', torch.zeros((data_in.batch['edges'].size()[0],data_in.batch['edges'].size()[1], self.cfg.c_len)))[:,1:,:]
+    #     if time_context.size()[-1] > self.cfg.c_len:
+    #         time_context = time_context[:,:,:self.cfg.c_len]
+    #         print("Warning: time context is too long. Truncating it to the first {} values".format(self.cfg.c_len))
+    #         print()
+    #         print("THIS IS ONLY OKAY FOR DEBUGGING!!!!!! YOU ARE NOT TRAINING A MODEL THAT WILL WORK IN REALITY!!!!!")
+    #         print()
+    #     if time_context.size()[-1] < self.cfg.c_len:
+    #         time_context = torch.cat([time_context, torch.zeros((time_context.size()[0], time_context.size()[1], self.cfg.c_len - time_context.size()[2])).to('cuda')], dim=-1)
 
-        batch_size_act, sequence_len, num_act = activity_seq.size()
+    #     batch_size_act, sequence_len, num_act = activity_seq.size()
 
-        if sequence_len < data_in.num_steps+2 : data_in.num_steps = sequence_len-2
-        if data_in.num_steps < 1: return 
+    #     if sequence_len < data_in.num_steps+2 : data_in.num_steps = sequence_len-2
+    #     if data_in.num_steps < 1: return 
 
-        obj_mask = graph_dyn_edges[:,1:pred_seq_len+1,:,:].sum(-1)>0
+    #     obj_mask = graph_dyn_edges[:,1:pred_seq_len+1,:,:].sum(-1)>0
 
-        inconsistency_masks = {thresh:torch.bitwise_and(self.object_usage_frequency[:pred_seq_len,:].unsqueeze(0).to('cuda') > thresh, 
-                                                        self.object_usage_frequency[:pred_seq_len,:].unsqueeze(0).to('cuda') < (60-thresh)) for thresh in self.cfg.consistency_thresholds}
+    #     inconsistency_masks = {thresh:torch.bitwise_and(self.object_usage_frequency[:pred_seq_len,:].unsqueeze(0).to('cuda') > thresh, 
+    #                                                     self.object_usage_frequency[:pred_seq_len,:].unsqueeze(0).to('cuda') < (60-thresh)) for thresh in self.cfg.consistency_thresholds}
  
-        ## Based on relocation_probs and activity_probs, decide which queries to make
-        def usefuleness_metric(pred_edges_original, pred_edges_new):
-            if self.cfg.query_usefulness_metric == 'expected_changes':
-                return (pred_edges_original.argmax(-1) != pred_edges_new.argmax(-1)).sum(-1)
-            elif self.cfg.query_usefulness_metric == 'information_gain':
-                def entropy(pedg):
-                    return -(pedg*(pedg+1e-8).log()).sum(-1).sum(-1)
-                return torch.clip(entropy(pred_edges_original) - entropy(pred_edges_new), min=0)
+    #     ## Based on relocation_probs and activity_probs, decide which queries to make
+    #     def usefuleness_metric(pred_edges_original, pred_edges_new):
+    #         if self.cfg.query_usefulness_metric == 'expected_changes':
+    #             return (pred_edges_original.argmax(-1) != pred_edges_new.argmax(-1)).sum(-1)
+    #         elif self.cfg.query_usefulness_metric == 'information_gain':
+    #             def entropy(pedg):
+    #                 return -(pedg*(pedg+1e-8).log()).sum(-1).sum(-1)
+    #             return torch.clip(entropy(pred_edges_original) - entropy(pred_edges_new), min=0)
 
-        obj_queries_buffer = []
-        act_queries_buffer = None
+    #     obj_queries_buffer = []
+    #     act_queries_buffer = None
 
-        relocations_probs_wo_query = deepcopy(data_in.relocations_probs)
-        pred_activities_wo_query = deepcopy(data_in.pred_activities_all).to(int)
-        relocation_correction = [deepcopy(relocations_probs_wo_query[0,i:i+1,:,:]) for i in range(pred_seq_len)]
-        relocation_corrected = [deepcopy(relocations_probs_wo_query[0,i:i+1,:,:]) for i in range(pred_seq_len)]
-        pred_act_correction = [(deepcopy(pred_activities_wo_query[0,i:i+1])).to(int) for i in range(pred_seq_len)]
-        pred_activities_corrected = [(deepcopy(pred_activities_wo_query[0,i:i+1])) for i in range(pred_seq_len)]
-        tensor_for_size = (pred_activities_wo_query[0,:1])
-        best_queries_act_viz = [(torch.zeros_like(tensor_for_size).to('cuda')) for _ in range(pred_seq_len)]
-        queries_act_viz_carryover = [(torch.zeros_like(tensor_for_size).to('cuda')) for _ in range(pred_seq_len)]
-        best_queries_obj_viz = [(torch.zeros_like(tensor_for_size).to('cuda').to(int)) for _ in range(pred_seq_len)]
-        queries_obj_viz_carryover = [(torch.zeros((1,obj_mask.size()[-1])).to('cuda').to(int)) for _ in range(pred_seq_len)]
-        value = [(torch.zeros_like(tensor_for_size).to('cuda')) for _ in range(pred_seq_len)]
-        value_act = [(torch.zeros_like(tensor_for_size).to('cuda')) for _ in range(pred_seq_len)]
-        value_obj = [(torch.zeros_like(tensor_for_size).to('cuda')) for _ in range(pred_seq_len)]
-        oracle_positive_obj = [(torch.zeros_like(tensor_for_size).to('cuda').to(bool)) for _ in range(pred_seq_len)]
-        query_type = [-(torch.ones_like(tensor_for_size)) for _ in range(pred_seq_len)]
-        correction_masks = []
-        num_carried_obj_queries = 0
-        num_carried_act_queries = 0
+    #     relocations_probs_wo_query = deepcopy(data_in.relocations_probs)
+    #     pred_activities_wo_query = deepcopy(data_in.pred_activities_all).to(int)
+    #     relocation_correction = [deepcopy(relocations_probs_wo_query[0,i:i+1,:,:]) for i in range(pred_seq_len)]
+    #     relocation_corrected = [deepcopy(relocations_probs_wo_query[0,i:i+1,:,:]) for i in range(pred_seq_len)]
+    #     pred_act_correction = [(deepcopy(pred_activities_wo_query[0,i:i+1])).to(int) for i in range(pred_seq_len)]
+    #     pred_activities_corrected = [(deepcopy(pred_activities_wo_query[0,i:i+1])) for i in range(pred_seq_len)]
+    #     tensor_for_size = (pred_activities_wo_query[0,:1])
+    #     best_queries_act_viz = [(torch.zeros_like(tensor_for_size).to('cuda')) for _ in range(pred_seq_len)]
+    #     queries_act_viz_carryover = [(torch.zeros_like(tensor_for_size).to('cuda')) for _ in range(pred_seq_len)]
+    #     best_queries_obj_viz = [(torch.zeros_like(tensor_for_size).to('cuda').to(int)) for _ in range(pred_seq_len)]
+    #     queries_obj_viz_carryover = [(torch.zeros((1,obj_mask.size()[-1])).to('cuda').to(int)) for _ in range(pred_seq_len)]
+    #     value = [(torch.zeros_like(tensor_for_size).to('cuda')) for _ in range(pred_seq_len)]
+    #     value_act = [(torch.zeros_like(tensor_for_size).to('cuda')) for _ in range(pred_seq_len)]
+    #     value_obj = [(torch.zeros_like(tensor_for_size).to('cuda')) for _ in range(pred_seq_len)]
+    #     oracle_positive_obj = [(torch.zeros_like(tensor_for_size).to('cuda').to(bool)) for _ in range(pred_seq_len)]
+    #     query_type = [-(torch.ones_like(tensor_for_size)) for _ in range(pred_seq_len)]
+    #     correction_masks = []
+    #     num_carried_obj_queries = 0
+    #     num_carried_act_queries = 0
 
-        if self.cfg.only_confused_queries:
-            confused = lambda p: torch.bitwise_and(p>0.1, p<0.9)
-        else:
-            confused = lambda p: torch.ones_like(p).to(bool).to('cuda') 
+    #     if self.cfg.only_confused_queries:
+    #         confused = lambda p: torch.bitwise_and(p>0.1, p<0.9)
+    #     else:
+    #         confused = lambda p: torch.ones_like(p).to(bool).to('cuda') 
 
-        def soften_mask(mask):
-            mask += 1e-8
-            normalizer = mask.sum(-1).clone().detach()
-            mask = mask/normalizer
-            return mask.to('cuda')
+    #     def soften_mask(mask):
+    #         mask += 1e-8
+    #         normalizer = mask.sum(-1).clone().detach()
+    #         mask = mask/normalizer
+    #         return mask.to('cuda')
 
-        changes_at_step_wo_query = data_in.changes_pred[:,:1,:]
-        for curr_step in range(pred_seq_len):
-            graph_masks = [None for _ in range(data_in.num_steps)]
-            activity_masks = None
-            activity_best_step = data_in.activity_best_step[:,curr_step:1+curr_step,0].to(int).item()
-            if data_in.initial_latents_forward is not None:
-                latents_forward = deepcopy(data_in.initial_latents_forward[:,curr_step:curr_step+1,:])
-                latent_series = deepcopy(data_in.initial_latents_forward[:,:curr_step+1,:])
-            else:
-                latents_forward = None
-                latent_series = None 
+    #     changes_at_step_wo_query = data_in.changes_pred[:,:1,:]
+    #     for curr_step in range(pred_seq_len):
+    #         graph_masks = [None for _ in range(data_in.num_steps)]
+    #         activity_masks = None
+    #         activity_best_step = data_in.activity_best_step[:,curr_step:1+curr_step,0].to(int).item()
+    #         if data_in.initial_latents_forward is not None:
+    #             latents_forward = deepcopy(data_in.initial_latents_forward[:,curr_step:curr_step+1,:])
+    #             latent_series = deepcopy(data_in.initial_latents_forward[:,:curr_step+1,:])
+    #         else:
+    #             latents_forward = None
+    #             latent_series = None 
 
-            def evaluate_obj_query(mask, time_mask, ask_mask):
-                graph_mask_pos = mask[0]
-                graph_mask_neg = mask[1]
-                assert not EXTRACAREFUL or torch.allclose(graph_seq_edges.sum(-1), torch.ones_like(graph_seq_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
+    #         def evaluate_obj_query(mask, time_mask, ask_mask):
+    #             graph_mask_pos = mask[0]
+    #             graph_mask_neg = mask[1]
+    #             assert not EXTRACAREFUL or torch.allclose(graph_seq_edges.sum(-1), torch.ones_like(graph_seq_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
 
-                ## pos_query
-                pos_query_time_mask = time_mask
-                relocatn_probs_pos, prob_of_query_pos, pred_activity_pos, changes_pred_pos, _ = self.rollout_onestep_with_masks(
-                                                latent_series=LatentDeterministic(deepcopy(latent_series.sample().repeat(mask[0].size()[0],1,1)), learn_magnitude=latent_series.learn_magnitude) if latent_series is not None else None,
-                                                time_context_series=deepcopy(time_context[:,:curr_step+1+data_in.num_steps,:].repeat(mask[0].size()[0],1,1)),
-                                                num_steps=data_in.num_steps, 
-                                                graph_seq_edges=deepcopy(graph_seq_edges[:,curr_step+1:curr_step+data_in.num_steps+2].repeat(mask[0].size()[0],1,1,1)),
-                                                input_nodes_forward=deepcopy(graph_seq_nodes[:,curr_step+1:2+curr_step,:,:].repeat(mask[0].size()[0],1,1,1)), 
-                                                time_context=deepcopy(time_context[:,curr_step:curr_step+data_in.num_steps+2].repeat(mask[0].size()[0],1,1)), 
-                                                graph_dyn_edges=deepcopy(graph_dyn_edges[:,curr_step+1:curr_step+data_in.num_steps+2,:,:].repeat(mask[0].size()[0],1,1,1)), 
-                                                graph_masks_old = graph_masks, 
-                                                activity_masks_old = activity_masks,
-                                                query_time = pos_query_time_mask, 
-                                                query_type = 'graph', 
-                                                query_mask = graph_mask_pos,
-                                                reference_activity = activity_id_seq[:,curr_step:curr_step+1],
-                                                activity_embedding_matrix=data_in.activity_embedding_matrix)
+    #             ## pos_query
+    #             pos_query_time_mask = time_mask
+    #             relocatn_probs_pos, prob_of_query_pos, pred_activity_pos, changes_pred_pos, _ = self.rollout_onestep_with_masks(
+    #                                             latent_series=LatentDeterministic(deepcopy(latent_series.sample().repeat(mask[0].size()[0],1,1)), learn_magnitude=latent_series.learn_magnitude) if latent_series is not None else None,
+    #                                             time_context_series=deepcopy(time_context[:,:curr_step+1+data_in.num_steps,:].repeat(mask[0].size()[0],1,1)),
+    #                                             num_steps=data_in.num_steps, 
+    #                                             graph_seq_edges=deepcopy(graph_seq_edges[:,curr_step+1:curr_step+data_in.num_steps+2].repeat(mask[0].size()[0],1,1,1)),
+    #                                             input_nodes_forward=deepcopy(graph_seq_nodes[:,curr_step+1:2+curr_step,:,:].repeat(mask[0].size()[0],1,1,1)), 
+    #                                             time_context=deepcopy(time_context[:,curr_step:curr_step+data_in.num_steps+2].repeat(mask[0].size()[0],1,1)), 
+    #                                             graph_dyn_edges=deepcopy(graph_dyn_edges[:,curr_step+1:curr_step+data_in.num_steps+2,:,:].repeat(mask[0].size()[0],1,1,1)), 
+    #                                             graph_masks_old = graph_masks, 
+    #                                             activity_masks_old = activity_masks,
+    #                                             query_time = pos_query_time_mask, 
+    #                                             query_type = 'graph', 
+    #                                             query_mask = graph_mask_pos,
+    #                                             reference_activity = activity_id_seq[:,curr_step:curr_step+1],
+    #                                             activity_embedding_matrix=data_in.activity_embedding_matrix)
             
-                ## neg_query
-                neg_query_time_mask = None if self.cfg.query_negative_at_all_steps else time_mask
-                relocatn_probs_neg, prob_of_query_neg, pred_activity_neg, changes_pred_neg, _ = self.rollout_onestep_with_masks(
-                                                latent_series=LatentDeterministic(deepcopy(latent_series.sample().repeat(mask[0].size()[0],1,1)), learn_magnitude=latent_series.learn_magnitude) if latent_series is not None else None,
-                                                time_context_series=deepcopy(time_context[:,:curr_step+1+data_in.num_steps,:].repeat(mask[0].size()[0],1,1)),
-                                                num_steps=data_in.num_steps, 
-                                                graph_seq_edges=deepcopy(graph_seq_edges[:,curr_step+1:curr_step+data_in.num_steps+2].repeat(mask[0].size()[0],1,1,1)),
-                                                input_nodes_forward=deepcopy(graph_seq_nodes[:,curr_step+1:2+curr_step,:,:].repeat(mask[0].size()[0],1,1,1)), 
-                                                time_context=deepcopy(time_context[:,curr_step:curr_step+data_in.num_steps+2].repeat(mask[0].size()[0],1,1)), 
-                                                graph_dyn_edges=deepcopy(graph_dyn_edges[:,curr_step+1:curr_step+data_in.num_steps+2,:,:].repeat(mask[0].size()[0],1,1,1)), 
-                                                graph_masks_old = graph_masks, 
-                                                activity_masks_old = activity_masks,
-                                                query_time = neg_query_time_mask, 
-                                                query_type = 'graph', 
-                                                query_mask = graph_mask_neg,
-                                                reference_activity = activity_id_seq[:,curr_step:curr_step+1],
-                                                activity_embedding_matrix=data_in.activity_embedding_matrix)
+    #             ## neg_query
+    #             neg_query_time_mask = None if self.cfg.query_negative_at_all_steps else time_mask
+    #             relocatn_probs_neg, prob_of_query_neg, pred_activity_neg, changes_pred_neg, _ = self.rollout_onestep_with_masks(
+    #                                             latent_series=LatentDeterministic(deepcopy(latent_series.sample().repeat(mask[0].size()[0],1,1)), learn_magnitude=latent_series.learn_magnitude) if latent_series is not None else None,
+    #                                             time_context_series=deepcopy(time_context[:,:curr_step+1+data_in.num_steps,:].repeat(mask[0].size()[0],1,1)),
+    #                                             num_steps=data_in.num_steps, 
+    #                                             graph_seq_edges=deepcopy(graph_seq_edges[:,curr_step+1:curr_step+data_in.num_steps+2].repeat(mask[0].size()[0],1,1,1)),
+    #                                             input_nodes_forward=deepcopy(graph_seq_nodes[:,curr_step+1:2+curr_step,:,:].repeat(mask[0].size()[0],1,1,1)), 
+    #                                             time_context=deepcopy(time_context[:,curr_step:curr_step+data_in.num_steps+2].repeat(mask[0].size()[0],1,1)), 
+    #                                             graph_dyn_edges=deepcopy(graph_dyn_edges[:,curr_step+1:curr_step+data_in.num_steps+2,:,:].repeat(mask[0].size()[0],1,1,1)), 
+    #                                             graph_masks_old = graph_masks, 
+    #                                             activity_masks_old = activity_masks,
+    #                                             query_time = neg_query_time_mask, 
+    #                                             query_type = 'graph', 
+    #                                             query_mask = graph_mask_neg,
+    #                                             reference_activity = activity_id_seq[:,curr_step:curr_step+1],
+    #                                             activity_embedding_matrix=data_in.activity_embedding_matrix)
 
-                query_value = prob_of_query_pos * usefuleness_metric(relocations_probs_wo_query[:,curr_step:1+curr_step,:,:].repeat(relocatn_probs_pos.size()[0],1,1,1), relocatn_probs_pos) + \
-                        (1 - prob_of_query_pos) * usefuleness_metric(relocations_probs_wo_query[:,curr_step:1+curr_step,:,:].repeat(relocatn_probs_pos.size()[0],1,1,1), relocatn_probs_neg)
+    #             query_value = prob_of_query_pos * usefuleness_metric(relocations_probs_wo_query[:,curr_step:1+curr_step,:,:].repeat(relocatn_probs_pos.size()[0],1,1,1), relocatn_probs_pos) + \
+    #                     (1 - prob_of_query_pos) * usefuleness_metric(relocations_probs_wo_query[:,curr_step:1+curr_step,:,:].repeat(relocatn_probs_pos.size()[0],1,1,1), relocatn_probs_neg)
             
-                assert (prob_of_query_pos>=-0.1).all()
-                assert (prob_of_query_pos<=1.1).all()
-                assert not torch.isnan(query_value).any()
+    #             assert (prob_of_query_pos>=-0.1).all()
+    #             assert (prob_of_query_pos<=1.1).all()
+    #             assert not torch.isnan(query_value).any()
 
-                query_value *= ask_mask
+    #             query_value *= ask_mask
 
-                best_query = query_value.argmax(0)
-                all_relocation_probs_pos = relocatn_probs_pos[best_query,:,:,:].unsqueeze(0)
-                all_relocation_probs_neg = relocatn_probs_neg[best_query,:,:,:].unsqueeze(0)
-                all_act_pred_pos = pred_activity_pos[best_query,:,:].argmax(-1)
-                all_act_pred_neg = pred_activity_neg[best_query,:,:].argmax(-1)
+    #             best_query = query_value.argmax(0)
+    #             all_relocation_probs_pos = relocatn_probs_pos[best_query,:,:,:].unsqueeze(0)
+    #             all_relocation_probs_neg = relocatn_probs_neg[best_query,:,:,:].unsqueeze(0)
+    #             all_act_pred_pos = pred_activity_pos[best_query,:,:].argmax(-1)
+    #             all_act_pred_neg = pred_activity_neg[best_query,:,:].argmax(-1)
 
-                return query_value.max(0).values, \
-                    all_relocation_probs_pos, \
-                    all_relocation_probs_neg, \
-                    best_query, \
-                    all_act_pred_pos, \
-                    all_act_pred_neg
+    #             return query_value.max(0).values, \
+    #                 all_relocation_probs_pos, \
+    #                 all_relocation_probs_neg, \
+    #                 best_query, \
+    #                 all_act_pred_pos, \
+    #                 all_act_pred_neg
         
-            def oracle_activity(activity_id_seq):
-                current_activity = activity_id_seq[0,curr_step:1+curr_step]
-                oracle_next_activity = deepcopy(activity_id_seq[0,1+curr_step:2+curr_step])
-                oracle_next_activity[oracle_next_activity == current_activity] = -1
-                for ostep in range(data_in.num_steps):
-                    oracle_next_activity[oracle_next_activity < 2] = activity_id_seq[0,1+curr_step+ostep:2+curr_step+ostep][oracle_next_activity < 2]
-                    oracle_next_activity[oracle_next_activity == current_activity] = -1
-                ## Only return current activity if no other activity will be performed
-                oracle_next_activity[oracle_next_activity == -1] = current_activity[oracle_next_activity == -1]
-                return oracle_next_activity
+    #         def oracle_activity(activity_id_seq):
+    #             current_activity = activity_id_seq[0,curr_step:1+curr_step]
+    #             oracle_next_activity = deepcopy(activity_id_seq[0,1+curr_step:2+curr_step])
+    #             oracle_next_activity[oracle_next_activity == current_activity] = -1
+    #             for ostep in range(data_in.num_steps):
+    #                 oracle_next_activity[oracle_next_activity < 2] = activity_id_seq[0,1+curr_step+ostep:2+curr_step+ostep][oracle_next_activity < 2]
+    #                 oracle_next_activity[oracle_next_activity == current_activity] = -1
+    #             ## Only return current activity if no other activity will be performed
+    #             oracle_next_activity[oracle_next_activity == -1] = current_activity[oracle_next_activity == -1]
+    #             return oracle_next_activity
         
-            def oracle_object(query_objects, changes_gt):
-                oracle_positive = (changes_gt.squeeze(0) * F.one_hot(query_objects, num_classes=changes_gt.size()[-1])).sum(-1)
-                oracle_negative = ((1-changes_gt.to(int).squeeze(0)) * F.one_hot(query_objects, num_classes=changes_gt.size()[-1])).sum(-1)
-                assert oracle_positive.max() <= 1 and oracle_positive.min() >= 0
-                assert oracle_negative.max() <= 1 and oracle_negative.min() >= 0
-                assert (oracle_negative == 1 - oracle_positive).all()
-                return oracle_positive.to(bool), oracle_negative.to(bool)
+    #         def oracle_object(query_objects, changes_gt):
+    #             oracle_positive = (changes_gt.squeeze(0) * F.one_hot(query_objects, num_classes=changes_gt.size()[-1])).sum(-1)
+    #             oracle_negative = ((1-changes_gt.to(int).squeeze(0)) * F.one_hot(query_objects, num_classes=changes_gt.size()[-1])).sum(-1)
+    #             assert oracle_positive.max() <= 1 and oracle_positive.min() >= 0
+    #             assert oracle_negative.max() <= 1 and oracle_negative.min() >= 0
+    #             assert (oracle_negative == 1 - oracle_positive).all()
+    #             return oracle_positive.to(bool), oracle_negative.to(bool)
         
-            no_activity_queries = False
+    #         no_activity_queries = False
 
-            if self.cfg.query_type in ['activity','both']:
-                ## Exact activity queries
-                value_local = torch.zeros((1,1)).float().to('cuda')
-                relocations_by_activity = []
-                pred_act_by_activity = []
-                activities_checked = []
-                query_activity_mask = torch.tensor([]).to('cuda')
-                if activity_masks is None:
-                    for activity in range(self.cfg.n_activities):
-                        activity_mask = F.one_hot((torch.ones((1,1))*activity).to(int).to('cuda'), num_classes=self.cfg.n_activities).clone().detach()
-                        query_activity_mask = torch.cat([query_activity_mask, activity_mask])
-                        activities_checked.append(activity)
-                    relocations_by_activity, prob_of_query, pred_act_by_activity, changes_pred, _ = self.rollout_onestep_with_masks(
-                                                    latent_series=LatentDeterministic(deepcopy(latent_series.sample().repeat(len(activities_checked),1,1)), learn_magnitude=latent_series.learn_magnitude) if latent_series is not None else None,
-                                                    time_context_series=deepcopy(time_context[:,:curr_step+1+data_in.num_steps,:].repeat(len(activities_checked),1,1)),
-                                                    num_steps=data_in.num_steps, 
-                                                    graph_seq_edges=deepcopy(graph_seq_edges[:,curr_step+1:curr_step+data_in.num_steps+2].repeat(len(activities_checked),1,1,1)),
-                                                    input_nodes_forward=deepcopy(graph_seq_nodes[:,curr_step+1:2+curr_step,:,:].repeat(len(activities_checked),1,1,1)), 
-                                                    time_context=deepcopy(time_context[:,curr_step:curr_step+data_in.num_steps+2].repeat(len(activities_checked),1,1)), 
-                                                    graph_dyn_edges=deepcopy(graph_dyn_edges[:,curr_step+1:curr_step+data_in.num_steps+2,:,:].repeat(len(activities_checked),1,1,1)), 
-                                                    graph_masks_old = graph_masks, 
-                                                    activity_masks_old = activity_masks,
-                                                    query_time = activity_best_step, 
-                                                    query_type = 'activity', 
-                                                    query_mask = query_activity_mask,
-                                                    reference_activity = activity_id_seq[:,curr_step:curr_step+1],
-                                                    activity_embedding_matrix=data_in.activity_embedding_matrix)
-                    value_local = prob_of_query.T @ usefuleness_metric(relocations_probs_wo_query[:,curr_step:1+curr_step,:,:].repeat(len(activities_checked),1,1,1), relocations_by_activity)
-                    oracle_labels = oracle_activity(activity_id_seq)
-                    actidx = activities_checked.index(oracle_labels.item())
-                    relocation_correction[curr_step] = relocations_by_activity[actidx]
-                    pred_act_correction[curr_step] = pred_act_by_activity[actidx].argmax(-1)
-                    best_queries_act_viz[curr_step] = oracle_labels
+    #         if self.cfg.query_type in ['activity','both']:
+    #             ## Exact activity queries
+    #             value_local = torch.zeros((1,1)).float().to('cuda')
+    #             relocations_by_activity = []
+    #             pred_act_by_activity = []
+    #             activities_checked = []
+    #             query_activity_mask = torch.tensor([]).to('cuda')
+    #             if activity_masks is None:
+    #                 for activity in range(self.cfg.n_activities):
+    #                     activity_mask = F.one_hot((torch.ones((1,1))*activity).to(int).to('cuda'), num_classes=self.cfg.n_activities).clone().detach()
+    #                     query_activity_mask = torch.cat([query_activity_mask, activity_mask])
+    #                     activities_checked.append(activity)
+    #                 relocations_by_activity, prob_of_query, pred_act_by_activity, changes_pred, _ = self.rollout_onestep_with_masks(
+    #                                                 latent_series=LatentDeterministic(deepcopy(latent_series.sample().repeat(len(activities_checked),1,1)), learn_magnitude=latent_series.learn_magnitude) if latent_series is not None else None,
+    #                                                 time_context_series=deepcopy(time_context[:,:curr_step+1+data_in.num_steps,:].repeat(len(activities_checked),1,1)),
+    #                                                 num_steps=data_in.num_steps, 
+    #                                                 graph_seq_edges=deepcopy(graph_seq_edges[:,curr_step+1:curr_step+data_in.num_steps+2].repeat(len(activities_checked),1,1,1)),
+    #                                                 input_nodes_forward=deepcopy(graph_seq_nodes[:,curr_step+1:2+curr_step,:,:].repeat(len(activities_checked),1,1,1)), 
+    #                                                 time_context=deepcopy(time_context[:,curr_step:curr_step+data_in.num_steps+2].repeat(len(activities_checked),1,1)), 
+    #                                                 graph_dyn_edges=deepcopy(graph_dyn_edges[:,curr_step+1:curr_step+data_in.num_steps+2,:,:].repeat(len(activities_checked),1,1,1)), 
+    #                                                 graph_masks_old = graph_masks, 
+    #                                                 activity_masks_old = activity_masks,
+    #                                                 query_time = activity_best_step, 
+    #                                                 query_type = 'activity', 
+    #                                                 query_mask = query_activity_mask,
+    #                                                 reference_activity = activity_id_seq[:,curr_step:curr_step+1],
+    #                                                 activity_embedding_matrix=data_in.activity_embedding_matrix)
+    #                 value_local = prob_of_query.T @ usefuleness_metric(relocations_probs_wo_query[:,curr_step:1+curr_step,:,:].repeat(len(activities_checked),1,1,1), relocations_by_activity)
+    #                 oracle_labels = oracle_activity(activity_id_seq)
+    #                 actidx = activities_checked.index(oracle_labels.item())
+    #                 relocation_correction[curr_step] = relocations_by_activity[actidx]
+    #                 pred_act_correction[curr_step] = pred_act_by_activity[actidx].argmax(-1)
+    #                 best_queries_act_viz[curr_step] = oracle_labels
 
-                    assert value_local.squeeze(0).size()[0] == 1
-                    value[curr_step] = deepcopy(value_local.squeeze(0))
-                    query_type[curr_step] = torch.ones_like(value_local.squeeze(0))
-                    value_act[curr_step] = deepcopy(value_local.squeeze(0))
+    #                 assert value_local.squeeze(0).size()[0] == 1
+    #                 value[curr_step] = deepcopy(value_local.squeeze(0))
+    #                 query_type[curr_step] = torch.ones_like(value_local.squeeze(0))
+    #                 value_act[curr_step] = deepcopy(value_local.squeeze(0))
                 
-                else:
-                    no_activity_queries = True
+    #             else:
+    #                 no_activity_queries = True
 
-            if self.cfg.query_type in ['object','both']:
-                object_queries_list_lenient = [torch.argwhere(confused(relprob) & dynamic).squeeze(-1) for relprob,dynamic in zip(data_in.relocations_best_prob[0,curr_step:curr_step+1,:], obj_mask[0,curr_step:curr_step+1,:])]
-                rolled_over_obj_queries = [obj_q['query'][0] for obj_q in obj_queries_buffer]
-                object_queries_list = [torch.tensor([o for o in object_queries_list_lenient_step if o not in rolled_over_obj_queries]).to('cuda') for object_queries_list_lenient_step in object_queries_list_lenient]
+    #         if self.cfg.query_type in ['object','both']:
+    #             object_queries_list_lenient = [torch.argwhere(confused(relprob) & dynamic).squeeze(-1) for relprob,dynamic in zip(data_in.relocations_best_prob[0,curr_step:curr_step+1,:], obj_mask[0,curr_step:curr_step+1,:])]
+    #             rolled_over_obj_queries = [obj_q['query'][0] for obj_q in obj_queries_buffer]
+    #             object_queries_list = [torch.tensor([o for o in object_queries_list_lenient_step if o not in rolled_over_obj_queries]).to('cuda') for object_queries_list_lenient_step in object_queries_list_lenient]
 
-                num_queries = [len(oq) for oq in object_queries_list]
-                if max(num_queries) > 0:
-                    object_queries = torch.stack([torch.cat([aq.to(torch.long), torch.zeros(max(num_queries)-nq, dtype=torch.long).to(aq.device)]) for aq, nq in zip(object_queries_list, num_queries)], dim=-1)
-                    ask_mask = torch.stack([torch.cat([torch.ones(nq, dtype=torch.long).to(object_queries.device), torch.zeros(max(num_queries)-nq, dtype=torch.long).to(object_queries.device)]) for nq in num_queries], dim=-1)
-                    assert changes_at_step_wo_query.size()[0] == 1, "Batch size should be 1 for query hack, else add a dimension to all of this!!!"
-                    object_mask = (F.one_hot(object_queries, num_classes=self.cfg.n_nodes))
-                    query_time_mask = (object_mask * data_in.relocations_best_step[:,curr_step:curr_step+1,:].repeat(object_mask.size()[0],1,1)).sum(-1)
-                    query_time_mask[ask_mask == 0] = 0
-                    object_mask = object_mask.unsqueeze(-1).repeat(1,1,1,self.cfg.n_nodes)
-                    _reference_edges = deepcopy(graph_seq_edges[:,curr_step+1:curr_step+2,:,:].argmax(-1))
-                    reference_edge_mask = F.one_hot(_reference_edges, num_classes=self.cfg.n_nodes).clone().detach()
-                    pos_mask = (object_mask*(1-reference_edge_mask))+(1-object_mask)
-                    neg_mask = (object_mask*reference_edge_mask)+(1-object_mask)
-                    value_obj_at_step, relocation_pos_obj, relocation_neg_obj, best_queries_obj, pred_act_pos_obj, pred_act_neg_obj = evaluate_obj_query((pos_mask, neg_mask), query_time_mask, ask_mask)
-                    queried_object = object_queries_list[0][best_queries_obj]
-                    assert not EXTRACAREFUL or relocation_pos_obj.argmax(-1).squeeze()[object_queries_list[0][best_queries_obj]] != _reference_edges[0,0,object_queries_list[0][best_queries_obj]]
-                    assert not EXTRACAREFUL or relocation_neg_obj.argmax(-1).squeeze()[object_queries_list[0][best_queries_obj]] == _reference_edges[0,0,object_queries_list[0][best_queries_obj]]
-                    oracle_positive_obj_at_step, _ = oracle_object(object_queries[best_queries_obj, torch.arange(len(best_queries_obj))], data_in.changes_gt[:,curr_step:curr_step+1,:])
-                    if EXTRACAREFUL:
-                        multiple_locations_for_object = (len(graph_seq_edges[:,curr_step+1:curr_step+2+data_in.num_steps,object_queries_list[0][best_queries_obj],:].argmax(-1).unique()) > 1)
-                        assert multiple_locations_for_object == oracle_positive_obj_at_step, f"Object oracle is wrong!! {multiple_locations_for_object} != {oracle_positive_obj_at_step}"
-                    oracle_positive_obj[curr_step] = oracle_positive_obj_at_step
-                    best_queries_obj_viz[curr_step] = object_queries[best_queries_obj, torch.arange(len(best_queries_obj))]
-                    relocation_correction_obj = relocation_neg_obj
-                    relocation_correction_obj[oracle_positive_obj_at_step] = relocation_pos_obj[oracle_positive_obj_at_step]
-                    pred_act_correction_obj = pred_act_neg_obj
-                    pred_act_correction_obj[oracle_positive_obj_at_step] = pred_act_pos_obj[oracle_positive_obj_at_step]
-                    value_obj[curr_step] = deepcopy(value_obj_at_step)
-                    if self.cfg.query_type == 'both' and not no_activity_queries:
-                        if (value_obj_at_step > value_act[curr_step]).sum() > 0:
-                            query_type[curr_step][value_obj_at_step>value_act[curr_step]] = 2
-                            value[curr_step][value_obj_at_step>value_act[curr_step]] = value_obj_at_step[value_obj_at_step>value_act[curr_step]]
-                            relocation_correction[curr_step][value_obj_at_step>value_act[curr_step]] = relocation_correction_obj[value_obj_at_step>value_act[curr_step]]
-                            pred_act_correction[curr_step][value_obj_at_step>value_act[curr_step]] = pred_act_correction_obj[value_obj_at_step>value_act[curr_step]]
-                    else:
-                        query_type[curr_step] = torch.ones_like(value_obj_at_step)*2
-                        value[curr_step] = deepcopy(value_obj_at_step)
-                        relocation_correction[curr_step] = relocation_correction_obj
-                        pred_act_correction[curr_step] = pred_act_correction_obj
+    #             num_queries = [len(oq) for oq in object_queries_list]
+    #             if max(num_queries) > 0:
+    #                 object_queries = torch.stack([torch.cat([aq.to(torch.long), torch.zeros(max(num_queries)-nq, dtype=torch.long).to(aq.device)]) for aq, nq in zip(object_queries_list, num_queries)], dim=-1)
+    #                 ask_mask = torch.stack([torch.cat([torch.ones(nq, dtype=torch.long).to(object_queries.device), torch.zeros(max(num_queries)-nq, dtype=torch.long).to(object_queries.device)]) for nq in num_queries], dim=-1)
+    #                 assert changes_at_step_wo_query.size()[0] == 1, "Batch size should be 1 for query hack, else add a dimension to all of this!!!"
+    #                 object_mask = (F.one_hot(object_queries, num_classes=self.cfg.n_nodes))
+    #                 query_time_mask = (object_mask * data_in.relocations_best_step[:,curr_step:curr_step+1,:].repeat(object_mask.size()[0],1,1)).sum(-1)
+    #                 query_time_mask[ask_mask == 0] = 0
+    #                 object_mask = object_mask.unsqueeze(-1).repeat(1,1,1,self.cfg.n_nodes)
+    #                 _reference_edges = deepcopy(graph_seq_edges[:,curr_step+1:curr_step+2,:,:].argmax(-1))
+    #                 reference_edge_mask = F.one_hot(_reference_edges, num_classes=self.cfg.n_nodes).clone().detach()
+    #                 pos_mask = (object_mask*(1-reference_edge_mask))+(1-object_mask)
+    #                 neg_mask = (object_mask*reference_edge_mask)+(1-object_mask)
+    #                 value_obj_at_step, relocation_pos_obj, relocation_neg_obj, best_queries_obj, pred_act_pos_obj, pred_act_neg_obj = evaluate_obj_query((pos_mask, neg_mask), query_time_mask, ask_mask)
+    #                 queried_object = object_queries_list[0][best_queries_obj]
+    #                 assert not EXTRACAREFUL or relocation_pos_obj.argmax(-1).squeeze()[object_queries_list[0][best_queries_obj]] != _reference_edges[0,0,object_queries_list[0][best_queries_obj]]
+    #                 assert not EXTRACAREFUL or relocation_neg_obj.argmax(-1).squeeze()[object_queries_list[0][best_queries_obj]] == _reference_edges[0,0,object_queries_list[0][best_queries_obj]]
+    #                 oracle_positive_obj_at_step, _ = oracle_object(object_queries[best_queries_obj, torch.arange(len(best_queries_obj))], data_in.changes_gt[:,curr_step:curr_step+1,:])
+    #                 if EXTRACAREFUL:
+    #                     multiple_locations_for_object = (len(graph_seq_edges[:,curr_step+1:curr_step+2+data_in.num_steps,object_queries_list[0][best_queries_obj],:].argmax(-1).unique()) > 1)
+    #                     assert multiple_locations_for_object == oracle_positive_obj_at_step, f"Object oracle is wrong!! {multiple_locations_for_object} != {oracle_positive_obj_at_step}"
+    #                 oracle_positive_obj[curr_step] = oracle_positive_obj_at_step
+    #                 best_queries_obj_viz[curr_step] = object_queries[best_queries_obj, torch.arange(len(best_queries_obj))]
+    #                 relocation_correction_obj = relocation_neg_obj
+    #                 relocation_correction_obj[oracle_positive_obj_at_step] = relocation_pos_obj[oracle_positive_obj_at_step]
+    #                 pred_act_correction_obj = pred_act_neg_obj
+    #                 pred_act_correction_obj[oracle_positive_obj_at_step] = pred_act_pos_obj[oracle_positive_obj_at_step]
+    #                 value_obj[curr_step] = deepcopy(value_obj_at_step)
+    #                 if self.cfg.query_type == 'both' and not no_activity_queries:
+    #                     if (value_obj_at_step > value_act[curr_step]).sum() > 0:
+    #                         query_type[curr_step][value_obj_at_step>value_act[curr_step]] = 2
+    #                         value[curr_step][value_obj_at_step>value_act[curr_step]] = value_obj_at_step[value_obj_at_step>value_act[curr_step]]
+    #                         relocation_correction[curr_step][value_obj_at_step>value_act[curr_step]] = relocation_correction_obj[value_obj_at_step>value_act[curr_step]]
+    #                         pred_act_correction[curr_step][value_obj_at_step>value_act[curr_step]] = pred_act_correction_obj[value_obj_at_step>value_act[curr_step]]
+    #                 else:
+    #                     query_type[curr_step] = torch.ones_like(value_obj_at_step)*2
+    #                     value[curr_step] = deepcopy(value_obj_at_step)
+    #                     relocation_correction[curr_step] = relocation_correction_obj
+    #                     pred_act_correction[curr_step] = pred_act_correction_obj
 
-            correction_mask = (value[curr_step] > self.cfg.query_thresh).to(bool)
-            act_correction = correction_mask & (query_type[curr_step] == 1)
-            obj_correction = correction_mask & (query_type[curr_step] == 2)
-            value_act[curr_step][torch.bitwise_not(act_correction)] = 0
-            value_obj[curr_step][torch.bitwise_not(obj_correction)] = 0
+    #         correction_mask = (value[curr_step] > self.cfg.query_thresh).to(bool)
+    #         act_correction = correction_mask & (query_type[curr_step] == 1)
+    #         obj_correction = correction_mask & (query_type[curr_step] == 2)
+    #         value_act[curr_step][torch.bitwise_not(act_correction)] = 0
+    #         value_obj[curr_step][torch.bitwise_not(obj_correction)] = 0
 
-            if correction_mask.sum() > 0:
-                relocation_corrected[curr_step][correction_mask] = deepcopy(relocation_correction[curr_step][correction_mask])
-                pred_activities_corrected[curr_step][correction_mask] = deepcopy(pred_act_correction[curr_step][correction_mask])
+    #         if correction_mask.sum() > 0:
+    #             relocation_corrected[curr_step][correction_mask] = deepcopy(relocation_correction[curr_step][correction_mask])
+    #             pred_activities_corrected[curr_step][correction_mask] = deepcopy(pred_act_correction[curr_step][correction_mask])
 
-            correction_masks.append(correction_mask)
+    #         correction_masks.append(correction_mask)
 
-        relocation_corrected = torch.stack(relocation_corrected, dim=1)
-        pred_activities_corrected = torch.stack(pred_activities_corrected, dim=1)
-        best_queries_act_viz = torch.cat(best_queries_act_viz, dim=0)
-        queries_act_viz_carryover = torch.cat(queries_act_viz_carryover, dim=0)
-        best_queries_obj_viz = torch.cat(best_queries_obj_viz, dim=0)
-        queries_obj_viz_carryover = torch.cat(queries_obj_viz_carryover, dim=0)
-        value = torch.cat(value, dim=0)
-        value_act = torch.cat(value_act, dim=0)
-        value_obj = torch.cat(value_obj, dim=0)
-        oracle_positive_obj = torch.cat(oracle_positive_obj, dim=0)
-        query_type = torch.cat(query_type, dim=0)
-        correction_masks = torch.cat(correction_masks, dim=0)
+    #     relocation_corrected = torch.stack(relocation_corrected, dim=1)
+    #     pred_activities_corrected = torch.stack(pred_activities_corrected, dim=1)
+    #     best_queries_act_viz = torch.cat(best_queries_act_viz, dim=0)
+    #     queries_act_viz_carryover = torch.cat(queries_act_viz_carryover, dim=0)
+    #     best_queries_obj_viz = torch.cat(best_queries_obj_viz, dim=0)
+    #     queries_obj_viz_carryover = torch.cat(queries_obj_viz_carryover, dim=0)
+    #     value = torch.cat(value, dim=0)
+    #     value_act = torch.cat(value_act, dim=0)
+    #     value_obj = torch.cat(value_obj, dim=0)
+    #     oracle_positive_obj = torch.cat(oracle_positive_obj, dim=0)
+    #     query_type = torch.cat(query_type, dim=0)
+    #     correction_masks = torch.cat(correction_masks, dim=0)
 
-        assert ((num_carried_act_queries == 0) and (num_carried_obj_queries == 0))
+    #     assert ((num_carried_act_queries == 0) and (num_carried_obj_queries == 0))
         
-        changes_pred = deepcopy(relocation_corrected.argmax(-1) != graph_seq_edges[0,1:pred_seq_len+1,:,:].argmax(-1))
-        dest_pred = deepcopy(relocation_corrected.argmax(-1))
+    #     changes_pred = deepcopy(relocation_corrected.argmax(-1) != graph_seq_edges[0,1:pred_seq_len+1,:,:].argmax(-1))
+    #     dest_pred = deepcopy(relocation_corrected.argmax(-1))
 
-        assert not EXTRACAREFUL or (changes_pred[0,torch.arange(changes_pred.size()[1]), best_queries_obj_viz][oracle_positive_obj & correction_masks & (value_obj>0)]).all()
-        assert not EXTRACAREFUL or not (changes_pred[0,torch.arange(changes_pred.size()[1]), best_queries_obj_viz][torch.bitwise_not(oracle_positive_obj) & correction_masks & (value_obj>0)]).any()
+    #     assert not EXTRACAREFUL or (changes_pred[0,torch.arange(changes_pred.size()[1]), best_queries_obj_viz][oracle_positive_obj & correction_masks & (value_obj>0)]).all()
+    #     assert not EXTRACAREFUL or not (changes_pred[0,torch.arange(changes_pred.size()[1]), best_queries_obj_viz][torch.bitwise_not(oracle_positive_obj) & correction_masks & (value_obj>0)]).any()
 
-        assert not EXTRACAREFUL or (value_act > 0).sum()+(value_obj > 0).sum() == correction_masks.sum()
+    #     assert not EXTRACAREFUL or (value_act > 0).sum()+(value_obj > 0).sum() == correction_masks.sum()
 
-        if self.cfg.query_type not in self.result_data['relocation_distributions_clarified']:
-            self.result_data['relocation_distributions_clarified'][self.cfg.query_type] = deepcopy(relocation_corrected)
-            self.result_data['activity_distributions_clarified'][self.cfg.query_type] = deepcopy(pred_activities_corrected)
-            self.result_data['num_queries'][self.cfg.query_type] = int(correction_masks.sum())
-        else:
-            self.result_data['relocation_distributions_clarified'][self.cfg.query_type] = torch.cat([self.result_data['relocation_distributions_clarified'][self.cfg.query_type], 
-                                                                                                                    deepcopy(relocation_corrected)], dim=0)
-            self.result_data['activity_distributions_clarified'][self.cfg.query_type] = torch.cat([self.result_data['activity_distributions_clarified'][self.cfg.query_type], 
-                                                                                                                    deepcopy(pred_activities_corrected)], dim=0)
-            self.result_data['num_queries'][self.cfg.query_type] += int(correction_masks.sum())
-        if self.cfg.query_type not in self.results_with_clarification:
-            self.results_with_clarification[self.cfg.query_type] = {'num_queries': 0,
-                                                            #  'queries_spread': 0,
-                                                                'tp': 0, 
-                                                                'fn': 0,
-                                                                'fp': 0,
-                                                                'act_correct': 0,
-                                                                'act_total': 0,
-                                                                'num_activity_queries': 0,
-                                                                'num_object_queries': 0,
-                                                                'num_activity_queries_carriedover': 0,
-                                                                'num_object_queries_carriedover': 0,
-                                                                'consistent_tp': {k:0 for k in inconsistency_masks.keys()},
-                                                                'consistent_fn': {k:0 for k in inconsistency_masks.keys()},
-                                                                'consistent_fp': {k:0 for k in inconsistency_masks.keys()},
-                                                                'inconsistent_tp': {k:0 for k in inconsistency_masks.keys()},
-                                                                'inconsistent_fn': {k:0 for k in inconsistency_masks.keys()},
-                                                                'inconsistent_fp': {k:0 for k in inconsistency_masks.keys()}}
-        self.results_with_clarification[self.cfg.query_type]['tp'] += int(torch.bitwise_and(torch.bitwise_and((dest_pred == data_in.dest_gt), data_in.changes_gt), obj_mask).sum())
-        self.results_with_clarification[self.cfg.query_type]['fp'] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), changes_pred), obj_mask).sum())
-        self.results_with_clarification[self.cfg.query_type]['fn'] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), data_in.changes_gt), obj_mask).sum())
-        self.results_with_clarification[self.cfg.query_type]['num_queries'] += int(correction_masks.sum())
-        self.results_with_clarification[self.cfg.query_type]['act_correct'] += int((pred_activities_corrected == data_in.expected_activities).sum())
-        self.results_with_clarification[self.cfg.query_type]['num_activity_queries_carriedover'] += num_carried_act_queries
-        self.results_with_clarification[self.cfg.query_type]['num_object_queries_carriedover'] += num_carried_obj_queries
-        self.results_with_clarification[self.cfg.query_type]['act_total'] += int(torch.numel(pred_activities_corrected))
-        self.results_with_clarification[self.cfg.query_type]['num_activity_queries'] += int(torch.bitwise_and(correction_masks, query_type==1).sum())
-        self.results_with_clarification[self.cfg.query_type]['num_object_queries'] += int(torch.bitwise_and(correction_masks, query_type==2).sum())
-        for consistency_thresh, inconsistency_mask in inconsistency_masks.items():
-            consistent_obj_mask = torch.bitwise_and(obj_mask, torch.bitwise_not(inconsistency_mask))
-            self.results_with_clarification[self.cfg.query_type]['consistent_tp'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred == data_in.dest_gt), data_in.changes_gt), consistent_obj_mask).sum())
-            self.results_with_clarification[self.cfg.query_type]['consistent_fp'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), changes_pred), consistent_obj_mask).sum())
-            self.results_with_clarification[self.cfg.query_type]['consistent_fn'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), data_in.changes_gt), consistent_obj_mask).sum())
-            inconsistent_obj_mask = torch.bitwise_and(obj_mask, inconsistency_mask)
-            self.results_with_clarification[self.cfg.query_type]['inconsistent_tp'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred == data_in.dest_gt), data_in.changes_gt), inconsistent_obj_mask).sum())
-            self.results_with_clarification[self.cfg.query_type]['inconsistent_fp'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), changes_pred), inconsistent_obj_mask).sum())
-            self.results_with_clarification[self.cfg.query_type]['inconsistent_fn'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), data_in.changes_gt), inconsistent_obj_mask).sum())
-            assert self.results_with_clarification[self.cfg.query_type]['tp'] == self.results_with_clarification[self.cfg.query_type]['consistent_tp'][consistency_thresh] + self.results_with_clarification[self.cfg.query_type]['inconsistent_tp'][consistency_thresh], "TPs are not consistent"
-            assert self.results_with_clarification[self.cfg.query_type]['fp'] == self.results_with_clarification[self.cfg.query_type]['consistent_fp'][consistency_thresh] + self.results_with_clarification[self.cfg.query_type]['inconsistent_fp'][consistency_thresh], "FPs are not consistent"
-            assert self.results_with_clarification[self.cfg.query_type]['fn'] == self.results_with_clarification[self.cfg.query_type]['consistent_fn'][consistency_thresh] + self.results_with_clarification[self.cfg.query_type]['inconsistent_fn'][consistency_thresh], "FNs are not consistent"
+    #     if self.cfg.query_type not in self.result_data['relocation_distributions_clarified']:
+    #         self.result_data['relocation_distributions_clarified'][self.cfg.query_type] = deepcopy(relocation_corrected)
+    #         self.result_data['activity_distributions_clarified'][self.cfg.query_type] = deepcopy(pred_activities_corrected)
+    #         self.result_data['num_queries'][self.cfg.query_type] = int(correction_masks.sum())
+    #     else:
+    #         self.result_data['relocation_distributions_clarified'][self.cfg.query_type] = torch.cat([self.result_data['relocation_distributions_clarified'][self.cfg.query_type], 
+    #                                                                                                                 deepcopy(relocation_corrected)], dim=0)
+    #         self.result_data['activity_distributions_clarified'][self.cfg.query_type] = torch.cat([self.result_data['activity_distributions_clarified'][self.cfg.query_type], 
+    #                                                                                                                 deepcopy(pred_activities_corrected)], dim=0)
+    #         self.result_data['num_queries'][self.cfg.query_type] += int(correction_masks.sum())
+    #     if self.cfg.query_type not in self.results_with_clarification:
+    #         self.results_with_clarification[self.cfg.query_type] = {'num_queries': 0,
+    #                                                         #  'queries_spread': 0,
+    #                                                             'tp': 0, 
+    #                                                             'fn': 0,
+    #                                                             'fp': 0,
+    #                                                             'act_correct': 0,
+    #                                                             'act_total': 0,
+    #                                                             'num_activity_queries': 0,
+    #                                                             'num_object_queries': 0,
+    #                                                             'num_activity_queries_carriedover': 0,
+    #                                                             'num_object_queries_carriedover': 0,
+    #                                                             'consistent_tp': {k:0 for k in inconsistency_masks.keys()},
+    #                                                             'consistent_fn': {k:0 for k in inconsistency_masks.keys()},
+    #                                                             'consistent_fp': {k:0 for k in inconsistency_masks.keys()},
+    #                                                             'inconsistent_tp': {k:0 for k in inconsistency_masks.keys()},
+    #                                                             'inconsistent_fn': {k:0 for k in inconsistency_masks.keys()},
+    #                                                             'inconsistent_fp': {k:0 for k in inconsistency_masks.keys()}}
+    #     self.results_with_clarification[self.cfg.query_type]['tp'] += int(torch.bitwise_and(torch.bitwise_and((dest_pred == data_in.dest_gt), data_in.changes_gt), obj_mask).sum())
+    #     self.results_with_clarification[self.cfg.query_type]['fp'] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), changes_pred), obj_mask).sum())
+    #     self.results_with_clarification[self.cfg.query_type]['fn'] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), data_in.changes_gt), obj_mask).sum())
+    #     self.results_with_clarification[self.cfg.query_type]['num_queries'] += int(correction_masks.sum())
+    #     self.results_with_clarification[self.cfg.query_type]['act_correct'] += int((pred_activities_corrected == data_in.expected_activities).sum())
+    #     self.results_with_clarification[self.cfg.query_type]['num_activity_queries_carriedover'] += num_carried_act_queries
+    #     self.results_with_clarification[self.cfg.query_type]['num_object_queries_carriedover'] += num_carried_obj_queries
+    #     self.results_with_clarification[self.cfg.query_type]['act_total'] += int(torch.numel(pred_activities_corrected))
+    #     self.results_with_clarification[self.cfg.query_type]['num_activity_queries'] += int(torch.bitwise_and(correction_masks, query_type==1).sum())
+    #     self.results_with_clarification[self.cfg.query_type]['num_object_queries'] += int(torch.bitwise_and(correction_masks, query_type==2).sum())
+    #     for consistency_thresh, inconsistency_mask in inconsistency_masks.items():
+    #         consistent_obj_mask = torch.bitwise_and(obj_mask, torch.bitwise_not(inconsistency_mask))
+    #         self.results_with_clarification[self.cfg.query_type]['consistent_tp'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred == data_in.dest_gt), data_in.changes_gt), consistent_obj_mask).sum())
+    #         self.results_with_clarification[self.cfg.query_type]['consistent_fp'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), changes_pred), consistent_obj_mask).sum())
+    #         self.results_with_clarification[self.cfg.query_type]['consistent_fn'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), data_in.changes_gt), consistent_obj_mask).sum())
+    #         inconsistent_obj_mask = torch.bitwise_and(obj_mask, inconsistency_mask)
+    #         self.results_with_clarification[self.cfg.query_type]['inconsistent_tp'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred == data_in.dest_gt), data_in.changes_gt), inconsistent_obj_mask).sum())
+    #         self.results_with_clarification[self.cfg.query_type]['inconsistent_fp'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), changes_pred), inconsistent_obj_mask).sum())
+    #         self.results_with_clarification[self.cfg.query_type]['inconsistent_fn'][consistency_thresh] += int(torch.bitwise_and(torch.bitwise_and((dest_pred != data_in.dest_gt), data_in.changes_gt), inconsistent_obj_mask).sum())
+    #         assert self.results_with_clarification[self.cfg.query_type]['tp'] == self.results_with_clarification[self.cfg.query_type]['consistent_tp'][consistency_thresh] + self.results_with_clarification[self.cfg.query_type]['inconsistent_tp'][consistency_thresh], "TPs are not consistent"
+    #         assert self.results_with_clarification[self.cfg.query_type]['fp'] == self.results_with_clarification[self.cfg.query_type]['consistent_fp'][consistency_thresh] + self.results_with_clarification[self.cfg.query_type]['inconsistent_fp'][consistency_thresh], "FPs are not consistent"
+    #         assert self.results_with_clarification[self.cfg.query_type]['fn'] == self.results_with_clarification[self.cfg.query_type]['consistent_fn'][consistency_thresh] + self.results_with_clarification[self.cfg.query_type]['inconsistent_fn'][consistency_thresh], "FNs are not consistent"
         
-        assert obj_mask.size(0) == 1, "This hack doesn't work with >1 batch size"
-        assert (obj_mask[0,0,:] == obj_mask[0,5,:]).all(), "Just checking!!"
-        obj_mask_single_dim = obj_mask[0,0,:]
-        dense_gt = data_in.dest_gt.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
-        snapshot_gt = deepcopy(data_in.dest_gt)
-        snapshot_gt[torch.bitwise_not(data_in.changes_gt)] = -1
-        snapshot_gt = snapshot_gt.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
-        x=0.1
-        snapshot_gt_alpha = ((((relocation_corrected*F.one_hot(data_in.dest_gt)).sum(-1))*((1-x)/.5))+x).clip(0,1)
-        snapshot_gt_alpha = snapshot_gt_alpha.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
-        dense_pred = deepcopy(dest_pred.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0))
-        snapshot_pred = deepcopy(dest_pred)
-        snapshot_pred[torch.bitwise_not(changes_pred)] = -1
-        snapshot_pred = snapshot_pred.squeeze(0).permute(1,0)[obj_mask_single_dim].permute(1,0)
-        pred_alpha = (data_in.changes_pred != changes_pred).squeeze(0).permute(1,0)[obj_mask_single_dim].permute(1,0).to(int)*0.5+0.5
-        assert graph_seq_nodes.size(0) == 1, "This hack doesn't work with >1 batch size"
-        node_idxs = (data_in.batch.get('node_ids')[0,0,0,:][obj_mask_single_dim]).to(int).reshape(-1)
-        potential_movements = relocation_corrected.squeeze(0).clone().detach()
-        potential_movements[F.one_hot(graph_seq_edges[0,1:pred_seq_len+1,:,:].argmax(-1), num_classes = relocation_corrected.size()[-1]).to(bool).squeeze(0)] = 0.0
-        potential_movements_loc = potential_movements.argmax(-1).permute(1,0)[obj_mask_single_dim].permute(1,0)
-        potential_movements_alpha = ((potential_movements.max(-1)[0]*((1-x)/.5))+x).clip(0,1).permute(1,0)[obj_mask_single_dim].permute(1,0).squeeze(0)
+    #     assert obj_mask.size(0) == 1, "This hack doesn't work with >1 batch size"
+    #     assert (obj_mask[0,0,:] == obj_mask[0,5,:]).all(), "Just checking!!"
+    #     obj_mask_single_dim = obj_mask[0,0,:]
+    #     dense_gt = data_in.dest_gt.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
+    #     snapshot_gt = deepcopy(data_in.dest_gt)
+    #     snapshot_gt[torch.bitwise_not(data_in.changes_gt)] = -1
+    #     snapshot_gt = snapshot_gt.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
+    #     x=0.1
+    #     snapshot_gt_alpha = ((((relocation_corrected*F.one_hot(data_in.dest_gt)).sum(-1))*((1-x)/.5))+x).clip(0,1)
+    #     snapshot_gt_alpha = snapshot_gt_alpha.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
+    #     dense_pred = deepcopy(dest_pred.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0))
+    #     snapshot_pred = deepcopy(dest_pred)
+    #     snapshot_pred[torch.bitwise_not(changes_pred)] = -1
+    #     snapshot_pred = snapshot_pred.squeeze(0).permute(1,0)[obj_mask_single_dim].permute(1,0)
+    #     pred_alpha = (data_in.changes_pred != changes_pred).squeeze(0).permute(1,0)[obj_mask_single_dim].permute(1,0).to(int)*0.5+0.5
+    #     assert graph_seq_nodes.size(0) == 1, "This hack doesn't work with >1 batch size"
+    #     node_idxs = (data_in.batch.get('node_ids')[0,0,0,:][obj_mask_single_dim]).to(int).reshape(-1)
+    #     potential_movements = relocation_corrected.squeeze(0).clone().detach()
+    #     potential_movements[F.one_hot(graph_seq_edges[0,1:pred_seq_len+1,:,:].argmax(-1), num_classes = relocation_corrected.size()[-1]).to(bool).squeeze(0)] = 0.0
+    #     potential_movements_loc = potential_movements.argmax(-1).permute(1,0)[obj_mask_single_dim].permute(1,0)
+    #     potential_movements_alpha = ((potential_movements.max(-1)[0]*((1-x)/.5))+x).clip(0,1).permute(1,0)[obj_mask_single_dim].permute(1,0).squeeze(0)
         
-        if self.cfg.query_type not in self.snapshots_queries: self.snapshots_queries[self.cfg.query_type] = []
+    #     if self.cfg.query_type not in self.snapshots_queries: self.snapshots_queries[self.cfg.query_type] = []
 
-        value_act_alpha = deepcopy(value_act)
+    #     value_act_alpha = deepcopy(value_act)
 
-        self.snapshots_queries[self.cfg.query_type].append(adict({'pred':adict({'dense':dense_pred, 'alpha':pred_alpha, 'snapshot':snapshot_pred, 'activities':pred_activities_corrected, 
-                                                                    'snapshot_wo_query': data_in.snapshot_pred, 'activities_wo_query': data_in.pred_activities_all}), 
-                                                    'gt':adict({'dense':dense_gt, 'snapshot':snapshot_gt, 'alpha':snapshot_gt_alpha, 'activities':data_in.expected_activities}), 
-                                                    'obj_mask':obj_mask_single_dim, 'node_idxs':node_idxs, 
-                                                    'probs':adict({'location':potential_movements_loc, 'alpha':potential_movements_alpha}),
-                                                    'queries':adict({'obj_queries': F.one_hot(best_queries_obj_viz.detach(), num_classes=obj_mask.size()[-1]).permute(1,0)[obj_mask[0,0,:]].permute(1,0), 
-                                                            'obj_queries_carryover': queries_obj_viz_carryover.permute(1,0)[obj_mask[0,0,:]].permute(1,0), 
-                                                            'obj_value': value_obj, 
-                                                            'obj_oracle': oracle_positive_obj, 
-                                                            'act_queries': best_queries_act_viz, 
-                                                            'act_queries_carryover': queries_act_viz_carryover, 
-                                                            'act_value': value_act_alpha, 
-                                                            'act_oracle': best_queries_act_viz==pred_activities_wo_query[0,:]})}))
+    #     self.snapshots_queries[self.cfg.query_type].append(adict({'pred':adict({'dense':dense_pred, 'alpha':pred_alpha, 'snapshot':snapshot_pred, 'activities':pred_activities_corrected, 
+    #                                                                 'snapshot_wo_query': data_in.snapshot_pred, 'activities_wo_query': data_in.pred_activities_all}), 
+    #                                                 'gt':adict({'dense':dense_gt, 'snapshot':snapshot_gt, 'alpha':snapshot_gt_alpha, 'activities':data_in.expected_activities}), 
+    #                                                 'obj_mask':obj_mask_single_dim, 'node_idxs':node_idxs, 
+    #                                                 'probs':adict({'location':potential_movements_loc, 'alpha':potential_movements_alpha}),
+    #                                                 'queries':adict({'obj_queries': F.one_hot(best_queries_obj_viz.detach(), num_classes=obj_mask.size()[-1]).permute(1,0)[obj_mask[0,0,:]].permute(1,0), 
+    #                                                         'obj_queries_carryover': queries_obj_viz_carryover.permute(1,0)[obj_mask[0,0,:]].permute(1,0), 
+    #                                                         'obj_value': value_obj, 
+    #                                                         'obj_oracle': oracle_positive_obj, 
+    #                                                         'act_queries': best_queries_act_viz, 
+    #                                                         'act_queries_carryover': queries_act_viz_carryover, 
+    #                                                         'act_value': value_act_alpha, 
+    #                                                         'act_oracle': best_queries_act_viz==pred_activities_wo_query[0,:]})}))
         
 
     def training_step(self, batch, batch_idx):

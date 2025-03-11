@@ -114,45 +114,39 @@ class ObjectActivityCoembeddingModule(LightningModule):
                                                     )
 
     def activity_prediction_loss(self, x, y):
-        if self.cfg.multiple_activities:
-            return (nn.MSELoss(reduction='mean')(x.squeeze(-1), y.squeeze(-1)))
-        else:
-            return ((nn.CrossEntropyLoss(reduction='none')(x.permute(0,2,1), y.long()))[y != 0]).mean()
+        ## MHC changes: BCELoss for activity too
+        return nn.BCELoss(reduction='mean')(x, y)
+        # if self.cfg.multiple_activities:
+        #     return (nn.MSELoss(reduction='mean')(x.squeeze(-1), y.squeeze(-1)))
+        # else:
+        #     return ((nn.CrossEntropyLoss(reduction='none')(x.permute(0,2,1), y.long()))[y != 0]).mean()
+        ## MHC changes end
         
     def activity_inference(self, x):
-        if self.cfg.multiple_activities:
-            return torch.round(x).long()
-        else:
-            return F.softmax(x, dim=-1)
+        ## MHC changes: Sigmoid for activity too
+        return nn.Sigmoid(x)
+        # if self.cfg.multiple_activities:
+        #     return torch.round(x).long()
+        # else:
+        #     return F.softmax(x, dim=-1)
+        ## MHC changes end
                    
     def activity_accuracy(self, x, y):
-        if self.cfg.multiple_activities:
-            return (torch.abs(x-y) < 0.5).sum()/torch.numel(y)
-        else:
-            return (x.argmax(-1) == y.squeeze(-1))[y != 0].sum()/(y != 0).sum()
+        ## Make this thresholded inference not argmax
+        return (x > 0.5).float().eq(y).sum()/torch.numel(y)
+        # if self.cfg.multiple_activities:
+        #     return (torch.abs(x-y) < 0.5).sum()/torch.numel(y)
+        # else:
+        #     return (x.argmax(-1) == y.squeeze(-1))[y != 0].sum()/(y != 0).sum()
+        ## MHC changes end
         
     def obj_graph_loss(self, x, y, obj_mask=None):
+        ## MHC changes: Crossentropyloss to BCELoss
+        ## TODO MHC: Do we need the permute here?
         if obj_mask is None:
-            return nn.CrossEntropyLoss(reduction='mean')(x.permute(0,3,1,2), y.argmax(-1))
-        return (nn.CrossEntropyLoss(reduction='none')(x.permute(0,3,1,2), y.argmax(-1))[obj_mask]).mean()
-              
-    def obj_graph_loss_conf_matrix(self, x, y, ref, obj_mask=None):
-        # let softmax be the Heaviside function [Tsoi et al. 2022]
-        agreement_prob = x * y
-        disagreement_prob = x * (1-y)
-        change_gt = y.detach().argmax(-1) != ref.detach().argmax(-1)
-        if obj_mask is not None:
-            tp_soft = (agreement_prob)[torch.bitwise_and(change_gt, obj_mask.detach())].sum()
-            fn_soft = (disagreement_prob)[torch.bitwise_and(change_gt, obj_mask.detach())].sum()
-            fp_soft = (disagreement_prob)[torch.bitwise_and(torch.bitwise_not(change_gt), obj_mask.detach())].sum()
-        else:
-            tp_soft = (agreement_prob)[change_gt]
-            fn_soft = (disagreement_prob)[change_gt]
-            fp_soft = (disagreement_prob)[torch.bitwise_not(change_gt)]
-        prec = tp_soft / (tp_soft + fp_soft)
-        recl = tp_soft / (tp_soft + fn_soft)
-        f1 = 2 * prec * recl / (prec + recl)
-        return -f1
+            return nn.nn.BCELoss(reduction='mean')(x, y)
+        return (nn.nn.BCELoss(reduction='none')(x, y)[obj_mask]).mean()
+        ## MHC changes end
 
     def activity_encoder(self, activity):
         """
@@ -224,20 +218,26 @@ class ObjectActivityCoembeddingModule(LightningModule):
         pred_dynamic = pred_dynamic.view(batch_size, sequence_len, self.cfg.n_nodes, 1)
         
         assert (dynamic_edges_mask.to(bool) == (dynamic_edges_mask==1).to(bool)).all(), f"Conversion check {dynamic_edges_mask.to(bool)} {dynamic_edges_mask}"
-        pred_edges = F.softmax(logits, dim=-1)
+        
+        ## MHC changes: Softmax to Signomid
+        pred_edges = nn.Sigmoid(logits, dim=-1)
         pred_edges = self.cfg.movement_inertia * input_edges + \
                     (1 - self.cfg.movement_inertia) * pred_edges
-        assert not EXTRACAREFUL or torch.allclose(pred_edges.sum(-1), torch.tensor([1.0]).to(pred_edges.device), atol=0.1), f"Sum of edges is not 1.0 {(pred_edges.sum(-1)-1).max()} to {(pred_edges.sum(-1)-1).min()}"
+        assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), 
+                f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
         pred_edges += 1e-8
         pred_edges = pred_edges.masked_fill(dynamic_edges_mask == 0, float(0.0))
         ## Fill in all non-dynamic objects as input edges
         obj_mask = (dynamic_edges_mask.sum(-1) > 0)
-        assert not EXTRACAREFUL or torch.allclose(input_edges.sum(-1), torch.tensor([1.0]).to(input_edges.device), atol=0.1), f"Sum of edges is not 1.0 {(input_edges.sum(-1)-1).max()} to {(input_edges.sum(-1)-1).min()}"
+        assert not EXTRACAREFUL or torch.all(input_edges < torch.tensor([1.0]).to(input_edges.device)) and torch.all(input_edges > torch.tensor([0.0]).to(input_edges.device)),  
+                f"Edge probabilities are not between 0.0 and 1.0 {input_edges.max()} to {input_edges.min()}"
         pred_edges[torch.bitwise_not(obj_mask)] = input_edges[torch.bitwise_not(obj_mask)]
         ## Normalize for zeroed out self-edges
         normalizer = pred_edges.sum(-1).unsqueeze(-1)
         pred_edges = pred_edges / normalizer
-        assert not EXTRACAREFUL or torch.allclose(pred_edges.sum(-1), torch.tensor([1.0]).to(pred_edges.device), atol=0.1), f"Sum of edges is not 1.0 {(pred_edges.sum(-1)-1).max()} to {(pred_edges.sum(-1)-1).min()}"
+        assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), 
+                f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
+        ## MHC changes end
 
         graph_pred_loss = None
         graph_pred_accuracy = {'used':0, 'unused':0}
@@ -248,7 +248,7 @@ class ObjectActivityCoembeddingModule(LightningModule):
                 assert activity_mask.size()[0] == obj_mask.size()[0], 'Mismatch in 0th dim '+str(activity_mask.size()[0]) + ' vs '+str(obj_mask.size()[0])
                 assert activity_mask.size()[1] == obj_mask.size()[1], 'Mismatch in 1st dim'+str(activity_mask.size()[1]) + ' vs '+str(obj_mask.size()[1])
                 obj_mask = torch.bitwise_or(obj_mask, activity_mask.unsqueeze(-1))
-            graph_pred_loss = self.obj_graph_loss(logits, output_edges, obj_mask=obj_mask)
+            graph_pred_loss = self.obj_graph_loss(pred_edges, output_edges, obj_mask=obj_mask)
 
             auxiliary_loss_activity = torch.Tensor([0.]).to('cuda')
             ## TODO Maithili: Remove these arbitrary 'squeeze()'s
@@ -279,11 +279,13 @@ class ObjectActivityCoembeddingModule(LightningModule):
 
         # pred_edges = self.cfg.movement_confidence_margin*input_edges.view(batch_size*(sequence_len), self.cfg.n_nodes, self.cfg.n_nodes) + (1-self.cfg.movement_confidence_margin)*pred_edges
 
+        ## MHC changes: Masks per edge rather than per object
         if output_edges is not None:
-            used_mask = torch.bitwise_and((output_edges.argmax(-1) != input_edges.argmax(-1)), obj_mask)
-            graph_pred_accuracy['used'] = (pred_edges.argmax(-1) == output_edges.argmax(-1))[used_mask].sum()/(used_mask.sum()+1e-8)
-            unused_mask =  torch.bitwise_and((output_edges.argmax(-1) == input_edges.argmax(-1)), obj_mask)
-            graph_pred_accuracy['unused'] = (pred_edges.argmax(-1) == output_edges.argmax(-1))[unused_mask].sum()/(unused_mask.sum()+1e-8)
+            used_mask = torch.bitwise_and((output_edges != input_edges), obj_mask)
+            graph_pred_accuracy['used'] = (pred_edges == output_edges)[used_mask].sum()/(used_mask.sum()+1e-8)
+            unused_mask =  torch.bitwise_and((output_edges == input_edges), obj_mask)
+            graph_pred_accuracy['unused'] = (pred_edges == output_edges)[unused_mask].sum()/(unused_mask.sum()+1e-8)
+        ## MHC changes end
 
         return pred_edges, graph_pred_loss, graph_pred_accuracy
 
@@ -311,11 +313,14 @@ class ObjectActivityCoembeddingModule(LightningModule):
         
         activity_pred_loss = None
         activity_pred_acc = None
+        
+        ## MHC changes: Loss and accuracy after inference (sigmoid)
+        output_activity = self.activity_inference(output_activity)
+        
         if ground_truth is not None:
             activity_pred_loss = self.activity_prediction_loss(output_activity, ground_truth)
             activity_pred_acc = self.activity_accuracy(output_activity, ground_truth)
-            
-        output_activity = self.activity_inference(output_activity)
+        ## MHC changes end
 
         return output_activity, activity_pred_loss, activity_pred_acc
 

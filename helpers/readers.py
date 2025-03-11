@@ -382,6 +382,7 @@ class ProcessDataset():
                 if e['relation_type'] in self.common_data['edge_keys'] and e['from_id'] in temporary_data['node_ids'] and e['to_id'] in temporary_data['node_ids']:
                     edge_features[i,temporary_data['node_idx_from_id'][e['from_id']],temporary_data['node_idx_from_id'][e['to_id']]] = 1
             original_edges = edge_features[i,:,:]
+            ## TODO MHC: If we use this code, this sparsify will create trouble!!
             edge_features[i,:,:] = _sparsify(edge_features[i,:,:])
             edge_features[i, temporary_data['node_idx_from_id'][-1], temporary_data['node_idx_from_id'][-1]] = 1
             if (edge_features[i,:,:].sum(axis=-1)).max() != 1:

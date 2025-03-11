@@ -1,6 +1,20 @@
 # SLaTe-PRO
 
 
+## Changes needed for MHC
+
+- ~~Convert to multi-parent graph~~
+    - ~~Change loss to BCE~~
+    - ~~Change inference to threshold rather than argmax~~
+    - ~~Remove any hindering functions like sparsify~~
+- ~~Take as input probabilistic graphs~~
+- Write input processors
+- Test with dummy MHC-formatted data
+- Change eval functions
+- Denoise??
+    - Low pass filter on output graph probabilities
+
+
 ## How-Tos
 
 To run a previously trained model
