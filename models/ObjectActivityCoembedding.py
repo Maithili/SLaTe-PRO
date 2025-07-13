@@ -223,20 +223,17 @@ class ObjectActivityCoembeddingModule(LightningModule):
         pred_edges = nn.Sigmoid(logits, dim=-1)
         pred_edges = self.cfg.movement_inertia * input_edges + \
                     (1 - self.cfg.movement_inertia) * pred_edges
-        assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), 
-                f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
+        assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
         pred_edges += 1e-8
         pred_edges = pred_edges.masked_fill(dynamic_edges_mask == 0, float(0.0))
         ## Fill in all non-dynamic objects as input edges
         obj_mask = (dynamic_edges_mask.sum(-1) > 0)
-        assert not EXTRACAREFUL or torch.all(input_edges < torch.tensor([1.0]).to(input_edges.device)) and torch.all(input_edges > torch.tensor([0.0]).to(input_edges.device)),  
-                f"Edge probabilities are not between 0.0 and 1.0 {input_edges.max()} to {input_edges.min()}"
+        assert not EXTRACAREFUL or torch.all(input_edges < torch.tensor([1.0]).to(input_edges.device)) and torch.all(input_edges > torch.tensor([0.0]).to(input_edges.device)), f"Edge probabilities are not between 0.0 and 1.0 {input_edges.max()} to {input_edges.min()}"
         pred_edges[torch.bitwise_not(obj_mask)] = input_edges[torch.bitwise_not(obj_mask)]
         ## Normalize for zeroed out self-edges
         normalizer = pred_edges.sum(-1).unsqueeze(-1)
         pred_edges = pred_edges / normalizer
-        assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), 
-                f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
+        assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
         ## MHC changes end
 
         graph_pred_loss = None
