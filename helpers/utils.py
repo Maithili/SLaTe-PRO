@@ -261,60 +261,9 @@ color_map = {
 color_palette = sns.color_palette()+sns.color_palette(palette='dark')
 color_palette = color_palette * 10
 
-def get_metrics(results, node_classes=None, activity_consistencies=[], obj_time_inconsistency=None, split_objects_by=None):
+def get_metrics(results, node_classes=None, obj_time_inconsistency=None, split_objects_by=None):
 
-    s_batch, s_sequence, s_obj = results['reference_locations'].size()
-
-    # query_threshes = list(results['num_queries'].keys())
-    # query_thresh = min(query_threshes)
-    # query_thresh_control = max(query_threshes)
-    
-    difficult_objects = {}
-
-    difficult_objects1 = [1 if obj in obj_in_multiple_variations else 0 for obj in node_classes]
-    difficult_objects1 = torch.tensor(difficult_objects1).bool().to('cuda')
-    difficult_objects['_1'] = difficult_objects1
-
-
-    stdev_for_node_idx = [0 for _ in node_classes]
-    for activity, stdev in activity_consistencies.items():
-        if activity in objects_by_activity:
-            for object_with_std in objects_by_activity[activity]:
-                if stdev_for_node_idx[node_classes.index(object_with_std)] < stdev:
-                    stdev_for_node_idx[node_classes.index(object_with_std)] = stdev
-    print('inconsistent_activity_objects', node_classes, stdev_for_node_idx)
-
-
-    name_thresh = [(n,t) for n,t in zip(['_2a','_2b','_2c','_2d'], stdev_threshes)]
-    for name, thresh in name_thresh:
-        difficult_objects[name] = torch.tensor([0 for _ in node_classes]).to(bool).to('cuda')
-    for nidx, stdev in enumerate(stdev_for_node_idx):
-        for name, thresh in name_thresh:
-            if stdev > thresh:
-                difficult_objects[name][nidx] = True
-                break
-            
-    name_thresh = [(n,t) for n,t in zip(['_3a','_3b','_3c','_3d'], stdev_threshes)]
-    for name, thresh in name_thresh:
-        difficult_objects[name] = torch.tensor([0 for _ in node_classes]).to(bool).to('cuda')
-        for nidx, stdev in enumerate(stdev_for_node_idx):
-            if stdev > thresh:
-                difficult_objects[name][nidx] = True
-                
-    difficult_objects4 = torch.tensor([True])
-    if obj_time_inconsistency is not None:
-        difficult_objects4 = obj_time_inconsistency.squeeze(0)[:s_sequence,:]
-        print(f"Object Time Inconsistency: {difficult_objects4.sum()}/{torch.numel(difficult_objects4)}")
-        difficult_objects['_4'] = difficult_objects4
-
-
-    difficult_objects5 = [1 if obj in obj_in_multiple_variations_all_all else 0 for obj in node_classes]
-    difficult_objects5 = torch.tensor(difficult_objects5).bool().to('cuda')
-    difficult_objects['_5'] = difficult_objects5
-
-    difficult_objects['_all'] = difficult_objects1 & difficult_objects['_3b'] & difficult_objects4 & difficult_objects5
-    difficult_objects['_any'] = difficult_objects1 | difficult_objects['_3b'] | difficult_objects4 | difficult_objects5
-
+    s_batch, s_sequence, s_obj, _ = results['reference_locations'].size()
     query_types = results['num_queries'].keys()
 
     results = make_adict(results)
@@ -324,14 +273,6 @@ def get_metrics(results, node_classes=None, activity_consistencies=[], obj_time_
                 'activity':{'correct':{s:0 for s in range(data_steps)}, 'total':{s:0 for s in range(data_steps)}, 'correct_fraction':{s:0 for s in range(data_steps)}},
                 'relocation_clarified':{qt:{'precision':{'tp':0, 'fp':0, 'fn':0, 'result':0}, 'recall':{'tp':0, 'fp':0, 'fn':0, 'result':0}, 'num_queries':results.num_queries[qt], 'f1':0} for qt in query_types},
                 'activity_clarified':{qt:{'correct':0, 'total':0, 'correct_fraction':0} for qt in query_types}}
-    metrics.update({'relocation_difficult'+suffix:{m:{'tp':{s:0 for s in range(data_steps)}, 'fp':{s:0 for s in range(data_steps)}, 'fn':{s:0 for s in range(data_steps)}, 'result':{s:0 for s in range(data_steps)}} 
-                    for m in ['precision', 'recall']} for suffix in difficult_objects.keys()})
-    metrics.update({'relocation_easy'+suffix:{m:{'tp':{s:0 for s in range(data_steps)}, 'fp':{s:0 for s in range(data_steps)}, 'fn':{s:0 for s in range(data_steps)}, 'result':{s:0 for s in range(data_steps)}} 
-                    for m in ['precision', 'recall']} for suffix in difficult_objects.keys()})
-    metrics.update({'relocation_clarified_difficult'+suffix:{qt:{'precision':{'tp':0, 'fp':0, 'fn':0, 'result':0}, 'recall':{'tp':0, 'fp':0, 'fn':0, 'result':0}, 'num_queries':results.num_queries[qt], 'f1':0} 
-                                                      for qt in query_types} for suffix in difficult_objects.keys()})
-    metrics.update({'relocation_clarified_easy'+suffix:{qt:{'precision':{'tp':0, 'fp':0, 'fn':0, 'result':0}, 'recall':{'tp':0, 'fp':0, 'fn':0, 'result':0}, 'num_queries':results.num_queries[qt], 'f1':0} 
-                                                      for qt in query_types} for suffix in difficult_objects.keys()})
 
     metrics['relocation_clarified']['query_step'] = results.query_step
 
@@ -347,7 +288,7 @@ def get_metrics(results, node_classes=None, activity_consistencies=[], obj_time_
         obj_mask = results.obj_mask[pred_step].to(bool)
         if split_objects_by == 'taking_out': obj_mask=obj_mask & taking_out_mask
         if split_objects_by == 'putting_away': obj_mask=obj_mask & putting_away_mask
-        dest_pred = results.relocation_distributions[pred_step].argmax(dim=-1)
+        dest_pred = results.relocation_distributions[pred_step]
         changes_pred = (dest_pred != results.reference_locations)
         combination_metrics = ['relocation']
         for m in ['recall', 'precision']:
@@ -358,16 +299,6 @@ def get_metrics(results, node_classes=None, activity_consistencies=[], obj_time_
             metrics['relocation'][m]['fp'][pred_step] += ((dest_pred != dest_gt) & changes_pred & obj_mask).sum().item()
             metrics['relocation'][m]['fn'][pred_step] += ((dest_pred != dest_gt) & changes_gt & obj_mask).sum().item()
 
-            for suffix in difficult_objects.keys():
-                metrics['relocation_difficult' + suffix][m]['tp'][pred_step] += ((dest_pred == dest_gt) & changes_gt & changes_pred & obj_mask & difficult_objects[suffix]).sum().item()
-                metrics['relocation_difficult' + suffix][m]['fp'][pred_step] += ((dest_pred != dest_gt) & changes_pred & obj_mask & difficult_objects[suffix]).sum().item()
-                metrics['relocation_difficult' + suffix][m]['fn'][pred_step] += ((dest_pred != dest_gt) & changes_gt & obj_mask & difficult_objects[suffix]).sum().item()
-                metrics['relocation_easy' + suffix][m]['tp'][pred_step] += ((dest_pred == dest_gt) & changes_gt & changes_pred & obj_mask & torch.bitwise_not(difficult_objects[suffix])).sum().item()
-                metrics['relocation_easy' + suffix][m]['fp'][pred_step] += ((dest_pred != dest_gt) & changes_pred & obj_mask & torch.bitwise_not(difficult_objects[suffix])).sum().item()
-                metrics['relocation_easy' + suffix][m]['fn'][pred_step] += ((dest_pred != dest_gt) & changes_gt & obj_mask & torch.bitwise_not(difficult_objects[suffix])).sum().item()
-                if m == 'recall':
-                    combination_metrics.append('relocation_difficult' + suffix)
-                    combination_metrics.append('relocation_easy' + suffix)
 
         for r in combination_metrics:
             if 'f1' not in metrics[r]:
@@ -379,7 +310,7 @@ def get_metrics(results, node_classes=None, activity_consistencies=[], obj_time_
             metrics[r]['f1'][pred_step] = 2 * metrics[r]['precision']['result'][pred_step] * metrics[r]['recall']['result'][pred_step] / \
                                                         (metrics[r]['precision']['result'][pred_step] + metrics[r]['recall']['result'][pred_step] + 1e-8)
 
-        activities_pred = results.activity_distributions[pred_step].argmax(dim=-1)
+        activities_pred = results.activity_distributions[pred_step]
         activities_gt = results.activity_gt[pred_step]
         metrics['activity']['correct'][pred_step] += (activities_pred == activities_gt).sum().item()
         metrics['activity']['total'][pred_step] += torch.numel(activities_gt)
@@ -387,7 +318,7 @@ def get_metrics(results, node_classes=None, activity_consistencies=[], obj_time_
         
         if pred_step == results.query_step:
             for qt in query_types:
-                dest_pred_clarified = results.relocation_distributions_clarified[qt].argmax(dim=-1)
+                dest_pred_clarified = results.relocation_distributions_clarified[qt]
                 changes_pred_clarified = (dest_pred_clarified != results.reference_locations)
                 combination_metrics = ['relocation_clarified']
                 for m in ['recall', 'precision']:
@@ -396,19 +327,6 @@ def get_metrics(results, node_classes=None, activity_consistencies=[], obj_time_
                     metrics['relocation_clarified'][qt][m]['tp'] += ((dest_pred_clarified == dest_gt) & changes_gt & changes_pred_clarified & obj_mask).sum().item()
                     metrics['relocation_clarified'][qt][m]['fp'] += ((dest_pred_clarified != dest_gt) & changes_pred_clarified & obj_mask).sum().item()
                     metrics['relocation_clarified'][qt][m]['fn'] += ((dest_pred_clarified != dest_gt) & changes_gt & obj_mask).sum().item()
-                    
-                    for suffix in difficult_objects.keys():
-                        metrics['relocation_clarified_difficult'+suffix][qt][m]['tp'] += ((dest_pred_clarified == dest_gt) & changes_gt & changes_pred_clarified & obj_mask & difficult_objects[suffix]).sum().item()
-                        metrics['relocation_clarified_difficult'+suffix][qt][m]['fp'] += ((dest_pred_clarified != dest_gt) & changes_pred_clarified & obj_mask & difficult_objects[suffix]).sum().item()
-                        metrics['relocation_clarified_difficult'+suffix][qt][m]['fn'] += ((dest_pred_clarified != dest_gt) & changes_gt & obj_mask & difficult_objects[suffix]).sum().item()
-                        
-                        metrics['relocation_clarified_easy'+suffix][qt][m]['tp'] += ((dest_pred_clarified == dest_gt) & changes_gt & changes_pred_clarified & obj_mask & torch.bitwise_not(difficult_objects[suffix])).sum().item()
-                        metrics['relocation_clarified_easy'+suffix][qt][m]['fp'] += ((dest_pred_clarified != dest_gt) & changes_pred_clarified & obj_mask & torch.bitwise_not(difficult_objects[suffix])).sum().item()
-                        metrics['relocation_clarified_easy'+suffix][qt][m]['fn'] += ((dest_pred_clarified != dest_gt) & changes_gt & obj_mask & torch.bitwise_not(difficult_objects[suffix])).sum().item()
-                        
-                        if m == 'recall':
-                            combination_metrics.append('relocation_clarified_difficult' + suffix)
-                            combination_metrics.append('relocation_clarified_easy' + suffix)
                         
                 for r in combination_metrics:
                     metrics[r][qt]['precision']['result'] = metrics[r][qt]['precision']['tp'] / \

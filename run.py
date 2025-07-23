@@ -172,7 +172,6 @@ if __name__ == '__main__':
     parser.add_argument('--read_ckpt', action='store_true')
     parser.add_argument('--coarse', action='store_true')
     parser.add_argument('--original_model', action='store_true')
-    parser.add_argument('--use_bert', action='store_true')
     parser.add_argument('--phased_training', action='store_true')
     parser.add_argument('--train_only', action='store_true')
     parser.add_argument('--logs_dir', type=str, default='logs/0424_variations_coarse_default_debug', help='Path to store putputs.')
@@ -246,7 +245,6 @@ if __name__ == '__main__':
         data = RoutinesDataset(data_path=args.path,
                                 time_encoder=time_encoding, 
                                 batch_size=cfg['batch_size'],
-                                use_bert=args.use_bert,
                                 activity_dropout=cfg['activity_dropout_prob'])
         
     elif args.datatype.lower() == 'activities':

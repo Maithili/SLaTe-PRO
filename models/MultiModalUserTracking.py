@@ -15,7 +15,7 @@ import torch
 from torch.nn import functional as F
 from torch import nn
 from torch.optim import Adam
-from pytorch_lightning.core.lightning import LightningModule
+from pytorch_lightning.core.module import LightningModule
 from ObjectActivityCoembedding import ObjectActivityCoembeddingModule, Latent, LatentDeterministic, EXTRACAREFUL
 from utils import print_snapshots, color_map, color_palette, get_metrics
 
@@ -115,13 +115,13 @@ class MultiModalUserTrackingModule(LightningModule):
                                       'missed':0,
                                       'total':0,
                                       'fp':0,
-                                      } for _ in range(self.cfg.n_activities)],
+                                      } for _ in range(self.cfg.n_stations)],
                 'moved_by_consistency':[],
                 'activity':{'correct':[0 for _ in range(self.cfg.lookahead_steps)], 
                             'wrong':[0 for _ in range(self.cfg.lookahead_steps)],
                             'total':[0 for _ in range(self.cfg.lookahead_steps)],
                             },
-                'activity_confusion':[[0 for _ in range(self.cfg.n_activities)] for _ in range(self.cfg.n_activities)],
+                'activity_confusion':[[0 for _ in range(self.cfg.n_stations)] for _ in range(self.cfg.n_stations)],
                 'queries':[{'num_asked':0,
                             'num_predictions':0,
                             'perc_asked':None} for _ in range(self.cfg.lookahead_steps)],
@@ -134,10 +134,9 @@ class MultiModalUserTrackingModule(LightningModule):
         self.snapshots_queries = {}
         self.snapshots_data = []
 
-        self.collected_latents = {'latents':torch.Tensor([]).to('cuda'), 'latents_activity':torch.Tensor([]).to('cuda'), 'activity_labels':torch.Tensor([]).to('cuda'), 'no_movement':torch.Tensor([]).to('cuda').double(), 'encoded_data':[]}
-    
     def set_object_consistency(self, consistency):
         self.object_usage_frequency = consistency
+        self.object_usage_frequency = self.object_usage_frequency.to('cuda')
 
     def combine_latents(self, pred=None, enc_graph=None, enc_activity=None, time_context=None):
         if pred is not None:
@@ -225,10 +224,8 @@ class MultiModalUserTrackingModule(LightningModule):
         graph_seq_edges = batch['edges'].float()
         assert not EXTRACAREFUL or torch.allclose(graph_seq_edges.sum(-1), torch.ones_like(graph_seq_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
         graph_dynamic_edges_mask = batch['dynamic_edges_mask']
-        ## MHC changes: do not remove last element of activity_seq
-        # activity_seq = batch['activity_features'][:,:-1,:]
-        # activity_id_seq = batch['activity_ids'][:,:-1]
-        ## MHC changes end
+        activity_seq = batch['activity_features'][:,:-1,:]
+        activity_id_seq = batch['activity_ids'][:,:-1]
         latent_mask = batch['activity_mask_drop'][:,:-1]
         
         time_context = batch.get('time_features', torch.zeros((batch['edges'].size()[0],batch['edges'].size()[1], batch['edges'].size()[2], self.cfg.c_len)))
@@ -242,12 +239,6 @@ class MultiModalUserTrackingModule(LightningModule):
             print()
         time_context = torch.cat([time_context, torch.zeros((time_context.size()[0], time_context.size()[1], self.cfg.c_len - time_context.size()[2])).to('cuda')], dim=-1)
         
-        activity_relevant_objects = batch.get('activity_relevant_objects', torch.zeros((graph_seq_nodes.size()[0], graph_seq_nodes.size()[1]-1, graph_seq_nodes.size()[2])))
-        assert activity_relevant_objects.size()[0] == graph_seq_nodes.size()[0], f"Wrong auxiliary activity target size {activity_relevant_objects.size()[0]} v.s. {graph_seq_nodes.size()[0]}"
-        assert activity_relevant_objects.size()[1] == graph_seq_nodes.size()[1]-1, f"Wrong auxiliary activity target size {activity_relevant_objects.size()[1]} v.s. {graph_seq_nodes.size()[1]-1}"
-        assert activity_relevant_objects.size()[2] == graph_seq_nodes.size()[2], f"Wrong auxiliary activity target size {activity_relevant_objects.size()[2]} v.s. {graph_seq_nodes.size()[2]}"
-        activity_relevant_objects[latent_mask] = -1
-
 
         batch_size, sequence_len_plus_one, num_nodes, node_feature_len = graph_seq_nodes.size()
         batch_size_e, sequence_len_plus_one_e, num_f_nodes, num_t_nodes = graph_seq_edges.size()
@@ -312,15 +303,14 @@ class MultiModalUserTrackingModule(LightningModule):
                                                                         input_edges=graph_seq_edges[:,:-1,:,:],
                                                                         dynamic_edges_mask=graph_dynamic_edges_mask[:,:-1,:,:],
                                                                         output_edges=graph_seq_edges[:,1:,:,:],
-                                                                        activity_relevant_edges = activity_relevant_objects,
-                                                                        activity_mask = latent_mask)
+                                                                        activity_mask = None)  ## MHC change: activity mask is not a thing
 
             latent_in = graph_latents + time_context if self.cfg.addtnl_time_context else graph_latents
             _, cross_activity_pred_loss, cross_accuracy_activity = self.object_activity_coembedding_module.decode_activity(
                                                                                     latents=latent_in, 
                                                                                     ground_truth=activity_id_seq)
 
-            latent_similarity_loss = self.object_activity_coembedding_module.latent_loss(graph_latents, activity_latents, mask=latent_mask)
+            latent_similarity_loss = self.object_activity_coembedding_module.latent_loss(graph_latents, activity_latents) #, mask=latent_mask)## MHC change: activity mask is not a thing
             
             latents =  (graph_latents + activity_latents)
 
@@ -352,7 +342,8 @@ class MultiModalUserTrackingModule(LightningModule):
                                                                             input_edges=input_edges_forward,
                                                                             dynamic_edges_mask=graph_dynamic_edges_mask[:,1:-1,:,:],
                                                                             output_edges=output_edges_forward,
-                                                                            activity_relevant_edges = activity_relevant_objects[:,1:,:])
+                                                                            activity_relevant_edges = None #activity_relevant_objects[:,1:,:]
+                                                                            )
 
             pred_activity, activity_pred_loss, accuracy_activity = self.object_activity_coembedding_module.decode_activity(
                                                                                         latents=latent_in, 
@@ -500,7 +491,7 @@ class MultiModalUserTrackingModule(LightningModule):
     #         query_time_act = query_time
 
     #     for step in range(num_steps):
-    #         expected_objects = graph_seq_edges[:,1+step].unsqueeze(1).argmax(-1)
+    #         expected_edges = graph_seq_edges[:,1+step].unsqueeze(1).argmax(-1)
     #         assert not EXTRACAREFUL or torch.allclose(input_edges_forward.sum(-1), torch.ones_like(input_edges_forward.sum(-1)), atol=0.1), "Edges are not normalized!"
     #         if not self.original_model:
     #             latent_series, _ = self.predict(latent_series, time_context_series[:,step:-num_steps+step])
@@ -663,14 +654,14 @@ class MultiModalUserTrackingModule(LightningModule):
     #             new_changes_pred = deepcopy(torch.bitwise_and(pred_edges.argmax(-1) != reference_edges, torch.bitwise_not(changes_pred)))
     #             dest_pred[new_changes_pred] = deepcopy(pred_edges.argmax(-1)[new_changes_pred])
     #             changes_pred = deepcopy(torch.bitwise_or(changes_pred, new_changes_pred))
-    #             new_changes_gt = deepcopy(torch.bitwise_and(expected_objects != reference_edges, torch.bitwise_not(changes_gt)))
-    #             dest_gt[new_changes_gt] = deepcopy(expected_objects[new_changes_gt])
+    #             new_changes_gt = deepcopy(torch.bitwise_and(expected_edges != reference_edges, torch.bitwise_not(changes_gt)))
+    #             dest_gt[new_changes_gt] = deepcopy(expected_edges[new_changes_gt])
     #             changes_gt = deepcopy(torch.bitwise_or(changes_gt, new_changes_gt))
     #         else:
     #             dest_pred = deepcopy(pred_edges.argmax(-1))
     #             changes_pred = deepcopy(dest_pred != reference_edges)
-    #             changes_gt = deepcopy(expected_objects != reference_edges)
-    #             dest_gt = deepcopy(expected_objects)
+    #             changes_gt = deepcopy(expected_edges != reference_edges)
+    #             dest_gt = deepcopy(expected_edges)
     #             new_changes_pred = deepcopy(changes_pred)
     #             new_changes_gt = deepcopy(changes_gt)
 
@@ -731,23 +722,27 @@ class MultiModalUserTrackingModule(LightningModule):
         if num_steps < 1: return 
         pred_seq_len = sequence_len-num_steps
 
-        obj_mask = graph_dyn_edges.sum(-1)>0
-        assert obj_mask.size(0) == 1, "This hack doesn't work with >1 batch size"
-        assert (obj_mask[0,0,:] == obj_mask[0,5,:]).all(), "Just checking!!"
-        obj_mask_single_dim = obj_mask[0,0,:]
-        dense_gt = graph_seq_edges[:,1:,:,:].argmax(-1).permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
-        snapshot_gt = deepcopy(graph_seq_edges[:,1:,:,:].argmax(-1))
-        snapshot_gt[snapshot_gt == graph_seq_edges[0,:-1,:,:].argmax(-1)] = -1
-        snapshot_gt = snapshot_gt.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
-        snapshot_gt_alpha = self.object_usage_frequency.permute(1,0)[obj_mask_single_dim].permute(1,0)/60
-        assert graph_seq_nodes.size(0) == 1, "This hack doesn't work with >1 batch size"
+        ### MHC changes: Remove visualizations; reference_edges/activity are per edge ###
+        # obj_mask = graph_dyn_edges.sum(-1)>0
+        # assert obj_mask.size(0) == 1, "This hack doesn't work with >1 batch size"
+        # assert (obj_mask[0,0,:] == obj_mask[0,5,:]).all(), "Just checking!!"
+        # obj_mask_single_dim = obj_mask[0,0,:]
+        # dense_gt = graph_seq_edges[:,1:,:,:].argmax(-1).permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
+        # snapshot_gt = deepcopy(graph_seq_edges[:,1:,:,:].argmax(-1))
+        # snapshot_gt[snapshot_gt == graph_seq_edges[0,:-1,:,:].argmax(-1)] = -1
+        # snapshot_gt = snapshot_gt.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
+        # snapshot_gt_alpha = self.object_usage_frequency.permute(1,0)[obj_mask_single_dim].permute(1,0)/60
+        # assert graph_seq_nodes.size(0) == 1, "This hack doesn't work with >1 batch size"
         self.node_idxs = (batch.get('node_ids')[0,0,0,:])
-        self.snapshots_data.append((dense_gt, snapshot_gt, snapshot_gt_alpha, activity_id_seq, obj_mask_single_dim, self.node_idxs[obj_mask_single_dim].to(int).reshape(-1)))
+        # self.snapshots_data.append((dense_gt, snapshot_gt, snapshot_gt_alpha, activity_id_seq, obj_mask_single_dim, self.node_idxs[obj_mask_single_dim].to(int).reshape(-1)))
 
         input_nodes_forward = graph_seq_nodes[:,1:pred_seq_len+1,:,:].clone().detach()
         input_edges_forward = graph_seq_edges[:,1:pred_seq_len+1,:,:].clone().detach()
-        reference_edges = input_edges_forward.argmax(-1).clone().detach()
-        reference_activity = activity_seq[:,:pred_seq_len,:].argmax(-1).clone().detach()
+        # reference_edges = input_edges_forward.argmax(-1).clone().detach()
+        # reference_activity = activity_seq[:,:pred_seq_len,:].argmax(-1).clone().detach()
+        reference_edges = input_edges_forward.clone().detach()
+        reference_activity = activity_seq[:,:pred_seq_len,:].clone().detach()
+        ### MHC changes end ###
         self.result_data['reference_locations'] = torch.cat([self.result_data['reference_locations'], reference_edges], dim=0)
         correct = torch.zeros_like(reference_edges).to('cuda')
         wrong = torch.zeros_like(reference_edges).to('cuda')
@@ -760,17 +755,19 @@ class MultiModalUserTrackingModule(LightningModule):
             activity_latents, _, _ = self.object_activity_coembedding_module.autoencode_activity(activity_seq[:,:pred_seq_len,:], time_context=time_context[:,:pred_seq_len])
             latents_forward = (graph_latents+activity_latents)
 
-            activity_embedding_matrix = batch['activity_embedder'](torch.arange(self.cfg.n_activities).to('cuda')).float().detach()
-            if not self.cfg.multiple_activities:
-                graph_latents_sample = graph_latents.sample()
-                activity_latents_sample = (self.object_activity_coembedding_module.activity_encoder(activity_embedding_matrix)).sample()
-                self.collected_latents['latents'] = torch.cat([self.collected_latents['latents'], graph_latents_sample.view(-1, graph_latents_sample.size(-1))], dim=0)
-                self.activity_latents = activity_latents_sample.view(-1, activity_latents_sample.size(-1))
-                self.collected_latents['activity_labels'] = torch.cat([self.collected_latents['activity_labels'], batch.get('activity_ids')[:,:-1][:,:pred_seq_len].view(-1)], dim=0)
-                no_movements_added = (((graph_seq_edges[:,1:pred_seq_len+1,:,:]-graph_seq_edges[:,:pred_seq_len,:,:]).max(-1).values.sum(-1)).double()*15+15)
-                self.collected_latents['no_movement'] = torch.cat([self.collected_latents['no_movement'], no_movements_added.reshape(-1)], dim=0)
-                assert self.collected_latents['latents'].size()[0] == self.collected_latents['activity_labels'].size()[0], f"{self.collected_latents['latents'].size()}[0] == {self.collected_latents['activity_labels'].size()}[0]"
-            initial_latents_forward = deepcopy(latents_forward)
+            ## MHC changes: TODO Maithili: understand multiple_activities and uncomment/fix this
+            # activity_embedding_matrix = batch['activity_embedder'](torch.arange(self.cfg.n_stations).to('cuda')).float().detach()
+            # if not self.cfg.multiple_activities:
+            #     graph_latents_sample = graph_latents.sample()
+            #     activity_latents_sample = (self.object_activity_coembedding_module.activity_encoder(activity_embedding_matrix)).sample()
+            #     self.collected_latents['latents'] = torch.cat([self.collected_latents['latents'], graph_latents_sample.view(-1, graph_latents_sample.size(-1))], dim=0)
+            #     self.activity_latents = activity_latents_sample.view(-1, activity_latents_sample.size(-1))
+            #     self.collected_latents['activity_labels'] = torch.cat([self.collected_latents['activity_labels'], batch.get('activity_ids')[:,:-1][:,:pred_seq_len].view(-1)], dim=0)
+            #     no_movements_added = (((graph_seq_edges[:,1:pred_seq_len+1,:,:]-graph_seq_edges[:,:pred_seq_len,:,:]).max(-1).values.sum(-1)).double()*15+15)
+            #     self.collected_latents['no_movement'] = torch.cat([self.collected_latents['no_movement'], no_movements_added.reshape(-1)], dim=0)
+            #     assert self.collected_latents['latents'].size()[0] == self.collected_latents['activity_labels'].size()[0], f"{self.collected_latents['latents'].size()}[0] == {self.collected_latents['activity_labels'].size()}[0]"
+            # initial_latents_forward = deepcopy(latents_forward)
+            ## MHC changes end
 
 
         self.num_test_batches += 1
@@ -779,8 +776,8 @@ class MultiModalUserTrackingModule(LightningModule):
         relocations_best_prob = torch.zeros((batch_size_act, pred_seq_len, self.cfg.n_nodes)).to('cuda')
         relocations_best_step = 100 * torch.ones((batch_size_act, pred_seq_len, self.cfg.n_nodes)).to('cuda')
         relocations_probs = torch.zeros((batch_size_act, pred_seq_len, self.cfg.n_nodes, self.cfg.n_nodes)).to('cuda')
-        activity_probs = torch.zeros((batch_size_act, pred_seq_len, self.cfg.n_activities)).to('cuda')
-        activity_best_step = (num_steps-1) * torch.ones((batch_size_act, pred_seq_len, self.cfg.n_activities)).to('cuda')
+        activity_probs = torch.zeros((batch_size_act, pred_seq_len, self.cfg.n_stations)).to('cuda')
+        activity_best_step = (num_steps-1) * torch.ones((batch_size_act, pred_seq_len, self.cfg.n_stations)).to('cuda')
         pred_activities_all = torch.tensor([]).to('cuda')
         pred_activity_next = -torch.ones_like(reference_activity).to('cuda')
         expected_activity_next = -torch.ones_like(reference_activity).to('cuda')
@@ -793,7 +790,10 @@ class MultiModalUserTrackingModule(LightningModule):
             else:
                 latents_forward = LatentDeterministic(time_context[:,step+1:pred_seq_len+step+1], self.cfg.learn_latent_magnitude)
             
-            expected_objects = graph_seq_edges[:,2+step:pred_seq_len+2+step,:,:].argmax(-1)
+            ### MHC change: expected edge not object ###
+            expected_edges = graph_seq_edges[:,2+step:pred_seq_len+2+step,:,:]
+            # expected_objects = graph_seq_edges[:,2+step:pred_seq_len+2+step,:,:].argmax(-1)
+            ### MHC changes end ###
             expected_activities = activity_id_seq[:,1+step:pred_seq_len+1+step]
             new_expected_activity = (expected_activity_next == -1) & (expected_activities != reference_activity)
             expected_activity_next[new_expected_activity] = expected_activities[new_expected_activity]
@@ -801,7 +801,10 @@ class MultiModalUserTrackingModule(LightningModule):
             ## Activity Prediction
             latent_in = latents_forward + time_context[:,step+1:pred_seq_len+step+1] if self.cfg.addtnl_time_context else latents_forward
             pred_activity, _, _ = self.object_activity_coembedding_module.decode_activity(latents=latent_in)
-            pred_activities = pred_activity.argmax(-1)
+            ### MHC change: activity is not one-hot ###
+            # pred_activities = pred_activity.argmax(-1)
+            pred_activities = pred_activity
+            ### MHC changes end ###
             new_pred_activity = (pred_activity_next == -1) & (pred_activities != reference_activity)
             pred_activity_next[new_pred_activity] = pred_activities[new_pred_activity]
             activity_best_step[new_pred_activity] = step
@@ -817,32 +820,43 @@ class MultiModalUserTrackingModule(LightningModule):
 
             pred_edges = pred_edges_original.clone().detach()
             pred_edges_if_moved = pred_edges_original.clone().detach()
-            pred_edges_if_moved[F.one_hot(reference_edges, num_classes = pred_edges.size()[-1]).bool()] = 0
-            dest_pred_if_moved = pred_edges_if_moved.argmax(-1)
+            ## MHC change: reference edges not categorical, obj_mask sized as edges ###
+            # pred_edges_if_moved[F.one_hot(reference_edges.to(int), num_classes = pred_edges.size()[-1]).bool()] = 0
+            pred_edges_if_moved[reference_edges.bool()] = 0
+            # dest_pred_if_moved = pred_edges_if_moved.argmax(-1)
 
-            obj_mask = graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:].sum(-1)>0
+            # obj_mask = graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:].sum(-1)>0
+            obj_mask = (graph_dyn_edges[:,1+step:pred_seq_len+1+step,:,:].any(-1)>0).unsqueeze(-1)
+            ### MHC changes end ###
 
             if step > 0:
-                new_changes_pred = deepcopy(torch.bitwise_and(pred_edges.argmax(-1) != reference_edges, torch.bitwise_not(changes_pred)))
-                dest_pred[new_changes_pred] = deepcopy(pred_edges.argmax(-1)[new_changes_pred])
+                new_changes_pred = deepcopy(torch.bitwise_and((pred_edges != reference_edges).any(-1), torch.bitwise_not(changes_pred)))
+                dest_pred[new_changes_pred] = deepcopy(pred_edges[new_changes_pred])
                 changes_pred = deepcopy(torch.bitwise_or(changes_pred, new_changes_pred))
-                new_changes_gt = deepcopy(torch.bitwise_and(expected_objects != reference_edges, torch.bitwise_not(changes_gt)))
-                dest_gt[new_changes_gt] = deepcopy(expected_objects[new_changes_gt])
+                new_changes_gt = deepcopy(torch.bitwise_and((expected_edges != reference_edges).any(-1), torch.bitwise_not(changes_gt)))
+                dest_gt[new_changes_gt] = deepcopy(expected_edges[new_changes_gt])
                 changes_gt = deepcopy(torch.bitwise_or(changes_gt, new_changes_gt))
                 if step == 2:
                     lenient_changes_pred = deepcopy(torch.bitwise_and(dest_pred != reference_edges, obj_mask))
             else:
-                dest_pred = deepcopy(pred_edges.argmax(-1))
-                changes_pred = deepcopy(dest_pred != reference_edges)
+                ### MHC change ###
+                dest_pred = deepcopy(pred_edges) #.argmax(-1))
+                changes_pred = deepcopy(dest_pred != reference_edges).any(-1)
                 new_changes_pred = changes_pred
-                changes_gt = deepcopy(expected_objects != reference_edges)
+                changes_gt = deepcopy(expected_edges != reference_edges).any(-1)
                 new_changes_gt = changes_gt
-                dest_gt = deepcopy(expected_objects)
+                dest_gt = deepcopy(expected_edges)
+                ### MHC changes end ###
 
-            assert new_changes_pred[torch.bitwise_not(obj_mask)].sum() == 0, "New changes predicted in static edges"
+            ## TODO Maithili for MHC: Come back and fix this!!!!!!! ##
+            # assert new_changes_pred[torch.bitwise_not(obj_mask)].sum() == 0, "New changes predicted in static edges"
             
-            confidence_in_relocation = deepcopy((pred_edges * F.one_hot(dest_pred, num_classes = pred_edges.size()[-1])).sum(-1))
-            continued_changes_pred = pred_edges.argmax(-1) == dest_pred
+            ### MHC changes start ###
+            # confidence_in_relocation = deepcopy((pred_edges * F.one_hot(dest_pred, num_classes = pred_edges.size()[-1])).sum(-1))
+            # continued_changes_pred = pred_edges.argmax(-1) == dest_pred
+            confidence_in_relocation = deepcopy((pred_edges * dest_pred).sum(-1))
+            continued_changes_pred = (pred_edges == dest_pred).any(-1)
+            ### MHC changes end ###
             better_confidence = torch.bitwise_or(torch.bitwise_and(confidence_in_relocation > relocations_best_prob, continued_changes_pred), new_changes_pred)
             relocations_best_prob[better_confidence] = confidence_in_relocation[better_confidence]
             relocations_best_step[better_confidence] = step
@@ -857,10 +871,12 @@ class MultiModalUserTrackingModule(LightningModule):
             correct = deepcopy(dest_pred == dest_gt)
             wrong = deepcopy(dest_pred != dest_gt)
 
-            used_mask = deepcopy(torch.bitwise_and(changes_gt, obj_mask))
-            unused_mask = deepcopy( torch.bitwise_and(torch.bitwise_not(changes_gt), obj_mask))
-            pred_used_mask = deepcopy(torch.bitwise_and(changes_pred, obj_mask))
-            pred_unused_mask = deepcopy(torch.bitwise_and(torch.bitwise_not(changes_pred), obj_mask))
+            obj_mask = obj_mask.squeeze(-1)
+
+            used_mask = deepcopy(torch.bitwise_and(changes_gt, obj_mask)).unsqueeze(-1)
+            unused_mask = deepcopy( torch.bitwise_and(torch.bitwise_not(changes_gt), obj_mask)).unsqueeze(-1)
+            pred_used_mask = deepcopy(torch.bitwise_and(changes_pred, obj_mask)).unsqueeze(-1)
+            pred_unused_mask = deepcopy(torch.bitwise_and(torch.bitwise_not(changes_pred), obj_mask)).unsqueeze(-1)
             used_pred_and_gt = deepcopy(torch.bitwise_and(used_mask, pred_used_mask))
             used_pred_and_not_gt = deepcopy(torch.bitwise_and(torch.bitwise_not(used_mask), pred_used_mask))
 
@@ -884,45 +900,50 @@ class MultiModalUserTrackingModule(LightningModule):
             self.results['unmoved']['tn'][step] += int((unused_mask).sum() - int((torch.bitwise_and(wrong, unused_mask)).sum()))
             self.results['unmoved']['total'][step] += int((unused_mask).sum())
             
-            assert obj_mask.size(0) == 1, "This hack doesn't work with >1 batch size"
-            assert (obj_mask[0,0,:] == obj_mask[0,5,:]).all(), "Just checking!!"
-            obj_mask_single_dim = obj_mask[0,0,:]
-            dense_gt = dest_gt.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
-            snapshot_gt = deepcopy(dest_gt)
-            snapshot_gt[torch.bitwise_not(changes_gt)] = -1
-            snapshot_gt = snapshot_gt.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
-            x=0.1
-            snapshot_gt_alpha = ((((relocations_probs*F.one_hot(dest_gt)).sum(-1))*((1-x)/.5))+x).clip(0,1)
-            snapshot_gt_alpha = snapshot_gt_alpha.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
-            dense_pred = deepcopy(dest_pred.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0))
-            snapshot_pred = deepcopy(dest_pred)
-            snapshot_pred[torch.bitwise_not(changes_pred)] = -1
-            snapshot_pred = snapshot_pred.permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
-            assert graph_seq_nodes.size(0) == 1, "This hack doesn't work with >1 batch size"
-            node_idxs = (batch.get('node_ids')[0,0,0,:][obj_mask_single_dim]).to(int).reshape(-1)
-            activity_alpha = (batch['activity_mask_drop'][:,1+step:pred_seq_len+1+step].to(int)*-0.7 + 1.0).detach().cpu().numpy()
-            potential_movements = pred_edges.clone().detach()
-            potential_movements[F.one_hot(reference_edges, num_classes = pred_edges.size()[-1]).to(bool)] = 0.0
-            potential_movements_loc = potential_movements.argmax(-1).permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
-            potential_movements_alpha = ((potential_movements.max(-1)[0]*((1-x)/.5))+x).clip(0,1).permute(2,0,1)[obj_mask_single_dim].permute(1,2,0).squeeze(0)
+            # assert obj_mask.size(0) == 1, "This hack doesn't work with >1 batch size"
+            # assert (obj_mask[0,0,:] == obj_mask[0,5,:]).all(), "Just checking!!"
+            # import pdb; pdb.set_trace()
+            # obj_mask_single_dim = obj_mask[0,0,:].permute(1,0).unsqueeze(1).unsqueeze(-1)
+            # # obj_mask_single_dim = obj_mask_single_dim.repeat(1,dest_gt.size(1),1,dest_gt.size(3))
+            # dense_gt = dest_gt.permute(0,2,1,3)[obj_mask_single_dim].permute(1,0,2)
+            # snapshot_gt = deepcopy(dest_gt)
+            # snapshot_gt[torch.bitwise_not(changes_gt)] = -1
+            # snapshot_gt = snapshot_gt.permute(0,2,1,3)[obj_mask_single_dim].permute(1,0,2).squeeze(0)
+            # x=0.1
+            # snapshot_gt_alpha = ((((relocations_probs*dest_gt).sum(-1))*((1-x)/.5))+x).clip(0,1)
+            # snapshot_gt_alpha = snapshot_gt_alpha[obj_mask_single_dim.squeeze(-1).repeat(1,snapshot_gt_alpha.size(1),1)]
+            # dense_pred = deepcopy(dest_pred.permute(0,2,1,3)[obj_mask_single_dim].permute(1,0,2).squeeze(0))
+            # snapshot_pred = deepcopy(dest_pred)
+            # snapshot_pred[torch.bitwise_not(changes_pred)] = -1
+            # snapshot_pred = snapshot_pred.permute(0,2,1,3)[obj_mask_single_dim].permute(1,0,2).squeeze(0)
+            # assert graph_seq_nodes.size(0) == 1, "This hack doesn't work with >1 batch size"
+            # node_idxs = (batch.get('node_ids')[0,0,0,:][obj_mask_single_dim.squeeze()]).to(int).reshape(-1)
+            # activity_alpha = (batch['activity_mask_drop'][:,1+step:pred_seq_len+1+step].to(int)*-0.7 + 1.0).detach().cpu().numpy()
+            # potential_movements = pred_edges.clone().detach()
+            # potential_movements[reference_edges.to(bool)] = 0.0
+            # ### MHC changes start ###
+            # # potential_movements_loc = potential_movements.argmax(-1)[obj_mask_single_dim].squeeze(0)
+            # potential_movements_loc = potential_movements.permute(0,2,1,3)[obj_mask_single_dim].permute(1,0,2).squeeze(0)
+            # ### MHC changes end ###
+            # potential_movements_alpha = ((potential_movements.max(-1)[0]*((1-x)/.5))+x).clip(0,1)[obj_mask_single_dim].squeeze(0)
 
 
-            for _ in range(max(0,step+1-len(self.snapshots))):
-                self.snapshots.append([])
-            self.snapshots[step].append((dense_pred, snapshot_pred, pred_activity_next, 
-                                         dense_gt, snapshot_gt, snapshot_gt_alpha, expected_activity_next, 
-                                         obj_mask_single_dim, activity_alpha, node_idxs, 
-                                         potential_movements_loc, potential_movements_alpha))
+            # for _ in range(max(0,step+1-len(self.snapshots))):
+            #     self.snapshots.append([])
+            # self.snapshots[step].append((dense_pred, snapshot_pred, pred_activity_next, 
+            #                              dense_gt, snapshot_gt, snapshot_gt_alpha, expected_activity_next, 
+            #                              obj_mask_single_dim, activity_alpha, node_idxs, 
+            #                              potential_movements_loc, potential_movements_alpha))
 
-            if step == 0:
-                for act_num in range(self.cfg.n_activities):
-                    act_mask = (activity_id_seq[:,:pred_seq_len] == act_num).unsqueeze(-1)
-                    used_and_activity_mask = torch.bitwise_and(used_mask, act_mask)
-                    self.results['moved_by_activity'][act_num]['correct'] += int((torch.bitwise_and(correct, used_and_activity_mask)).sum())
-                    self.results['moved_by_activity'][act_num]['wrong'] += int((torch.bitwise_and(wrong, used_and_activity_mask)).sum())
-                    self.results['moved_by_activity'][act_num]['missed'] += int((used_and_activity_mask).sum() - (torch.bitwise_and(changes_pred, used_and_activity_mask)).sum())
-                    self.results['moved_by_activity'][act_num]['total'] += int((used_and_activity_mask).sum())
-                    self.results['moved_by_activity'][act_num]['fp'] += int(torch.bitwise_and(used_pred_and_not_gt, act_mask).sum())
+            # if step == 0:
+            #     for act_num in range(self.cfg.n_stations):
+            #         act_mask = (activity_id_seq[:,:pred_seq_len] == act_num).unsqueeze(-1)
+            #         used_and_activity_mask = torch.bitwise_and(used_mask, act_mask)
+            #         self.results['moved_by_activity'][act_num]['correct'] += int((torch.bitwise_and(correct, used_and_activity_mask)).sum())
+            #         self.results['moved_by_activity'][act_num]['wrong'] += int((torch.bitwise_and(wrong, used_and_activity_mask)).sum())
+            #         self.results['moved_by_activity'][act_num]['missed'] += int((used_and_activity_mask).sum() - (torch.bitwise_and(changes_pred, used_and_activity_mask)).sum())
+            #         self.results['moved_by_activity'][act_num]['total'] += int((used_and_activity_mask).sum())
+            #         self.results['moved_by_activity'][act_num]['fp'] += int(torch.bitwise_and(used_pred_and_not_gt, act_mask).sum())
             if step == num_steps-1:
                 for object_usage_frequency in range(self.object_usage_frequency.max()):
                     if len(self.results['moved_by_consistency']) <= object_usage_frequency:
@@ -932,20 +953,20 @@ class MultiModalUserTrackingModule(LightningModule):
                                                                     'total':0,
                                                                     'fp':0,
                                                                     })
-                    consistency_mask = (self.object_usage_frequency[:pred_seq_len,:] == object_usage_frequency).unsqueeze(0).to('cuda')
+                    consistency_mask = (self.object_usage_frequency[:pred_seq_len,:] == object_usage_frequency).unsqueeze(0).unsqueeze(-1).to('cuda')
                     used_and_consistency_mask = torch.bitwise_and(used_mask, consistency_mask)
                     self.results['moved_by_consistency'][object_usage_frequency]['correct'] += int((torch.bitwise_and(correct, used_and_consistency_mask)).sum())
                     self.results['moved_by_consistency'][object_usage_frequency]['wrong'] += int((torch.bitwise_and(wrong, used_and_consistency_mask)).sum())
-                    self.results['moved_by_consistency'][object_usage_frequency]['missed'] += int((used_and_consistency_mask).sum() - (torch.bitwise_and(changes_pred, used_and_consistency_mask)).sum())
+                    self.results['moved_by_consistency'][object_usage_frequency]['missed'] += int((used_and_consistency_mask).sum() - (torch.bitwise_and(changes_pred.unsqueeze(-1), used_and_consistency_mask)).sum())
                     self.results['moved_by_consistency'][object_usage_frequency]['total'] += int((used_and_consistency_mask).sum())
                     self.results['moved_by_consistency'][object_usage_frequency]['fp'] += int(torch.bitwise_and(used_pred_and_not_gt, consistency_mask).sum())
 
             self.results['activity']['correct'][step] += int((expected_activities == pred_activities).sum())
             self.results['activity']['wrong'][step] += int((expected_activities != pred_activities).sum())
             self.results['activity']['total'][step] += int(torch.numel((expected_activities)))
-            for gt_act in range(self.cfg.n_activities):
+            for gt_act in range(self.cfg.n_stations):
                 gt_act_mask = (expected_activities == gt_act)
-                for pred_act in range(self.cfg.n_activities):
+                for pred_act in range(self.cfg.n_stations):
                     self.results['activity_confusion'][gt_act][pred_act] += int(((pred_activities == pred_act)[gt_act_mask]).sum())
 
             pred_activities_all = torch.cat((pred_activities_all, pred_activities.unsqueeze(-1)), dim=-1)
@@ -1160,8 +1181,8 @@ class MultiModalUserTrackingModule(LightningModule):
     #             activities_checked = []
     #             query_activity_mask = torch.tensor([]).to('cuda')
     #             if activity_masks is None:
-    #                 for activity in range(self.cfg.n_activities):
-    #                     activity_mask = F.one_hot((torch.ones((1,1))*activity).to(int).to('cuda'), num_classes=self.cfg.n_activities).clone().detach()
+    #                 for activity in range(self.cfg.n_stations):
+    #                     activity_mask = F.one_hot((torch.ones((1,1))*activity).to(int).to('cuda'), num_classes=self.cfg.n_stations).clone().detach()
     #                     query_activity_mask = torch.cat([query_activity_mask, activity_mask])
     #                     activities_checked.append(activity)
     #                 relocations_by_activity, prob_of_query, pred_act_by_activity, changes_pred, _ = self.rollout_onestep_with_masks(
@@ -1370,13 +1391,13 @@ class MultiModalUserTrackingModule(LightningModule):
         batch_training_dropout = (torch.rand_like(batch['activity_ids'].float()) < self.cfg.activity_dropout_train).to(bool)
         final_mask = torch.bitwise_or(batch['activity_mask_drop'], batch_training_dropout)
         
-        batch['activity_features'].masked_fill_(final_mask.unsqueeze(-1).repeat(1,1,batch['activity_features'].size()[-1]), 0)
+        batch['activity_features'].masked_fill_(final_mask, 0)
         batch['activity_ids'].masked_fill_(batch['activity_mask_drop'], 0)
 
         results = self(batch)
-        self.log('Train loss',results['loss'])
-        self.log('Train accuracy',results['accuracies'])
-        self.log('Train latents',results['latents'])
+        # self.log('Train loss',results['loss'])
+        # self.log('Train accuracy',results['accuracies'])
+        # self.log('Train latents',results['latents'])
         try:
             self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
         except Exception as e:
@@ -1408,9 +1429,9 @@ class MultiModalUserTrackingModule(LightningModule):
         return res
         
     def validation_step(self, batch, batch_idx):
-        batch['activity_features'].masked_fill_(batch['activity_mask_drop'].unsqueeze(-1).repeat(1,1,batch['activity_features'].size()[-1]), 0)
+        batch['activity_features'].masked_fill_(batch['activity_mask_drop'], 0)
         results = self(batch)
-        self.log('Val accuracy',results['accuracies'])
+        # self.log('Val accuracy',results['accuracies'])
         
         self.reset_validation()
         self.evaluate_prediction(batch, num_steps=self.cfg.lookahead_steps)
@@ -1427,29 +1448,17 @@ class MultiModalUserTrackingModule(LightningModule):
         return 
 
     def test_step(self, batch, batch_idx):
-        batch['activity_features'].masked_fill_(batch['activity_mask_drop'].unsqueeze(-1).repeat(1,1,batch['activity_features'].size()[-1]), 0)
+        batch['activity_features'].masked_fill_(batch['activity_mask_drop'], 0)
         if self.test_forward:
             results = self(batch)
             self.log('Test loss',results['loss'])
-            self.log('Test accuracy',results['accuracies'])
+            # self.log('Test accuracy',results['accuracies'])
         self.evaluate_prediction(batch, num_steps=self.cfg.lookahead_steps)
         return 
 
     def write_results(self, output_dir, common_data, suffix=''):
         
-        activity_names=common_data['activities']
         node_classes=common_data['node_classes']
-        activitiy_to_coarse=common_data['activity_conversion']['to_coarse'] if 'activity_conversion' in common_data else None
-        inconsistent_activities = common_data['inconsistent_activities'] if 'inconsistent_activities' in common_data else []
-
-        def range_from_std(std):
-            if std > 2.0: return 1
-            if std > 1.0: return 2
-            if std > 0.5: return 3
-            else: return 4
-        std_for_activity = common_data['activity_stdev']
-        std_range_by_activity = [range_from_std(std_for_activity[a]) if a in common_data['activity_stdev'].keys() else 0 for a in common_data['activities']]
-
 
         os.makedirs(output_dir, exist_ok=True)
         self.results['f1_score'] = [None for _ in range(self.cfg.lookahead_steps)]
@@ -1478,83 +1487,56 @@ class MultiModalUserTrackingModule(LightningModule):
             self.results['queries'][step]['num_predictions'] = quer_tot
             self.results['queries'][step]['perc_asked'] = quer_asked/(self.results['queries'][0]['num_predictions']+1e-8)
 
-        assert len(activity_names) == self.cfg.n_activities
-        moved_by_activity_list = deepcopy(self.results['moved_by_activity'])
-        self.results['moved_by_activity'] = {k:{n:{'correct':0, 'wrong':0, 'missed':0, 'total':0, 'fp':0} for n in activity_names} for k in ['original']}
-        for act_num in range(self.cfg.n_activities):
-            act_name = activity_names[act_num]
-            self.results['moved_by_activity']['original'][act_name] = moved_by_activity_list[act_num]
-        
-        activity_confusion_list = deepcopy(self.results['activity_confusion'])
-        fig, axs = plt.subplots()
-        sums = np.expand_dims(np.array(activity_confusion_list).sum(-1), -1)
-        axs.imshow(np.array(activity_confusion_list)/(sums+1e-8))
-        axs.set_xticks(np.arange(self.cfg.n_activities))
-        axs.set_xticklabels([wrap_str(a) for a in activity_names])
-        axs.set_yticks(np.arange(self.cfg.n_activities))
-        axs.set_yticklabels([wrap_str(a) for a in activity_names])
-        fig.tight_layout()
-        fig.set_size_inches(3+self.cfg.n_activities, 3+self.cfg.n_activities)
-        fig.savefig(os.path.join(output_dir,f'activity_confusion.png'))
-
-        self.results['activity_confusion'] = {}
-        for gt_act_num in range(self.cfg.n_activities):
-            gt_act_name = activity_names[gt_act_num]
-            self.results['activity_confusion'][gt_act_name] = {}
-            for pred_act_num in range(self.cfg.n_activities):
-                self.results['activity_confusion'][gt_act_name][activity_names[pred_act_num]] = int(activity_confusion_list[gt_act_num][pred_act_num])
-
         json.dump(self.results, open(os.path.join(output_dir,f'test_evaluation_{suffix}.json'),'w'), indent=4)
         node_classes_in_order = [node_classes[n.item()] for n in self.node_idxs.int()]
         obj_time_inconsistency_masks = torch.bitwise_and(self.object_usage_frequency.unsqueeze(0).to('cuda') > self.cfg.consistency_thresholds[0], self.object_usage_frequency.unsqueeze(0).to('cuda') < (60-self.cfg.consistency_thresholds[0]))
-        torch.save({'activity_consistencies':std_for_activity, 
-                    'node_classes':node_classes_in_order, 
+        torch.save({'node_classes':node_classes_in_order, 
                     'obj_time_inconsistency':obj_time_inconsistency_masks,
                     'data':self.result_data}, os.path.join(output_dir,f'raw_results_{suffix}.pt'))
-        json.dump(get_metrics(self.result_data, node_classes=node_classes_in_order, activity_consistencies=std_for_activity, obj_time_inconsistency=obj_time_inconsistency_masks), open(os.path.join(output_dir,f'test_evaluation_splits.json'),'w'), indent=4)
-        for qt in self.results_with_clarification.keys():
-            self.results_with_clarification[qt]['precision'] = (self.results_with_clarification[qt]['tp'])/(self.results_with_clarification[qt]['tp']+self.results_with_clarification[qt]['fp']+1e-8)
-            self.results_with_clarification[qt]['recall'] = (self.results_with_clarification[qt]['tp'])/(self.results_with_clarification[qt]['tp']+self.results_with_clarification[qt]['fn']+1e-8)
-            self.results_with_clarification[qt]['f1'] = 2*self.results_with_clarification[qt]['precision']*self.results_with_clarification[qt]['recall']/(self.results_with_clarification[qt]['precision']+self.results_with_clarification[qt]['recall']+1e-8)
-        json.dump(self.results_with_clarification, open(os.path.join(output_dir,f'test_evaluation_clarifications_{suffix}.json'),'w'), indent=4)
+        json.dump(get_metrics(self.result_data, node_classes=node_classes_in_order, obj_time_inconsistency=obj_time_inconsistency_masks), open(os.path.join(output_dir,f'test_evaluation_splits.json'),'w'), indent=4)
+        # for qt in self.results_with_clarification.keys():
+        #     self.results_with_clarification[qt]['precision'] = (self.results_with_clarification[qt]['tp'])/(self.results_with_clarification[qt]['tp']+self.results_with_clarification[qt]['fp']+1e-8)
+        #     self.results_with_clarification[qt]['recall'] = (self.results_with_clarification[qt]['tp'])/(self.results_with_clarification[qt]['tp']+self.results_with_clarification[qt]['fn']+1e-8)
+        #     self.results_with_clarification[qt]['f1'] = 2*self.results_with_clarification[qt]['precision']*self.results_with_clarification[qt]['recall']/(self.results_with_clarification[qt]['precision']+self.results_with_clarification[qt]['recall']+1e-8)
+        # json.dump(self.results_with_clarification, open(os.path.join(output_dir,f'test_evaluation_clarifications_{suffix}.json'),'w'), indent=4)
 
-        print_snapshots(node_classes_in_order, activity_names, os.path.join(output_dir,f'snapshots_{suffix}'), self.snapshots_data, self.snapshots, self.snapshots_queries, query_steps=self.result_data['query_step']+1, std_range_by_activity=std_range_by_activity, activity_consistencies=std_for_activity)
-        plt.close('all')
+        # print_snapshots(node_classes_in_order, activity_names, os.path.join(output_dir,f'snapshots_{suffix}'), self.snapshots_data, self.snapshots, self.snapshots_queries, query_steps=self.result_data['query_step']+1, std_range_by_activity=std_range_by_activity, activity_consistencies=std_for_activity)
+        # plt.close('all')
 
-        if self.cfg.query_type == 'object':
+        # if self.cfg.query_type == 'object':
 
-            if not self.original_model:
-                figall, axsall = plt.subplots()
-                figall.set_size_inches(27,18)
-                latents_compressed = TSNE(n_components=2, learning_rate='auto', init='random', perplexity=3).fit_transform(torch.cat([self.collected_latents['latents'].cpu(), self.activity_latents.cpu()]))
-                graph_latents_compressed = latents_compressed[:self.collected_latents['latents'].size()[0]]
-                activity_latents_compressed = latents_compressed[self.collected_latents['latents'].size()[0]:]
-                torch.save(self.collected_latents, os.path.join(output_dir,f'test_latents.pt'))
+        #     if not self.original_model:
+        #         figall, axsall = plt.subplots()
+        #         figall.set_size_inches(27,18)
+                # latents_compressed = TSNE(n_components=2, learning_rate='auto', init='random', perplexity=3).fit_transform(torch.cat([self.collected_latents['latents'].cpu(), self.activity_latents.cpu()]))
+                # graph_latents_compressed = latents_compressed[:self.collected_latents['latents'].size()[0]]
+                # activity_latents_compressed = latents_compressed[self.collected_latents['latents'].size()[0]:]
+                # torch.save(self.collected_latents, os.path.join(output_dir,f'test_latents.pt'))
 
-                plot_num = 0
-                act_per_plot = 10
-                while(True):
-                    if len(self.cfg.DATA_INFO['activities']) > 1+(plot_num+1)*act_per_plot:
-                        activity_idx_in_plot = np.arange(1+plot_num*act_per_plot, 1+(plot_num+1)*act_per_plot)
-                    else:
-                        if len(self.cfg.DATA_INFO['activities']) <= 1+plot_num*act_per_plot:
-                            break
-                        activity_idx_in_plot = np.arange(1+plot_num*act_per_plot, len(self.cfg.DATA_INFO['activities'][1:]))
-                    activity_mask = np.in1d(self.collected_latents['activity_labels'].cpu().squeeze().numpy(),activity_idx_in_plot)
-                    fig, axs = plt.subplots()
-                    fig.set_size_inches(27,18)
-                    axs.scatter(graph_latents_compressed[:,0][activity_mask], graph_latents_compressed[:,1][activity_mask], color = np.array([color_palette[int(i)] for i in list(self.collected_latents['activity_labels'].cpu().squeeze())])[activity_mask], alpha=0.5, s=self.collected_latents['no_movement'].cpu().numpy()[activity_mask])
-                    axsall.scatter(graph_latents_compressed[:,0][activity_mask], graph_latents_compressed[:,1][activity_mask], color = np.array([color_palette[int(i)] for i in list(self.collected_latents['activity_labels'].cpu().squeeze())])[activity_mask], alpha=0.5, s=self.collected_latents['no_movement'].cpu().numpy()[activity_mask])
-                    for i,act in enumerate(self.cfg.DATA_INFO['activities']):
-                        if i in activity_idx_in_plot:
-                            axs.scatter(activity_latents_compressed[i,0], activity_latents_compressed[i,1], color = color_palette[i], marker='x', s=100, label=act)
-                            axsall.scatter(activity_latents_compressed[i,0], activity_latents_compressed[i,1], color = color_palette[i], marker='x', s=100, label=act)
-                    axs.legend()
-                    fig.savefig(os.path.join(output_dir,f'latents_{plot_num}.png'))
-                    plot_num += 1
-                axsall.legend()
-                figall.savefig(os.path.join(output_dir,f'latents.png'))
-                plt.close('all')
+                # plot_num = 0
+                # act_per_plot = 10
+                # while(True):
+                #     if len(self.cfg.DATA_INFO['activities']) > 1+(plot_num+1)*act_per_plot:
+                #         activity_idx_in_plot = np.arange(1+plot_num*act_per_plot, 1+(plot_num+1)*act_per_plot)
+                #     else:
+                #         if len(self.cfg.DATA_INFO['activities']) <= 1+plot_num*act_per_plot:
+                #             break
+                #         activity_idx_in_plot = np.arange(1+plot_num*act_per_plot, len(self.cfg.DATA_INFO['activities'][1:]))
+                #     activity_mask = np.in1d(self.collected_latents['activity_labels'].cpu().squeeze().numpy(),activity_idx_in_plot)
+                #     fig, axs = plt.subplots()
+                #     fig.set_size_inches(27,18)
+                #     axs.scatter(graph_latents_compressed[:,0][activity_mask], graph_latents_compressed[:,1][activity_mask], color = np.array([color_palette[int(i)] for i in list(self.collected_latents['activity_labels'].cpu().squeeze())])[activity_mask], alpha=0.5, s=self.collected_latents['no_movement'].cpu().numpy()[activity_mask])
+                #     axsall.scatter(graph_latents_compressed[:,0][activity_mask], graph_latents_compressed[:,1][activity_mask], color = np.array([color_palette[int(i)] for i in list(self.collected_latents['activity_labels'].cpu().squeeze())])[activity_mask], alpha=0.5, s=self.collected_latents['no_movement'].cpu().numpy()[activity_mask])
+                #     for i,act in enumerate(self.cfg.DATA_INFO['activities']):
+                #         if i in activity_idx_in_plot:
+                #             axs.scatter(activity_latents_compressed[i,0], activity_latents_compressed[i,1], color = color_palette[i], marker='x', s=100, label=act)
+                #             axsall.scatter(activity_latents_compressed[i,0], activity_latents_compressed[i,1], color = color_palette[i], marker='x', s=100, label=act)
+                #     axs.legend()
+                #     fig.savefig(os.path.join(output_dir,f'latents_{plot_num}.png'))
+                #     plot_num += 1
+                # axsall.legend()
+                # figall.savefig(os.path.join(output_dir,f'latents.png'))
+                # plt.close('all')
         self.reset_validation()
 
     def configure_optimizers(self):

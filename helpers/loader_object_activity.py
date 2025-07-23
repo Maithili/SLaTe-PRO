@@ -171,11 +171,7 @@ class ActivitiesDataset():
         self.params['n_nodes'] = model_data['nodes'].size()[-2]
         self.params['n_len'] = model_data['nodes'].size()[-1]
         print(self.common_data['activities'], len(self.common_data['activities']))
-        self.params['n_activities'] = len(self.common_data['activities'])
-        if None in self.common_data['activities']:
-            self.params['null_activity_idx'] = self.common_data['activities'].index(None)
-        else:
-            self.params['null_activity_idx'] = -1
+        self.params['n_stations'] = self.common_data['n_stations']
 
     def get_train_loader(self):
         return DataLoader(self.train, num_workers=min(4,os.cpu_count()), batch_size=self.params['batch_size'], collate_fn=self.train.collate_fn)

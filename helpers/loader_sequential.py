@@ -75,6 +75,10 @@ class OneHotEmbedder():
     def __call__(self, idxs):
         return F.one_hot(idxs.to(int), num_classes=len(self.class_list))
 
+class IdentityEmbedder():
+    def __call__(self, idxs):
+        return idxs.float()
+
 class BertEmbedder():
     def __init__(self, map_file, map_type):
         bertmap = torch.load(map_file)
@@ -158,7 +162,7 @@ def collate(tensor_tuple):
 
 
 class DataSplit():
-    def __init__(self, routines_dir, time_encoder, filerange=(None, None), node_embedder=lambda x:x, activity_embedder=lambda x:x, activity_dropout=0.0, activity_idx_by_visibility=[], objects_by_activity=None):
+    def __init__(self, routines_dir, time_encoder, filerange=(None, None), node_embedder=lambda x:x, activity_embedder=lambda x:x, activity_dropout=0.0):
         self.time_encoder = time_encoder
         self.routines_dir = routines_dir
         self.collate_fn = collate
@@ -170,9 +174,8 @@ class DataSplit():
             self.files = self.files[filerange[0]:]
         self.node_embedder = node_embedder
         self.activity_embedder = activity_embedder
-        self.activity_masks = [None for _ in self.files]
+        # self.activity_masks = [None for _ in self.files]
         self.activity_dropout = activity_dropout
-        self.objects_by_activity = objects_by_activity
 
     def __len__(self):
         return len(self.files)
@@ -183,22 +186,6 @@ class DataSplit():
             data['times'] = torch.zeros((data['edges'].size()[0]-1, 1))
         movements = (data['edges'][1:,:,:]-data['edges'][:-1,:,:]).max(-1).values
         movements = movements.view(data['edges'].size()[0]-1, data['edges'].size()[1], 1)
-        activity = data['activity'][:-1].view(data['edges'].size()[0]-1,1).float()
-        # activity_relevant_objects = (movements * F.one_hot(activity.to(int))).sum(0).to(int)
-        node2idx = F.one_hot(data['nodes'].to(int), num_classes=self.objects_by_activity.size()[1]).permute(1,0)
-
-        activity_relevant_object_mask = F.one_hot(activity.squeeze(-1).to(int), num_classes=self.objects_by_activity.size()[0]) \
-                                            @ (self.objects_by_activity.to(int) @ node2idx)
-        variation_relevant_object_mask = torch.zeros_like(movements)
-        prev_act = None
-        var_idxs = []
-        for s,act in enumerate(activity):
-            if act != prev_act:
-                variation_relevant_object_mask[var_idxs] = movements[var_idxs].sum(0).unsqueeze(0)
-                var_idxs = []
-            var_idxs.append(s)
-        variation_relevant_object_mask = variation_relevant_object_mask.squeeze(-1)
-        variation_relevant_object_mask *= activity_relevant_object_mask
 
         edges = data['edges']
         node_features = self.node_embedder(data['nodes']).unsqueeze(0).repeat(data['edges'].size()[0],1,1)
@@ -208,9 +195,9 @@ class DataSplit():
         time_feature = self.time_encoder(data['times'])
         time = data['times']
         dynamic_edges_mask = data['active_edges'].unsqueeze(0).repeat(data['times'].size()[0],1,1)
-        if self.activity_masks[idx] is None:
-            self.activity_masks[idx] = (torch.rand_like(activity_id.float()) < self.activity_dropout).to(bool)
-        activity_mask_datapoint = self.activity_masks[idx]
+        # if self.activity_masks[idx] is None:
+        #     self.activity_masks[idx] = (torch.rand_like(activity_id.float()) < self.activity_dropout).to(bool)
+        # activity_mask_datapoint = self.activity_masks[idx]
 
         datapoint = {
             'edges': edges, 
@@ -221,9 +208,7 @@ class DataSplit():
             'time_features': time_feature,
             'time': time,
             'dynamic_edges_mask': dynamic_edges_mask,
-            'activity_relevant_objects': activity_relevant_object_mask,
-            'activity_variation_relevant_objects': variation_relevant_object_mask,
-            'activity_mask_drop': activity_mask_datapoint,
+            'activity_mask_drop': torch.ones_like(activity_id).to(bool),
             'node_embedder': self.node_embedder,
             'activity_embedder': self.activity_embedder,
         }
@@ -235,7 +220,6 @@ class RoutinesDataset():
                  time_encoder = time_external, 
                  batch_size = 1,
                  use_conceptnet = False,
-                 use_bert = False,
                  activity_dropout = 0.0):
 
         with open(os.path.join(data_path, 'common_data.json')) as f:
@@ -252,27 +236,15 @@ class RoutinesDataset():
         self.node_categories = self.common_data.get('node_categories', [None]*len(self.common_data['node_classes']))
         self.edge_keys = self.common_data['edge_keys']
         self.static_nodes = self.common_data.get('static_nodes', [None]*len(self.common_data['node_classes']))
-        self.activities = self.common_data['activities']
-        for activity in self.activities:
-            assert activity in ACTIVITIES_BY_VISIBILITY, f"Activity {activity} not in ACTIVITIES_BY_VISIBILITY"
-        
-        activity_idx_by_visibility = torch.tensor([ACTIVITIES_BY_VISIBILITY.index(activity)-1 for activity in self.activities])
 
-        if use_bert:
-            # self.bertembedder = BertEmbedder(os.path.join(data_path, 'common_embedding_map.pt'))
-            node_embedder = BertEmbedder(os.path.join(data_path, 'common_embedding_map.pt'), map_type='objects')
-            activity_embedder = BertEmbedder(os.path.join(data_path, 'common_embedding_map.pt'), map_type='activity')
-        elif use_conceptnet:
-            raise Exception("ConceptNet embedder is untested!")
-        else:
-            node_embedder = OneHotEmbedder(self.node_classes)
-            activity_embedder = OneHotEmbedder(self.activities)
+        node_embedder = OneHotEmbedder(self.node_classes)
+        activity_embedder = IdentityEmbedder()
         
         # Generate train and test loaders
 
-        self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,-5), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, activity_idx_by_visibility=activity_idx_by_visibility, objects_by_activity=self.get_objects_in_activity())
-        self.val = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(-5,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, activity_idx_by_visibility=activity_idx_by_visibility, objects_by_activity=self.get_objects_in_activity())
-        self.test = DataSplit(os.path.join(data_path,'test'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, activity_idx_by_visibility=activity_idx_by_visibility, objects_by_activity=self.get_objects_in_activity())
+        self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,-5), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
+        self.val = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(-5,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
+        self.test = DataSplit(os.path.join(data_path,'test'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
         print('Train split has ',len(self.train),' routines')
         print('Test split has ',len(self.test),' routines')
 
@@ -281,12 +253,7 @@ class RoutinesDataset():
         self.params['n_nodes'] = model_data['node_features'].size()[-2]
         self.params['n_len'] = model_data['node_features'].size()[-1]
         self.params['act_len'] = model_data['activity_features'].size()[-1]
-        print(self.common_data['activities'], len(self.common_data['activities']))
-        
-        self.params['n_activities'] = len(self.common_data['activities'])
-        # if not self.params['multiple_activities']:
-            # assert None in self.common_data['activities'], f"Activity list for sequential loader must contain None:\n {self.common_data['activities']}"
-            # assert self.common_data['activities'].index(None) == 0, "Temporary: Can only handle None being the first entry in activity list"
+        self.params['n_stations'] = 5
 
     def get_train_loader(self):
         return DataLoader(self.train, num_workers=os.cpu_count(), batch_size=self.params['batch_size'], collate_fn=self.train.collate_fn)
@@ -317,10 +284,3 @@ class RoutinesDataset():
                 obj_moved += obj_moved_around_now
 
         return obj_moved
-
-    def get_objects_in_activity(self):
-        obj_in_act = torch.zeros(len(self.activities), len(self.node_classes))
-        for activity, obj_list in objects_by_activity.items():
-            for obj in obj_list:
-                obj_in_act[self.activities.index(activity), self.node_classes.index(obj)] = 1
-        return obj_in_act

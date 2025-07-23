@@ -10,7 +10,7 @@ import torch
 from torch.nn import functional as F
 from torch import nn
 from torch.optim import Adam
-from pytorch_lightning.core.lightning import LightningModule
+from pytorch_lightning.core.module import LightningModule
 from GraphDecoder import GraphDecoderModule
 from GraphEncoder import GraphEncoderModule
 
@@ -110,12 +110,12 @@ class ObjectActivityCoembeddingModule(LightningModule):
 
         self.activity_decoder_mlp = nn.Sequential(nn.Linear(self.embedding_size, self.embedding_size),
                                                     nn.ReLU(),
-                                                    nn.Linear(self.embedding_size, self.cfg.n_activities)
+                                                    nn.Linear(self.embedding_size, self.cfg.n_stations)
                                                     )
 
     def activity_prediction_loss(self, x, y):
-        ## MHC changes: BCELoss for activity too
-        return nn.BCELoss(reduction='mean')(x, y)
+        ## MHC changes: MSELoss for activity
+        return nn.MSELoss(reduction='mean')(x, y)
         # if self.cfg.multiple_activities:
         #     return (nn.MSELoss(reduction='mean')(x.squeeze(-1), y.squeeze(-1)))
         # else:
@@ -124,7 +124,7 @@ class ObjectActivityCoembeddingModule(LightningModule):
         
     def activity_inference(self, x):
         ## MHC changes: Sigmoid for activity too
-        return nn.Sigmoid(x)
+        return torch.round(x)
         # if self.cfg.multiple_activities:
         #     return torch.round(x).long()
         # else:
@@ -143,17 +143,20 @@ class ObjectActivityCoembeddingModule(LightningModule):
     def obj_graph_loss(self, x, y, obj_mask=None):
         ## MHC changes: Crossentropyloss to BCELoss
         ## TODO MHC: Do we need the permute here?
+        assert x.size() == y.size(), f"Size mismatch in obj_graph_loss {x.size()} vs {y.size()}"
+        assert x.max() <= 1.0 and x.min() >= 0.0, f"Edge probabilities are not between 0.0 and 1.0 {x.max()} to {x.min()}"
+        assert y.max() <= 1.0 and y.min() >= 0.0, f"Edge probabilities are not between 0.0 and 1.0 {y.max()} to {y.min()}"
         if obj_mask is None:
-            return nn.nn.BCELoss(reduction='mean')(x, y)
-        return (nn.nn.BCELoss(reduction='none')(x, y)[obj_mask]).mean()
+            return nn.BCELoss(reduction='mean')(x, y)
+        return (nn.BCELoss(reduction='none')(x, y)[obj_mask]).mean()
         ## MHC changes end
 
     def activity_encoder(self, activity):
         """
         Args:
-            activity: batch_size x sequence_length x n_activities
+            activity: batch_size x sequence_length x n_stations
         Return:
-            _: batch_size x sequence_length x n_activities
+            _: batch_size x sequence_length x n_stations
         """
         return self.latent_obj(self.embed_context_activity(activity.float()), self.cfg.learn_latent_magnitude)
         # return self.embed_context_activity(activity.float())
@@ -220,7 +223,7 @@ class ObjectActivityCoembeddingModule(LightningModule):
         assert (dynamic_edges_mask.to(bool) == (dynamic_edges_mask==1).to(bool)).all(), f"Conversion check {dynamic_edges_mask.to(bool)} {dynamic_edges_mask}"
         
         ## MHC changes: Softmax to Signomid
-        pred_edges = nn.Sigmoid(logits, dim=-1)
+        pred_edges = nn.Sigmoid()(logits)
         pred_edges = self.cfg.movement_inertia * input_edges + \
                     (1 - self.cfg.movement_inertia) * pred_edges
         assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
@@ -230,10 +233,11 @@ class ObjectActivityCoembeddingModule(LightningModule):
         obj_mask = (dynamic_edges_mask.sum(-1) > 0)
         assert not EXTRACAREFUL or torch.all(input_edges < torch.tensor([1.0]).to(input_edges.device)) and torch.all(input_edges > torch.tensor([0.0]).to(input_edges.device)), f"Edge probabilities are not between 0.0 and 1.0 {input_edges.max()} to {input_edges.min()}"
         pred_edges[torch.bitwise_not(obj_mask)] = input_edges[torch.bitwise_not(obj_mask)]
-        ## Normalize for zeroed out self-edges
-        normalizer = pred_edges.sum(-1).unsqueeze(-1)
-        pred_edges = pred_edges / normalizer
-        assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
+        ## MHC changes: No need to normalize edges; all edges independent
+        # ## Normalize for zeroed out self-edges
+        # normalizer = pred_edges.sum(-1).unsqueeze(-1)
+        # pred_edges = pred_edges / normalizer
+        # assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
         ## MHC changes end
 
         graph_pred_loss = None
@@ -278,9 +282,9 @@ class ObjectActivityCoembeddingModule(LightningModule):
 
         ## MHC changes: Masks per edge rather than per object
         if output_edges is not None:
-            used_mask = torch.bitwise_and((output_edges != input_edges), obj_mask)
+            used_mask = torch.bitwise_and((output_edges != input_edges), obj_mask.unsqueeze(-1))
             graph_pred_accuracy['used'] = (pred_edges == output_edges)[used_mask].sum()/(used_mask.sum()+1e-8)
-            unused_mask =  torch.bitwise_and((output_edges == input_edges), obj_mask)
+            unused_mask =  torch.bitwise_and((output_edges == input_edges), obj_mask.unsqueeze(-1))
             graph_pred_accuracy['unused'] = (pred_edges == output_edges)[unused_mask].sum()/(unused_mask.sum()+1e-8)
         ## MHC changes end
 
@@ -299,7 +303,7 @@ class ObjectActivityCoembeddingModule(LightningModule):
             latent_vector: batch_size x sequence_length x embedding_size
             ground_truth: batch_size x sequence_length
         Return:
-            output_activity: batch_size x sequence_length x n_activities
+            output_activity: batch_size x sequence_length x n_stations
             activity_pred_loss: batch_size x sequence_length
         """
    
@@ -344,7 +348,7 @@ class ObjectActivityCoembeddingModule(LightningModule):
         assert self.cfg.n_len == node_feature_len, (str(self.cfg.n_len) +'!='+ str(node_feature_len))
         assert self.cfg.n_nodes == num_f_nodes, (str(self.cfg.n_nodes) +'!='+ str(num_f_nodes))
         assert self.cfg.n_nodes == num_t_nodes, (str(self.cfg.n_nodes) +'!='+ str(num_t_nodes))
-        assert self.cfg.n_activities == num_act, (str(self.cfg.n_activities) +'!='+ str(num_act))
+        assert self.cfg.n_stations == num_act, (str(self.cfg.n_stations) +'!='+ str(num_act))
 
         graph_latents, graph_autoenc_loss, accuracy_object_autoenc = self.autoencode_graph(graph_seq_nodes.unsqueeze(0), graph_seq_edges.unsqueeze(0), graph_dynamic_edges_mask.unsqueeze(0))
 
