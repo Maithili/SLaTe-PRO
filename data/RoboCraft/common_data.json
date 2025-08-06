@@ -1,0 +1,86 @@
+{
+    "dt": 10.0,
+    "start_time": 0.0,
+    "end_time": 180,
+    "node_classes": [
+        "room",
+        "supplyshelf",
+        "Table A",
+        "Table B",
+        "Table C",
+        "Table D",
+        "Table E",
+        "coasters",
+        "cup",
+        "etchpen",
+        "flower",
+        "foamball",
+        "gemset",
+        "glue",
+        "googlyeyes",
+        "keychain",
+        "moss",
+        "mossframe",
+        "paint",
+        "paintbrush",
+        "palette",
+        "photoframe",
+        "plantpot",
+        "stones",
+        "suncatcher",
+        "tissuebox",
+        "varnish"
+    ],
+    "node_categories": [
+        "Rooms",
+        "Furniture",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects",
+        "placable_objects"
+    ],
+    "edge_keys": [
+        "ON"
+    ],
+    "static_nodes": [
+        "room",
+        "supplyshelf"
+    ],
+    "static_node_categories": [
+        "Rooms",
+        "Furniture"
+    ],
+    "dataset_type": "RoboCraft",
+    "n_stations": 5,
+    "stations": [
+        "Table A",
+        "Table B",
+        "Table C",
+        "Table D",
+        "Table E"
+    ],
+    "dates": [
+        "2025-07-18"
+    ]
+}
