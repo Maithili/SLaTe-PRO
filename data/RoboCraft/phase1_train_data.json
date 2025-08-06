@@ -113,5 +113,25 @@
 		"date": "2025-07-23", 
 		"camera_id": "8", 
 		"table_name": "Table D"
+	},
+	{
+		"date": "2025-07-08",
+		"camera_id": "0",
+		"table_name": "Table B"
+	},
+	{
+		"date": "2025-07-08",
+		"camera_id": "2",
+		"table_name": "Table C"
+	},
+	{
+		"date": "2025-07-22",
+		"camera_id": "6",
+		"table_name": "Table C"
+	},
+	{
+		"date": "2025-07-22",
+		"camera_id": "4",
+		"table_name": "Table D"
 	}
 ]
