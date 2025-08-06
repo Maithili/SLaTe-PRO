@@ -1395,9 +1395,9 @@ class MultiModalUserTrackingModule(LightningModule):
         batch['activity_ids'].masked_fill_(batch['activity_mask_drop'], 0)
 
         results = self(batch)
-        # self.log('Train loss',results['loss'])
-        # self.log('Train accuracy',results['accuracies'])
-        # self.log('Train latents',results['latents'])
+        for elem in ['loss', 'accuracies', 'latents']:
+            for k, v in results[elem].items():
+                self.log(f'Train loss -- {k}',results[elem][k])
         # try:
         #     self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
         # except Exception as e:
@@ -1431,7 +1431,9 @@ class MultiModalUserTrackingModule(LightningModule):
     def validation_step(self, batch, batch_idx):
         batch['activity_features'].masked_fill_(batch['activity_mask_drop'], 0)
         results = self(batch)
-        # self.log('Val accuracy',results['accuracies'])
+        for elem in ['loss', 'accuracies']:
+            for k, v in results[elem].items():
+                self.log(f'Val {elem} -- {k}',results[elem][k])
         
         self.reset_validation()
         self.evaluate_prediction(batch, num_steps=self.cfg.lookahead_steps)
@@ -1451,8 +1453,9 @@ class MultiModalUserTrackingModule(LightningModule):
         batch['activity_features'].masked_fill_(batch['activity_mask_drop'], 0)
         if self.test_forward:
             results = self(batch)
-            self.log('Test loss',results['loss'])
-            # self.log('Test accuracy',results['accuracies'])
+            for elem in ['loss', 'accuracies']:
+                for k, v in results[elem].items():
+                    self.log(f'Train {elem} -- {k}',results[elem][k])
         self.evaluate_prediction(batch, num_steps=self.cfg.lookahead_steps)
         return 
 
