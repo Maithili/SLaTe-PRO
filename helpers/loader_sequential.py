@@ -241,11 +241,11 @@ class RoutinesDataset():
         activity_embedder = IdentityEmbedder()
         
         # Generate train and test loaders
-
-        self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,-5), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
-        self.val = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(-5,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
+        self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,-1), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
+        self.val = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(-1,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
         self.test = DataSplit(os.path.join(data_path,'test'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
         print('Train split has ',len(self.train),' routines')
+        print('Val split has ',len(self.val),' routines')
         print('Test split has ',len(self.test),' routines')
 
         # Infer parameters for the model
