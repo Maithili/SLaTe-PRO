@@ -27,6 +27,7 @@ import random
 from numpy import random as nrandom
 random.seed(23435)
 nrandom.seed(23435)
+wandb.init(project="RoboCraft")
 
 def compare_models(model_1, model_2, num_params_expected=None):
     models_differ = 0
@@ -55,7 +56,7 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
     output_dir = logs_dir
 
     # wandb_logger = WandbLogger(name=cfg['NAME'], log_model=True, group = group, tags = tags)
-    wandb_logger = WandbLogger(name=cfg['NAME'], group = group, tags = tags, settings=wandb.Settings(start_method="fork"), mode='disabled')
+    wandb_logger = WandbLogger(name=cfg['NAME'], group = group, tags = tags, settings=wandb.Settings(start_method="fork"))  #, mode='disabled')
     wandb_logger.experiment.config.update(cfg)
     
     def train_n_tries(trainer, model, train_loader, val_loader, n=15):

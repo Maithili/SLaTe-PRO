@@ -1398,10 +1398,10 @@ class MultiModalUserTrackingModule(LightningModule):
         # self.log('Train loss',results['loss'])
         # self.log('Train accuracy',results['accuracies'])
         # self.log('Train latents',results['latents'])
-        try:
-            self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
-        except Exception as e:
-            print(e)
+        # try:
+        #     self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
+        # except Exception as e:
+        #     print(e)
         res = torch.tensor([0.], requires_grad=True).to('cuda')
 
         if not self.original_model:   
@@ -1439,10 +1439,10 @@ class MultiModalUserTrackingModule(LightningModule):
         # Set early stopping metric
         self.log('Val_ES_accuracy',results['accuracies']['object_used'])
 
-        try:
-            self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
-        except Exception as e:
-            print(e)
+        # try:
+        #     self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
+        # except Exception as e:
+        #     print(e)
 
         self.reset_validation()
         return 
