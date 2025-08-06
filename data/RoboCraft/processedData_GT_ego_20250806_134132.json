@@ -1,0 +1,440 @@
+{
+    "2025-07-18": {
+        "tableA": {
+            "5": [],
+            "601": [],
+            "1205": [],
+            "1800": [],
+            "2405": [],
+            "3000": [],
+            "3600": [],
+            "4205": [],
+            "4801": [],
+            "5403": [
+                "coasters"
+            ],
+            "6001": [
+                "coasters",
+                "cup",
+                "paint",
+                "palette",
+                "suncatcher"
+            ],
+            "6605": [
+                "coasters",
+                "cup",
+                "paint",
+                "palette",
+                "suncatcher"
+            ],
+            "7205": [
+                "coasters",
+                "paint",
+                "suncatcher"
+            ],
+            "7800": [
+                "coasters",
+                "cup",
+                "paint",
+                "palette",
+                "suncatcher"
+            ],
+            "8405": [
+                "coasters",
+                "cup",
+                "paint",
+                "palette",
+                "suncatcher",
+                "tissuebox"
+            ],
+            "9001": [
+                "coasters",
+                "cup",
+                "paint",
+                "palette",
+                "suncatcher",
+                "tissuebox"
+            ],
+            "9600": [
+                "coasters",
+                "cup",
+                "paint",
+                "palette",
+                "stones",
+                "suncatcher",
+                "tissuebox"
+            ],
+            "10205": [
+                "coasters",
+                "cup",
+                "flower",
+                "stones",
+                "suncatcher",
+                "tissuebox"
+            ]
+        },
+        "tableB": {
+            "3": [],
+            "602": [],
+            "1204": [],
+            "1804": [],
+            "2401": [],
+            "3005": [],
+            "3603": [],
+            "4202": [],
+            "4802": [],
+            "5403": [],
+            "6003": [],
+            "6601": [],
+            "7200": [],
+            "7800": [
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe"
+            ],
+            "8402": [
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe"
+            ],
+            "9004": [
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe"
+            ],
+            "9602": [
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "tissuebox"
+            ],
+            "10200": [
+                "flower",
+                "keychain",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "tissuebox"
+            ]
+        },
+        "tableC": {
+            "0": [],
+            "600": [],
+            "1200": [],
+            "1804": [
+                "coasters",
+                "etchpen"
+            ],
+            "2404": [
+                "coasters",
+                "etchpen",
+                "paint",
+                "paintbrush",
+                "palette",
+                "plantpot"
+            ],
+            "3003": [
+                "etchpen",
+                "mossframe",
+                "paintbrush"
+            ],
+            "3601": [
+                "etchpen",
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "4205": [
+                "etchpen",
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "4802": [
+                "etchpen",
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "5405": [
+                "etchpen",
+                "flower",
+                "gemset",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "6003": [
+                "etchpen",
+                "flower",
+                "gemset",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "6603": [
+                "etchpen",
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "7202": [
+                "etchpen",
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "palette",
+                "stones"
+            ],
+            "7803": [
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "palette",
+                "stones",
+                "tissuebox"
+            ],
+            "8404": [
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "palette",
+                "stones",
+                "tissuebox"
+            ],
+            "9002": [
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "stones",
+                "tissuebox"
+            ],
+            "9602": [
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "stones",
+                "tissuebox",
+                "varnish"
+            ],
+            "10203": [
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "stones",
+                "tissuebox"
+            ]
+        },
+        "tableD": {
+            "5": [],
+            "601": [],
+            "1204": [],
+            "1803": [],
+            "2404": [],
+            "3005": [
+                "etchpen",
+                "googlyeyes",
+                "keychain",
+                "moss",
+                "plantpot"
+            ],
+            "3601": [
+                "etchpen",
+                "flower",
+                "moss"
+            ],
+            "4200": [
+                "etchpen",
+                "mossframe"
+            ],
+            "4801": [
+                "etchpen",
+                "keychain"
+            ],
+            "5400": [
+                "etchpen",
+                "keychain"
+            ],
+            "6000": [
+                "etchpen",
+                "keychain"
+            ],
+            "6602": [
+                "etchpen",
+                "keychain"
+            ],
+            "7202": [
+                "etchpen",
+                "keychain"
+            ],
+            "7803": [
+                "etchpen",
+                "keychain"
+            ],
+            "8403": [
+                "etchpen",
+                "keychain"
+            ],
+            "9004": [
+                "etchpen",
+                "keychain"
+            ],
+            "9601": [
+                "etchpen",
+                "flower",
+                "gemset",
+                "keychain",
+                "stones"
+            ],
+            "10204": [
+                "etchpen",
+                "flower",
+                "gemset",
+                "keychain",
+                "stones"
+            ]
+        },
+        "tableE": {
+            "3": [],
+            "603": [],
+            "1203": [],
+            "1800": [],
+            "2401": [],
+            "3002": [],
+            "3604": [],
+            "4202": [],
+            "4800": [
+                "cup",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "5404": [
+                "cup",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "6002": [
+                "cup",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "6604": [
+                "cup",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "7205": [
+                "cup",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "7804": [
+                "cup",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "8402": [
+                "cup",
+                "etchpen",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "9001": [
+                "cup",
+                "etchpen",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "9604": [
+                "cup",
+                "etchpen",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "10201": [
+                "cup",
+                "etchpen",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ]
+        }
+    }
+}
