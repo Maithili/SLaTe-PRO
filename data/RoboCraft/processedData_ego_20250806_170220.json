@@ -1,0 +1,625 @@
+{
+    "2025-07-08": {
+        "tableA": {},
+        "tableB": {},
+        "tableC": {},
+        "tableD": {},
+        "tableE": {}
+    },
+    "2025-07-23": {
+        "tableA": {
+            "150220": [],
+            "153200": [],
+            "153249": [],
+            "154557": [],
+            "154645": [],
+            "155716": [],
+            "155808": [],
+            "160938": [],
+            "162149": [],
+            "162225": [],
+            "163455": [],
+            "163529": [],
+            "164805": [],
+            "164841": [],
+            "170721": [],
+            "170803": [],
+            "172934": [],
+            "173016": []
+        },
+        "tableB": {
+            "145604": [],
+            "145647": [],
+            "151119": [],
+            "151154": [],
+            "151809": [],
+            "151900": [],
+            "153413": [],
+            "153507": [],
+            "154826": [],
+            "160025": [],
+            "161145": [],
+            "161223": [],
+            "162400": [],
+            "163707": [],
+            "165614": [],
+            "165653": [],
+            "170948": [],
+            "171024": [],
+            "173155": []
+        },
+        "tableC": {},
+        "tableD": {
+            "152242": [],
+            "152331": [],
+            "152410": [],
+            "154211": [],
+            "154301": [],
+            "154335": [],
+            "155323": [],
+            "155408": [],
+            "155503": [],
+            "160629": [],
+            "160710": [],
+            "160752": [],
+            "161652": [],
+            "161737": [],
+            "161821": [],
+            "162935": [],
+            "163025": [],
+            "163107": [],
+            "164218": [],
+            "165230": [],
+            "165320": [],
+            "170058": [],
+            "171440": [],
+            "171531": [],
+            "172344": []
+        },
+        "tableE": {}
+    },
+    "2025-07-18": {
+        "tableA": {
+            "150118": [],
+            "150153": [],
+            "151309": [],
+            "151346": [],
+            "153800": [],
+            "153836": [],
+            "155839": [],
+            "155914": [],
+            "161119": [],
+            "161154": [],
+            "163408": [],
+            "163500": [],
+            "164735": [],
+            "164812": [],
+            "170041": [],
+            "170125": [],
+            "171338": [],
+            "171421": [],
+            "172858": [],
+            "172947": []
+        },
+        "tableB": {
+            "145048": [],
+            "145127": [],
+            "150332": [],
+            "150410": [],
+            "151531": [],
+            "151611": [],
+            "153400": [],
+            "153439": [],
+            "154021": [],
+            "154102": [],
+            "160050": [],
+            "160126": [],
+            "161344": [],
+            "161423": [],
+            "162351": [],
+            "162430": [],
+            "163659": [],
+            "163738": [],
+            "164949": [],
+            "165025": [],
+            "170252": [],
+            "170333": [],
+            "171556": [],
+            "173120": [],
+            "175026": [],
+            "175104": []
+        },
+        "tableC": {
+            "145246": [],
+            "145424": [],
+            "150538": [],
+            "151728": [],
+            "151810": [],
+            "154222": [],
+            "154316": [],
+            "154411": [],
+            "155022": [],
+            "155114": [],
+            "160246": [],
+            "160341": [],
+            "161536": [],
+            "162551": [],
+            "162638": [],
+            "163853": [],
+            "163951": [],
+            "165159": [],
+            "165245": [],
+            "170501": [],
+            "170546": [],
+            "171828": [],
+            "171924": [],
+            "173811": [],
+            "173853": [],
+            "173938": [],
+            "175227": [],
+            "175312": [],
+            "175357": []
+        },
+        "tableD": {
+            "145541": [
+                "etchpen",
+                "keychain"
+            ],
+            "145719": [
+                "etchpen",
+                "keychain"
+            ],
+            "150828": [
+                "etchpen",
+                "keychain"
+            ],
+            "150912": [
+                "etchpen",
+                "keychain"
+            ],
+            "150952": [
+                "etchpen",
+                "keychain"
+            ],
+            "152023": [
+                "etchpen",
+                "keychain"
+            ],
+            "152112": [
+                "etchpen",
+                "keychain"
+            ],
+            "152155": [
+                "etchpen",
+                "keychain"
+            ],
+            "154522": [
+                "etchpen",
+                "keychain"
+            ],
+            "154606": [
+                "etchpen",
+                "keychain"
+            ],
+            "154655": [
+                "etchpen",
+                "keychain"
+            ],
+            "155314": [
+                "etchpen",
+                "keychain"
+            ],
+            "155411": [
+                "etchpen",
+                "keychain"
+            ],
+            "155453": [
+                "etchpen",
+                "keychain"
+            ],
+            "160542": [
+                "etchpen",
+                "keychain"
+            ],
+            "160712": [
+                "etchpen",
+                "keychain"
+            ],
+            "161833": [
+                "etchpen",
+                "keychain"
+            ],
+            "161946": [
+                "etchpen",
+                "keychain"
+            ],
+            "162025": [
+                "etchpen",
+                "keychain"
+            ],
+            "162850": [
+                "etchpen",
+                "keychain"
+            ],
+            "162932": [
+                "etchpen",
+                "keychain"
+            ],
+            "163024": [
+                "etchpen",
+                "keychain"
+            ],
+            "164206": [
+                "etchpen",
+                "keychain"
+            ],
+            "164252": [
+                "etchpen",
+                "keychain"
+            ],
+            "164333": [
+                "etchpen",
+                "keychain"
+            ],
+            "165458": [
+                "etchpen",
+                "keychain"
+            ],
+            "165551": [
+                "etchpen",
+                "keychain"
+            ],
+            "170749": [
+                "etchpen",
+                "keychain"
+            ],
+            "170834": [
+                "etchpen",
+                "keychain"
+            ],
+            "170917": [
+                "etchpen",
+                "keychain"
+            ],
+            "172135": [
+                "etchpen",
+                "keychain"
+            ],
+            "172216": [
+                "etchpen",
+                "keychain"
+            ],
+            "172309": [
+                "etchpen",
+                "keychain"
+            ],
+            "174147": [
+                "etchpen",
+                "keychain"
+            ],
+            "175511": [
+                "etchpen",
+                "keychain"
+            ],
+            "175602": [
+                "etchpen",
+                "keychain"
+            ]
+        },
+        "tableE": {
+            "145832": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "145913": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "145954": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "151113": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "151155": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "152320": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "152636": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "152717": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "153011": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "153246": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "155603": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "155643": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "155722": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "160821": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "160859": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "163135": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "164447": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "164545": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "165751": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "165822": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "165903": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "171026": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "171109": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "171211": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "172628": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "172724": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "174502": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "174545": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "175802": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "175846": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "175929": [
+                "etchpen",
+                "keychain",
+                "paintbrush",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ]
+        }
+    },
+    "2025-07-09": {
+        "tableA": {},
+        "tableB": {},
+        "tableC": {
+            "150258": [],
+            "150345": [],
+            "150440": [],
+            "152205": [],
+            "153657": [],
+            "153750": [],
+            "153832": [],
+            "160658": [],
+            "160834": [],
+            "164500": [],
+            "174851": [],
+            "175047": []
+        },
+        "tableD": {
+            "150553": [],
+            "150635": [],
+            "150711": [],
+            "152358": [],
+            "153946": [],
+            "154033": [],
+            "154112": [],
+            "160955": [],
+            "161045": [],
+            "161124": [],
+            "162408": [],
+            "162504": [],
+            "163620": [],
+            "164752": [],
+            "175213": [],
+            "175255": [],
+            "175336": []
+        },
+        "tableE": {}
+    },
+    "2025-07-16": {
+        "tableA": {},
+        "tableB": {
+            "152116": [],
+            "152206": [],
+            "153401": [],
+            "153440": [],
+            "154728": [],
+            "154807": [],
+            "160940": [],
+            "161016": [],
+            "162219": [],
+            "162300": [],
+            "163704": [],
+            "163737": [],
+            "165013": [],
+            "165102": [],
+            "165410": [],
+            "170401": [],
+            "171602": [],
+            "171645": [],
+            "172949": []
+        },
+        "tableC": {},
+        "tableD": {},
+        "tableE": {}
+    }
+}
