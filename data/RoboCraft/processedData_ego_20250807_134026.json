@@ -1,0 +1,626 @@
+{
+    "2025-07-08": {
+        "tableA": {},
+        "tableB": {},
+        "tableC": {},
+        "tableD": {},
+        "tableE": {}
+    },
+    "2025-07-23": {
+        "tableA": {
+            "140": [
+                "flower",
+                "gemset",
+                "googlyeyes",
+                "keychain",
+                "moss",
+                "mossframe",
+                "stones",
+                "varnish"
+            ],
+            "1920": [
+                "coasters",
+                "etchpen",
+                "gemset",
+                "googlyeyes",
+                "keychain",
+                "moss",
+                "mossframe",
+                "stones",
+                "varnish"
+            ],
+            "2757": [
+                "coasters",
+                "keychain",
+                "moss",
+                "mossframe",
+                "paint",
+                "paintbrush",
+                "palette",
+                "plantpot",
+                "stones",
+                "suncatcher",
+                "varnish"
+            ],
+            "3436": [
+                "coasters",
+                "keychain",
+                "moss",
+                "mossframe",
+                "plantpot",
+                "stones",
+                "suncatcher",
+                "varnish"
+            ],
+            "4178": [
+                "coasters",
+                "keychain",
+                "moss",
+                "mossframe",
+                "plantpot",
+                "stones",
+                "suncatcher"
+            ],
+            "4909": [
+                "coasters",
+                "keychain",
+                "mossframe",
+                "paint",
+                "palette",
+                "plantpot",
+                "stones",
+                "suncatcher"
+            ],
+            "5695": [
+                "coasters",
+                "keychain",
+                "mossframe",
+                "paint",
+                "palette",
+                "plantpot",
+                "suncatcher"
+            ],
+            "6485": [],
+            "7641": [],
+            "8974": []
+        },
+        "tableB": {
+            "-236": [],
+            "679": [],
+            "1089": [],
+            "2053": [],
+            "2906": [],
+            "3625": [
+                "coasters",
+                "cup",
+                "paint",
+                "paintbrush",
+                "palette"
+            ],
+            "4305": [
+                "coasters",
+                "cup",
+                "paint",
+                "paintbrush",
+                "palette"
+            ],
+            "5040": [
+                "coasters",
+                "paintbrush",
+                "palette"
+            ],
+            "5827": [
+                "coasters"
+            ],
+            "6974": [
+                "coasters",
+                "cup",
+                "flower",
+                "foamball",
+                "moss",
+                "palette",
+                "plantpot",
+                "stones"
+            ],
+            "7788": [
+                "coasters",
+                "cup",
+                "flower",
+                "foamball",
+                "moss",
+                "plantpot",
+                "stones"
+            ],
+            "9115": [
+                "flower",
+                "foamball",
+                "moss",
+                "plantpot",
+                "stones"
+            ]
+        },
+        "tableC": {},
+        "tableD": {
+            "1362": [],
+            "2531": [
+                "coasters",
+                "etchpen"
+            ],
+            "3203": [
+                "coasters",
+                "etchpen"
+            ],
+            "3989": [
+                "coasters",
+                "etchpen",
+                "paintbrush"
+            ],
+            "4612": [
+                "coasters",
+                "etchpen"
+            ],
+            "5375": [
+                "coasters",
+                "etchpen"
+            ],
+            "6138": [
+                "coasters",
+                "etchpen"
+            ],
+            "6750": [],
+            "7258": [
+                "coasters",
+                "cup",
+                "paint",
+                "paintbrush",
+                "palette"
+            ],
+            "8080": [
+                "coasters",
+                "cup",
+                "flower",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot"
+            ],
+            "8624": [
+                "coasters",
+                "cup",
+                "flower",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot"
+            ]
+        },
+        "tableE": {}
+    },
+    "2025-07-18": {
+        "tableA": {
+            "78": [],
+            "789": [],
+            "2280": [],
+            "3519": [],
+            "4279": [],
+            "5648": [
+                "coasters",
+                "cup",
+                "paint",
+                "palette",
+                "suncatcher"
+            ],
+            "6455": [
+                "coasters",
+                "cup",
+                "paint",
+                "palette",
+                "suncatcher"
+            ],
+            "7241": [
+                "coasters",
+                "paint",
+                "suncatcher"
+            ],
+            "8018": [
+                "coasters",
+                "cup",
+                "paint",
+                "palette",
+                "suncatcher",
+                "tissuebox"
+            ],
+            "8938": [
+                "coasters",
+                "cup",
+                "paint",
+                "palette",
+                "suncatcher",
+                "tissuebox"
+            ]
+        },
+        "tableB": {
+            "-552": [],
+            "212": [],
+            "931": [],
+            "2040": [],
+            "2421": [],
+            "3650": [],
+            "4424": [],
+            "5031": [],
+            "5819": [],
+            "6589": [],
+            "7372": [],
+            "8156": [
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe"
+            ],
+            "9080": [
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe"
+            ],
+            "10226": [
+                "flower",
+                "keychain",
+                "palette",
+                "photoframe",
+                "tissuebox"
+            ]
+        },
+        "tableC": {
+            "-434": [],
+            "338": [],
+            "1048": [],
+            "2542": [
+                "coasters",
+                "etchpen",
+                "paint",
+                "paintbrush",
+                "palette",
+                "plantpot"
+            ],
+            "3022": [
+                "mossframe",
+                "paintbrush"
+            ],
+            "3766": [
+                "etchpen",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "4536": [
+                "etchpen",
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "5151": [
+                "etchpen",
+                "flower",
+                "gemset",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "5933": [
+                "etchpen",
+                "flower",
+                "gemset",
+                "googlyeyes",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "6719": [
+                "etchpen",
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "stones"
+            ],
+            "7501": [
+                "etchpen",
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "palette",
+                "stones",
+                "tissuebox"
+            ],
+            "8308": [
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "palette",
+                "stones",
+                "tissuebox"
+            ],
+            "9491": [
+                "flower",
+                "moss",
+                "mossframe",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "stones",
+                "tissuebox",
+                "varnish"
+            ],
+            "10347": [
+                "mossframe",
+                "paintbrush",
+                "photoframe"
+            ]
+        },
+        "tableD": {
+            "-259": [],
+            "508": [],
+            "1223": [],
+            "2722": [],
+            "3194": [
+                "etchpen",
+                "plantpot",
+                "foamball"
+            ],
+            "3942": [
+                "etchpen",
+                "keychain"
+            ],
+            "4713": [
+                "etchpen",
+                "keychain"
+            ],
+            "5330": [
+                "etchpen",
+                "keychain"
+            ],
+            "6126": [
+                "etchpen",
+                "keychain"
+            ],
+            "6898": [
+                "etchpen",
+                "keychain"
+            ],
+            "7669": [
+                "etchpen",
+                "keychain"
+            ],
+            "8495": [
+                "etchpen",
+                "keychain"
+            ],
+            "9707": [
+                "etchpen",
+                "flower",
+                "gemset",
+                "keychain",
+                "stones"
+            ],
+            "10511": [
+                "etchpen",
+                "keychain"
+            ]
+        },
+        "tableE": {
+            "-88": [],
+            "673": [],
+            "1400": [],
+            "1596": [],
+            "1811": [],
+            "1966": [],
+            "3363": [],
+            "4101": [],
+            "5495": [
+                "cup",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "6287": [
+                "cup",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "7071": [
+                "cup",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "7826": [
+                "cup",
+                "etchpen",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "8788": [
+                "cup",
+                "etchpen",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "9902": [
+                "cup",
+                "etchpen",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ],
+            "10682": [
+                "cup",
+                "etchpen",
+                "keychain",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "plantpot",
+                "varnish"
+            ]
+        }
+    },
+    "2025-07-09": {
+        "tableA": {},
+        "tableB": {},
+        "tableC": {
+            "178": [],
+            "1325": [],
+            "2217": [],
+            "4018": [],
+            "6300": [],
+            "10131": [
+                "coasters",
+                "cup",
+                "etchpen",
+                "gemset",
+                "glue",
+                "paint",
+                "paintbrush",
+                "palette",
+                "photoframe",
+                "stones",
+                "tissuebox"
+            ]
+        },
+        "tableD": {
+            "353": [
+                "etchpen"
+            ],
+            "1438": [
+                "coasters",
+                "cup",
+                "etchpen",
+                "gemset",
+                "glue",
+                "stones"
+            ],
+            "2386": [
+                "cup",
+                "etchpen",
+                "gemset",
+                "glue",
+                "stones"
+            ],
+            "4195": [
+                "etchpen",
+                "mossframe"
+            ],
+            "5048": [
+                "cup",
+                "etchpen",
+                "mossframe",
+                "paint",
+                "paintbrush",
+                "palette"
+            ],
+            "5780": [
+                "cup",
+                "etchpen",
+                "mossframe",
+                "paint",
+                "paintbrush",
+                "palette"
+            ],
+            "6472": [
+                "cup",
+                "etchpen",
+                "mossframe",
+                "paint",
+                "paintbrush",
+                "palette"
+            ],
+            "10333": []
+        },
+        "tableE": {}
+    },
+    "2025-07-16": {
+        "tableA": {},
+        "tableB": {
+            "1276": [],
+            "2041": [],
+            "2848": [],
+            "4180": [
+                "etchpen",
+                "keychain"
+            ],
+            "4939": [
+                "etchpen",
+                "keychain"
+            ],
+            "5824": [
+                "etchpen",
+                "keychain"
+            ],
+            "6613": [
+                "coasters",
+                "etchpen",
+                "keychain"
+            ],
+            "6850": [
+                "coasters",
+                "etchpen",
+                "keychain"
+            ],
+            "7441": [
+                "coasters",
+                "etchpen",
+                "keychain"
+            ],
+            "8162": [
+                "coasters",
+                "etchpen"
+            ],
+            "8989": [
+                "coasters",
+                "etchpen"
+            ]
+        },
+        "tableC": {},
+        "tableD": {},
+        "tableE": {}
+    }
+}
