@@ -133,22 +133,26 @@ class ObjectActivityCoembeddingModule(LightningModule):
                    
     def activity_accuracy(self, x, y):
         ## Make this thresholded inference not argmax
-        return (x > 0.5).float().eq(y).sum()/torch.numel(y)
+        return torch.round(x).eq(y).sum()/torch.numel(y)
         # if self.cfg.multiple_activities:
         #     return (torch.abs(x-y) < 0.5).sum()/torch.numel(y)
         # else:
         #     return (x.argmax(-1) == y.squeeze(-1))[y != 0].sum()/(y != 0).sum()
         ## MHC changes end
         
-    def obj_graph_loss(self, x, y, obj_mask=None):
+    def obj_graph_loss(self, x, y, mask):
         ## MHC changes: Crossentropyloss to BCELoss
         ## TODO MHC: Do we need the permute here?
         assert x.size() == y.size(), f"Size mismatch in obj_graph_loss {x.size()} vs {y.size()}"
         assert x.max() <= 1.0 and x.min() >= 0.0, f"Edge probabilities are not between 0.0 and 1.0 {x.max()} to {x.min()}"
         assert y.max() <= 1.0 and y.min() >= 0.0, f"Edge probabilities are not between 0.0 and 1.0 {y.max()} to {y.min()}"
-        if obj_mask is None:
+        if mask is not None:
+            mask = mask.to(bool)
+            assert x.size() == mask.size(), f"Size mismatch in obj_graph_loss {x.size()} vs {mask.size()}"
+            assert y.size() == mask.size(), f"Size mismatch in obj_graph_loss {y.size()} vs {mask.size()}"
+            return nn.BCELoss(reduction='mean')(x[mask], y[mask])
+        else:
             return nn.BCELoss(reduction='mean')(x, y)
-        return (nn.BCELoss(reduction='none')(x, y)[obj_mask]).mean()
         ## MHC changes end
 
     def activity_encoder(self, activity):
@@ -196,10 +200,10 @@ class ObjectActivityCoembeddingModule(LightningModule):
 
         latent_in = graph_latents + time_context if self.cfg.addtnl_time_context else graph_latents
         _, graph_autoenc_loss, graph_autoenc_accuracy = self.decode_graph(latent_in, 
-                                                                          graph_seq_nodes[:,:-1,:,:], 
-                                                                          graph_seq_edges[:,:-1,:,:], 
-                                                                          graph_dynamic_edges_mask[:,:-1,:,:], 
-                                                                          output_edges=graph_seq_edges[:,1:,:,:])
+                                                                    graph_seq_nodes[:,:-1,:,:], 
+                                                                    graph_seq_edges[:,:-1,:,:], 
+                                                                    graph_dynamic_edges_mask[:,:-1,:,:], 
+                                                                    output_edges=graph_seq_edges[:,1:,:,:])
 
         assert graph_latents.size()[0] == graph_seq_nodes.size()[0] , 'Size Mismatch'
         assert graph_latents.size()[1] == graph_seq_nodes.size()[1] - 1, 'Size Mismatch'
@@ -207,7 +211,7 @@ class ObjectActivityCoembeddingModule(LightningModule):
 
         return graph_latents, graph_autoenc_loss, graph_autoenc_accuracy
 
-    def decode_graph(self, latents, input_nodes, input_edges, dynamic_edges_mask, output_edges=None, activity_relevant_edges=None, activity_mask=None):
+    def decode_graph(self, latents, input_nodes, input_edges, dynamic_edges_mask, output_edges=None):
         if isinstance(latents, Latent): latents = latents.sample()
         if self.cfg.learn_latent_magnitude:
             latents = F.normalize(latents, dim=-1)
@@ -227,67 +231,15 @@ class ObjectActivityCoembeddingModule(LightningModule):
         pred_edges = self.cfg.movement_inertia * input_edges + \
                     (1 - self.cfg.movement_inertia) * pred_edges
         assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
-        pred_edges += 1e-8
-        pred_edges = pred_edges.masked_fill(dynamic_edges_mask == 0, float(0.0))
-        ## Fill in all non-dynamic objects as input edges
-        obj_mask = (dynamic_edges_mask.sum(-1) > 0)
-        assert not EXTRACAREFUL or torch.all(input_edges < torch.tensor([1.0]).to(input_edges.device)) and torch.all(input_edges > torch.tensor([0.0]).to(input_edges.device)), f"Edge probabilities are not between 0.0 and 1.0 {input_edges.max()} to {input_edges.min()}"
-        pred_edges[torch.bitwise_not(obj_mask)] = input_edges[torch.bitwise_not(obj_mask)]
-        ## MHC changes: No need to normalize edges; all edges independent
-        # ## Normalize for zeroed out self-edges
-        # normalizer = pred_edges.sum(-1).unsqueeze(-1)
-        # pred_edges = pred_edges / normalizer
-        # assert not EXTRACAREFUL or torch.all(pred_edges < torch.tensor([1.0]).to(pred_edges.device)) and torch.all(pred_edges > torch.tensor([0.0]).to(pred_edges.device)), f"Edge probabilities are not between 0.0 and 1.0 {pred_edges.max()} to {pred_edges.min()}"
-        ## MHC changes end
+        ## Fill in all non-dynamic edges as input edges
+        assert dynamic_edges_mask.shape == pred_edges.shape, f"Size mismatch in decode_graph {dynamic_edges_mask.shape} vs {pred_edges.shape}"
+        pred_edges[dynamic_edges_mask == 0] = input_edges[dynamic_edges_mask == 0]
 
         graph_pred_loss = None
-        graph_pred_accuracy = {'used':0, 'unused':0}
-        self.auxiliary_accuracy = {'activity_recall':0, 'activity_prec':0, 'dynamic_recall':0, 'dynamic_prec':0}
+        graph_pred_accuracy = None
         if output_edges is not None:
-            # assert (input_edges[dynamic_edges_mask == 0] == output_edges[dynamic_edges_mask == 0]).all()
-            if activity_mask is not None:
-                assert activity_mask.size()[0] == obj_mask.size()[0], 'Mismatch in 0th dim '+str(activity_mask.size()[0]) + ' vs '+str(obj_mask.size()[0])
-                assert activity_mask.size()[1] == obj_mask.size()[1], 'Mismatch in 1st dim'+str(activity_mask.size()[1]) + ' vs '+str(obj_mask.size()[1])
-                obj_mask = torch.bitwise_or(obj_mask, activity_mask.unsqueeze(-1))
-            graph_pred_loss = self.obj_graph_loss(pred_edges, output_edges, obj_mask=obj_mask)
-
-            auxiliary_loss_activity = torch.Tensor([0.]).to('cuda')
-            ## TODO Maithili: Remove these arbitrary 'squeeze()'s
-            if activity_relevant_edges is not None:
-                pred_pos = pred_activity.squeeze(-1) > 0.5
-                if activity_mask is not None:
-                    activity_mask = torch.bitwise_or((activity_relevant_edges > -0.5).max(-1).values, activity_mask)
-                else:
-                    activity_mask = (activity_relevant_edges > -0.5).max(-1).values
-                act_pos = activity_relevant_edges.to(int)
-                auxiliary_loss_activity = nn.BCELoss(reduction='mean')(pred_activity.squeeze(-1)[activity_mask], activity_relevant_edges[activity_mask].float())
-                self.auxiliary_accuracy['activity_recall'] = torch.bitwise_and(pred_pos[activity_mask], act_pos[activity_mask]).sum()/act_pos[activity_mask].sum()
-                self.auxiliary_accuracy['activity_prec'] = torch.bitwise_and(pred_pos[activity_mask], act_pos[activity_mask]).sum()/pred_pos[activity_mask].sum()
-                self.auxiliary_accuracy['activity_loss'] = auxiliary_loss_activity
-                self.auxiliary_accuracy['activity_accuracy'] = (pred_pos[activity_mask] == act_pos[activity_mask]).sum()/torch.numel(pred_pos[activity_mask])
-                self.auxiliary_accuracy['activity_num'] = act_pos[activity_mask].sum()
-                self.auxiliary_accuracy['activity_pred_num'] = pred_pos[activity_mask].sum()
-            auxiliary_loss_dynamic = nn.BCELoss(reduction='mean')(pred_dynamic.squeeze(-1), dynamic_edges_mask.max(-1).values)
-            pred_dyn = pred_dynamic.squeeze(-1) > 0.5
-            self.auxiliary_accuracy['dynamic_recall'] = torch.bitwise_and(pred_dyn, dynamic_edges_mask.to(int).max(-1).values).sum()/(dynamic_edges_mask.to(int).max(-1).values).sum()
-            self.auxiliary_accuracy['dynamic_prec'] = torch.bitwise_and(pred_dyn, dynamic_edges_mask.to(int).max(-1).values).sum()/(pred_dyn).sum()
-            self.auxiliary_accuracy['dynamic_accuracy'] = (pred_dyn == dynamic_edges_mask.to(int).max(-1).values).sum()/torch.numel(pred_dyn)
-            self.auxiliary_accuracy['dynamic_loss'] = auxiliary_loss_dynamic
-            self.auxiliary_accuracy['dynamic_num'] = (dynamic_edges_mask.to(int).max(-1).values).sum()
-            self.auxiliary_accuracy['dynamic_pred_num'] = (pred_dyn).sum()
-
-            graph_pred_loss = graph_pred_loss + self.cfg.aux_loss_weight * (auxiliary_loss_activity + auxiliary_loss_dynamic)
-
-        # pred_edges = self.cfg.movement_confidence_margin*input_edges.view(batch_size*(sequence_len), self.cfg.n_nodes, self.cfg.n_nodes) + (1-self.cfg.movement_confidence_margin)*pred_edges
-
-        ## MHC changes: Masks per edge rather than per object
-        if output_edges is not None:
-            used_mask = torch.bitwise_and((output_edges != input_edges), obj_mask.unsqueeze(-1))
-            graph_pred_accuracy['used'] = (pred_edges == output_edges)[used_mask].sum()/(used_mask.sum()+1e-8)
-            unused_mask =  torch.bitwise_and((output_edges == input_edges), obj_mask.unsqueeze(-1))
-            graph_pred_accuracy['unused'] = (pred_edges == output_edges)[unused_mask].sum()/(unused_mask.sum()+1e-8)
-        ## MHC changes end
-
+            graph_pred_loss = self.obj_graph_loss(pred_edges, output_edges, mask=dynamic_edges_mask)
+            graph_pred_accuracy = (pred_edges == output_edges).to(int).sum()/torch.numel(pred_edges)
         return pred_edges, graph_pred_loss, graph_pred_accuracy
 
     def autoencode_activity(self, activity_seq, time_context=None, activity_gt=None):
@@ -350,13 +302,13 @@ class ObjectActivityCoembeddingModule(LightningModule):
         assert self.cfg.n_nodes == num_t_nodes, (str(self.cfg.n_nodes) +'!='+ str(num_t_nodes))
         assert self.cfg.n_stations == num_act, (str(self.cfg.n_stations) +'!='+ str(num_act))
 
-        graph_latents, graph_autoenc_loss, accuracy_object_autoenc = self.autoencode_graph(graph_seq_nodes.unsqueeze(0), graph_seq_edges.unsqueeze(0), graph_dynamic_edges_mask.unsqueeze(0))
+        graph_latents, graph_autoenc_loss, _ = self.autoencode_graph(graph_seq_nodes.unsqueeze(0), graph_seq_edges.unsqueeze(0), graph_dynamic_edges_mask.unsqueeze(0))
 
         graph_latents = graph_latents.squeeze(0)
 
         activity_latents, activity_autoenc_loss, accuracy_activity_autoenc = self.autoencode_activity(activity_seq)
 
-        _, cross_graph_pred_loss, cross_accuracy_object = self.decode_graph(latents=activity_latents, 
+        _, cross_graph_pred_loss, _ = self.decode_graph(latents=activity_latents, 
                                                                     input_nodes=graph_seq_nodes[:,:,:].unsqueeze(0),
                                                                     input_edges=graph_seq_edges[:,:,:].unsqueeze(0),
                                                                     dynamic_edges_mask=graph_dynamic_edges_mask[:,:,:].unsqueeze(0),
@@ -377,11 +329,7 @@ class ObjectActivityCoembeddingModule(LightningModule):
                       'latent_similarity': latent_similarity_loss,
                       },
             'accuracies' : {
-                        'object_autoenc_used': accuracy_object_autoenc['used'],
-                        'object_autoenc_unused': accuracy_object_autoenc['unused'],
                         'activity_autoenc': accuracy_activity_autoenc,
-                        'object_cross_used': cross_accuracy_object['used'],
-                        'object_cross_unused': cross_accuracy_object['unused'],
                         'activity_cross': cross_accuracy_activity,
                         }
         }

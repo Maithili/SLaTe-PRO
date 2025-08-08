@@ -5,44 +5,9 @@ import torch
 import torch.nn.functional as F
 from encoders import time_external
 from torch.utils.data import DataLoader
-from utils import objects_by_activity
 
-_ACTIVITIES_BY_VISIBILITY_ = [
-        "Unknown",
-        "going_to_the_bathroom",
-        "getting_dressed",
-        "showering",
-        "nap",
-        "sleep",
-        "wake_up",
-        "take_out_trash",
-        "leave_home",
-        "come_home",
-        "playing_music",
-        "listening_to_music",
-        "taking_medication",
-        "reading",
-        "watching_tv",
-        "computer_work",
-        "cleaning",
-        "socializing",
-        "lunch",
-        "wash_dishes_lunch",
-        "dinner",
-        "wash_dishes_dinner",
-        "breakfast",
-        "wash_dishes_breakfast",
-        "brushing_teeth",
-        "Idle",
-    ]
-
-ACTIVITIES_BY_VISIBILITY1 = ['Unknown', 'reading', 'nap', 'taking_medication', 'socializing', 'brushing_teeth', 'breakfast', 'take_out_trash', 'wake_up', 'getting_dressed', 'listening_to_music', 'lunch', 'leave_home', 'Idle', 'going_to_the_bathroom', 'come_home', 'playing_music', 'sleep', 'computer_work', 'cleaning', 'showering', 'wash_dishes_lunch', 'wash_dishes_dinner', 'dinner', 'wash_dishes_breakfast', 'watching_tv']
-ACTIVITIES_BY_VISIBILITY2 = ['Unknown', 'reading', 'watching_tv', 'cleaning', 'showering', 'computer_work', 'Idle', 'breakfast', 'leave_home', 'dinner', 'wash_dishes_lunch', 'wash_dishes_dinner', 'lunch', 'playing_music', 'listening_to_music', 'going_to_the_bathroom', 'brushing_teeth', 'come_home', 'taking_medication', 'sleep', 'wake_up', 'getting_dressed', 'take_out_trash', 'socializing', 'nap', 'wash_dishes_breakfast']
-ACTIVITIES_BY_VISIBILITY3 = ['Unknown', 'brushing_teeth', 'listening_to_music', 'nap', 'socializing', 'come_home', 'computer_work', 'getting_dressed', 'wash_dishes_dinner', 'watching_tv', 'dinner', 'sleep', 'take_out_trash', 'breakfast', 'leave_home', 'cleaning', 'Idle', 'taking_medication', 'playing_music', 'reading', 'lunch', 'wake_up', 'going_to_the_bathroom', 'showering', 'wash_dishes_lunch', 'wash_dishes_breakfast']
-ACTIVITIES_BY_VISIBILITY4 = ['Unknown', 'lunch', 'dinner', 'cleaning', 'reading', 'wash_dishes_dinner', 'socializing', 'leave_home', 'computer_work', 'wash_dishes_breakfast', 'take_out_trash', 'wash_dishes_lunch', 'breakfast', 'getting_dressed', 'listening_to_music', 'playing_music', 'taking_medication', 'sleep', 'Idle', 'watching_tv', 'nap', 'brushing_teeth', 'going_to_the_bathroom', 'come_home', 'showering', 'wake_up']
-ACTIVITIES_BY_VISIBILITY5 = ['Unknown', 'wash_dishes_lunch', 'watching_tv', 'wake_up', 'leave_home', 'getting_dressed', 'cleaning', 'wash_dishes_dinner', 'showering', 'dinner', 'socializing', 'brushing_teeth', 'sleep', 'computer_work', 'going_to_the_bathroom', 'playing_music', 'listening_to_music', 'wash_dishes_breakfast', 'taking_medication', 'reading', 'nap', 'lunch', 'Idle', 'take_out_trash', 'breakfast', 'come_home']
-
-ACTIVITIES_BY_VISIBILITY = ACTIVITIES_BY_VISIBILITY2
+from sentence_transformers import SentenceTransformer
+sentence_transformer = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 def not_a_tree(original_edges, sparse_edges, nodes):
     num_parents = sparse_edges.sum(axis=-1)
@@ -67,8 +32,20 @@ def _sparsify(edges):
     sparse_edges = dense_edges * (remove==0).astype(int)
     return sparse_edges
 
+class CustomObjectEmbedder():
+    def __init__(self, object_list):
+        object_desc = json.load(open("object_desc.json"))
+        assert set(object_list) == set(object_desc.keys()), f"Object list does not match object description. {set(object_list) - set(object_desc.keys())} and {set(object_desc.keys()) - set(object_list)}"
+        for object_name in object_desc:
+            object_desc[object_name]['embedding_description'] = sentence_transformer.encode(object_desc[object_name]['description'])
+            object_desc[object_name]['embedding_action'] = sum([sentence_transformer.encode(a) for a in object_desc[object_name]['action_list']])/len(object_desc[object_name]['action_list'])
+            object_desc[object_name]['embedding_combined'] = object_desc[object_name]['embedding_description'] + object_desc[object_name]['embedding_action']
+        self.embeddings = {object_list.index(object_name):object_desc[object_name]['embedding_combined'] for object_name in object_desc}
 
-class OneHotEmbedder():
+    def __call__(self, object_name):
+        return torch.stack([self.embeddings[int(o.item())] for o in object_name])
+
+class OneHotEmbedder(): 
     def __init__(self, class_list):
         self.class_list = class_list
 
@@ -194,10 +171,7 @@ class DataSplit():
         activity_id = data['activity']
         time_feature = self.time_encoder(data['times'])
         time = data['times']
-        dynamic_edges_mask = data['active_edges'].unsqueeze(0).repeat(data['times'].size()[0],1,1)
-        # if self.activity_masks[idx] is None:
-        #     self.activity_masks[idx] = (torch.rand_like(activity_id.float()) < self.activity_dropout).to(bool)
-        # activity_mask_datapoint = self.activity_masks[idx]
+        dynamic_edges_mask = data['active_edges'].unsqueeze(0).repeat(data['times'].size()[0],1,1).to(int)
 
         datapoint = {
             'edges': edges, 
@@ -237,7 +211,7 @@ class RoutinesDataset():
         self.edge_keys = self.common_data['edge_keys']
         self.static_nodes = self.common_data.get('static_nodes', [None]*len(self.common_data['node_classes']))
 
-        node_embedder = OneHotEmbedder(self.node_classes)
+        node_embedder = CustomObjectEmbedder(self.node_classes)
         activity_embedder = IdentityEmbedder()
         
         # Generate train and test loaders
@@ -254,6 +228,10 @@ class RoutinesDataset():
         self.params['n_len'] = model_data['node_features'].size()[-1]
         self.params['act_len'] = model_data['activity_features'].size()[-1]
         self.params['n_stations'] = 5
+        print("Inferred model parameters:\n")
+        print(f"Number of nodes: {self.params['n_nodes']}")
+        print(f"Number of activities: {self.params['act_len']}")
+        print(f"Size of node embeddings: {self.params['n_len']}")
 
     def get_train_loader(self):
         return DataLoader(self.train, num_workers=os.cpu_count(), batch_size=self.params['batch_size'], collate_fn=self.train.collate_fn)

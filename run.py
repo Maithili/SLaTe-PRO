@@ -145,7 +145,7 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
         eval_dir = os.path.join(output_dir,'test_evals_'+timestr)
         model.test_forward = False
         model.cfg.query_types = cfg['query_types']
-        for query_usefulness_metric in ['information_gain']: #, 'expected_changes']:
+        for query_usefulness_metric in ['information_gain']:
             print(f"Starting evaluation for with {query_usefulness_metric} metric")
             model.cfg.query_usefulness_metric = query_usefulness_metric
 

@@ -1,0 +1,163 @@
+{
+    "coasters": {
+        "description": "coaster",
+        "action_list": [
+            "attach",
+            "etch",
+            "paint"
+        ]
+    },
+    "cup": {
+        "description": "cup",
+        "action_list": [
+            "paint",
+            "clean"
+        ]
+    },
+    "etchpen": {
+        "description": "etching pen",
+        "action_list": [
+            "etch"
+        ]
+    },
+    "flower": {
+        "description": "leaves and flowers",
+        "action_list": [
+            "attach"
+        ]
+    },
+    "foamball": {
+        "description": "packing foam",
+        "action_list": [
+            "attach"
+        ]
+    },
+    "gemset": {
+        "description": "craft gems",
+        "action_list": [
+            "attach"
+        ]
+    },
+    "googlyeyes": {
+        "description": "googly eyes",
+        "action_list": [
+            "attach"
+        ]
+    },
+    "keychain": {
+        "description": "keychain",
+        "action_list": [
+            "attach",
+            "etch",
+            "apply"
+        ]
+    },
+    "moss": {
+        "description": "moss",
+        "action_list": [
+            "attach"
+        ]
+    },
+    "mossframe": {
+        "description": "art frame",
+        "action_list": [
+            "attach",
+            "etch",
+            "apply"
+        ]
+    },
+    "paint": {
+        "description": "paintset",
+        "action_list": [
+            "apply"
+        ]
+    },
+    "paintbrush": {
+        "description": "paint brushes and pencils",
+        "action_list": [
+            "apply"
+        ]
+    },
+    "palette": {
+        "description": "paint palette",
+        "action_list": [
+            "apply"
+        ]
+    },
+    "photoframe": {
+        "description": "photo frame",
+        "action_list": [
+            "attach",
+            "etch",
+            "apply"
+        ]
+    },
+    "plantpot": {
+        "description": "plant pot",
+        "action_list": [
+            "attach",
+            "apply"
+        ]
+    },
+    "stones": {
+        "description": "stones",
+        "action_list": [
+            "attach"
+        ]
+    },
+    "suncatcher": {
+        "description": "ornament",
+        "action_list": [
+            "attach",
+            "apply"
+        ]
+    },
+    "tissuebox": {
+        "description": "tissue paper",
+        "action_list": [
+            "clean"
+        ]
+    },
+    "varnish": {
+        "description": "wood varnish",
+        "action_list": [
+            "apply"
+        ]
+    },
+    "tableA": {
+        "description": "table",
+        "action_list": [
+            "workbench"
+        ]
+    },
+    "tableB": {
+        "description": "table",
+        "action_list": [
+            "workbench"
+        ]
+    },
+    "tableC": {
+        "description": "table",
+        "action_list": [
+            "workbench"
+        ]
+    },
+    "tableD": {
+        "description": "table",
+        "action_list": [
+            "workbench"
+        ]
+    },
+    "tableE": {
+        "description": "table",
+        "action_list": [
+            "workbench"
+        ]
+    },
+    "room": {
+        "description": "room",
+        "action_list": [
+            "room"
+        ]
+    }
+}

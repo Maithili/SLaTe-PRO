@@ -26,6 +26,13 @@ To train a model
 >`python ./run.py --coarse --activity_availability=100 --path=data/HouseholdVariations/householdA --logs_dir=./logs`
 
 
+## ToDos
+
+- Embeddings for objects
+- Split results by objects added/removed from table
+- Figure out layer and embedding sizes
+- Apply query mask for future predictions. Use Case: When someone refuses an object, the robot should use that for the next prediction
+- Compare Overhead v.s. Overhead@RobotTimestamps
 
 
 
