@@ -4,7 +4,6 @@
     "end_time": 180,
     "node_classes": [
         "room",
-        "supplyshelf",
         "tableA",
         "tableB",
         "tableC",
@@ -16,7 +15,6 @@
         "flower",
         "foamball",
         "gemset",
-        "glue",
         "googlyeyes",
         "keychain",
         "moss",
@@ -38,8 +36,6 @@
         "Furniture",
         "Furniture",
         "Furniture",
-        "Furniture",
-        "placable_objects",
         "placable_objects",
         "placable_objects",
         "placable_objects",
@@ -65,7 +61,6 @@
     ],
     "static_nodes": [
         "room",
-        "supplyshelf",
         "tableA",
         "tableB",
         "tableC",
@@ -86,12 +81,12 @@
         "tableE"
     ],
     "dates": [
-        "2025-07-17",
-        "2025-07-23",
-        "2025-07-16",
         "2025-07-08",
-        "2025-07-18",
         "2025-07-09",
-        "2025-07-15"
+        "2025-07-15",
+        "2025-07-16",
+        "2025-07-17",
+        "2025-07-18",
+        "2025-07-23"
     ]
 }

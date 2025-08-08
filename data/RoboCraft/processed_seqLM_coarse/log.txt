@@ -1,7 +1,1 @@
-Number of movements recorded for 2025-07-17: 53.0
-Number of movements recorded for 2025-07-23: 60.0
-Number of movements recorded for 2025-07-16: 14.0
-Number of movements recorded for 2025-07-08: 0.0
-Number of movements recorded for 2025-07-18: 47.0
-Number of movements recorded for 2025-07-09: 25.0
-Number of movements recorded for 2025-07-15: 18.0
+Number of movements recorded for 2025-07-08: 11.0
