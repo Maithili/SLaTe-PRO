@@ -11,6 +11,7 @@ etchpen
 flower
 foamball
 gemset
+glue
 googlyeyes
 keychain
 moss

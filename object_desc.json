@@ -38,6 +38,12 @@
             "attach"
         ]
     },
+    "glue": {
+        "description": "glue",
+        "action_list": [
+            "attach"
+        ]
+    },
     "googlyeyes": {
         "description": "googly eyes",
         "action_list": [
