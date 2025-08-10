@@ -29,6 +29,9 @@ random.seed(23435)
 nrandom.seed(23435)
 wandb.init(project="RoboCraft")
 
+os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+os.environ['TORCH_USE_CUDA_DSA'] = '1'
+
 def compare_models(model_1, model_2, num_params_expected=None):
     models_differ = 0
     num_params = 0
@@ -54,6 +57,8 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
     cfg.update(data.params)
     model_configs = adict(cfg)
     output_dir = logs_dir
+    os.makedirs(output_dir, exist_ok=True)
+    json.dump(cfg, open(os.path.join(output_dir, f'config.json'), 'w'), indent=4)
 
     # wandb_logger = WandbLogger(name=cfg['NAME'], log_model=True, group = group, tags = tags)
     wandb_logger = WandbLogger(name=cfg['NAME'], group = group, tags = tags, settings=wandb.Settings(start_method="fork"))  #, mode='disabled')
@@ -80,8 +85,9 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
         while tries_remaining > 0:
             try:
                 trainer.test(model, test_loader)
+                print("Testing successful!!!!!!!!!!!!!!!!!!")
                 break
-            except AttributeError:
+            except AttributeError as e:
                 print(traceback.format_exc())
                 torch.cuda.empty_cache()
                 tries_remaining -= 1
@@ -90,43 +96,33 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
     if checkpoint_dir is None:
     
         os.makedirs(output_dir, exist_ok=True)
-        epochs = cfg['epochs']
-
         ckpt_callback = ModelCheckpoint(dirpath=output_dir)
 
-        train_loader = data.get_train_loader()
-        val_loader = data.get_val_loader()        
-
-        if model_configs.phased_training:
-            ckpt_callback = ModelCheckpoint(dirpath=output_dir+'_pretr')
-            model_configs.loss_latent_pred = False
-            model_configs.loss_object_pred = False
-            model_configs.loss_activity_pred = False
-
-        early_stop_callback = EarlyStopping(monitor="Val_ES_accuracy", patience=40, verbose=False, mode="max")
-        trainer = Trainer(accelerator='gpu', devices = torch.cuda.device_count(), logger=wandb_logger, max_epochs=epochs, log_every_n_steps=1, callbacks=[ckpt_callback, early_stop_callback], check_val_every_n_epoch=5)
+        prev_epochs = 0
         model = model_generator(model_configs = model_configs, original_model = original_model)
-        model.set_object_consistency(data.get_object_consistency())
-        model.cfg.query_types = []
-        train_n_tries(trainer, model, train_loader, val_loader, n=15)
+        for epochs in cfg['epochs']:
+            model_configs.epochs = epochs - prev_epochs
+            prev_epochs = epochs
+            train_loader = data.get_train_loader()
+            val_loader = data.get_val_loader()        
 
-        if model_configs.phased_training:
-            model_configs.loss_latent_pred = True
-            model_configs.loss_object_pred = True
-            model_configs.loss_activity_pred = True
-
-            ckpt_callback = ModelCheckpoint(dirpath=output_dir)
             early_stop_callback = EarlyStopping(monitor="Val_ES_accuracy", patience=40, verbose=False, mode="max")
             trainer = Trainer(accelerator='gpu', devices = torch.cuda.device_count(), logger=wandb_logger, max_epochs=epochs, log_every_n_steps=1, callbacks=[ckpt_callback, early_stop_callback], check_val_every_n_epoch=5)
-            model = model_generator(model_configs = model_configs, original_model = original_model)
-            model.set_object_consistency(data.get_object_consistency())
             train_n_tries(trainer, model, train_loader, val_loader, n=15)
 
-        torch.save(model.state_dict(), os.path.join(output_dir,'weights.pt'))
-        model_check = model_generator(model_configs = model_configs, original_model = original_model)
-        model_check.load_state_dict(torch.load(os.path.join(output_dir,'weights.pt')))
-        compare_models(model, model_check, num_params_expected=sum(param.numel() for param in model.parameters()))
-        print('Outputs saved at ',output_dir)
+            torch.save(model.state_dict(), os.path.join(output_dir,'weights.pt'))
+            model_check = model_generator(model_configs = model_configs, original_model = original_model)
+            model_check.load_state_dict(torch.load(os.path.join(output_dir,'weights.pt')))
+            compare_models(model, model_check, num_params_expected=sum(param.numel() for param in model.parameters()))
+            print('Outputs saved at ',output_dir)
+            eval_dir = output_dir
+            model.test_forward = False
+            os.makedirs(eval_dir, exist_ok=True)
+            test_n_tries(trainer, model, data.get_test_loader())
+            model.write_results(eval_dir,
+                                common_data = data.common_data,
+                                prefix=f'Epoch{epochs}_',
+                                )
 
     else:
         assert not train_only, "Cannot train only with --read_ckpt"
@@ -141,21 +137,15 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
         json.dump(model_configs, open(os.path.join(output_dir, f'config_{timestr}.json'), 'w'), indent=4)
 
     if not train_only:
-        model.set_object_consistency(data.get_object_consistency())
-        eval_dir = os.path.join(output_dir,'test_evals_'+timestr)
+        # eval_dir = os.path.join(output_dir,'test_evals_'+timestr)
+        eval_dir = output_dir
         model.test_forward = False
-        model.cfg.query_types = cfg['query_types']
-        for query_usefulness_metric in ['information_gain']:
-            print(f"Starting evaluation for with {query_usefulness_metric} metric")
-            model.cfg.query_usefulness_metric = query_usefulness_metric
-
-            os.makedirs(eval_dir, exist_ok=True)
-            model.cfg.query_usefullness_thresh = cfg['query_usefullness_thresh'][query_usefulness_metric]
-            test_n_tries(trainer, model, data.get_test_loader())
-            model.write_results(eval_dir,
-                                common_data = data.common_data,
-                                suffix=query_usefulness_metric,
-                                )
+        os.makedirs(eval_dir, exist_ok=True)
+        test_n_tries(trainer, model, data.get_test_loader())
+        model.write_results(eval_dir,
+                            common_data = data.common_data,
+                            prefix=f'Final_',
+                            )
           
 
 
@@ -173,7 +163,6 @@ if __name__ == '__main__':
     parser.add_argument('--read_ckpt', action='store_true')
     parser.add_argument('--coarse', action='store_true')
     parser.add_argument('--original_model', action='store_true')
-    parser.add_argument('--phased_training', action='store_true')
     parser.add_argument('--train_only', action='store_true')
     parser.add_argument('--logs_dir', type=str, default='logs/0424_variations_coarse_default_debug', help='Path to store putputs.')
     parser.add_argument('--dt', type=int)

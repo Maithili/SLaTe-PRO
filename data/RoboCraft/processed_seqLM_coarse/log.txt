@@ -1,7 +1,22 @@
 Number of movements recorded for 2025-07-08: 11.0
+Probability of object movement: 0.0061111110262572765 (11.0/1800)
 Number of movements recorded for 2025-07-09: 25.0
+Probability of object movement: 0.013888888992369175 (25.0/1800)
 Number of movements recorded for 2025-07-15: 18.0
+Probability of object movement: 0.009999999776482582 (18.0/1800)
 Number of movements recorded for 2025-07-16: 14.0
+Probability of object movement: 0.007777777966111898 (14.0/1800)
 Number of movements recorded for 2025-07-17: 45.0
+Probability of object movement: 0.02500000037252903 (45.0/1800)
 Number of movements recorded for 2025-07-18: 38.0
-Number of movements recorded for 2025-07-23: 60.0
+Probability of object movement: 0.021111110225319862 (38.0/1800)
+Number of movements recorded for 2025-07-23: 63.0
+Probability of object movement: 0.03500000014901161 (63.0/1800)
+Average number of movements: 30.571428298950195
+Average probability of object movement: 0.0169841255992651
+Random model performance: 
+	TP=0.0002884605200961232, 
+	FP/TN=0.016695665195584297, 
+	FN=0.966320276260376, 
+	Precision=0.0169841255992651, 
+	Recall=0.0169841255992651

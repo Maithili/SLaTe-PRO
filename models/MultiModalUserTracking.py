@@ -80,13 +80,9 @@ class MultiModalUserTrackingModule(LightningModule):
                 },
         }
 
-        self.snapshots = []
-        self.snapshots_queries = {}
-        self.snapshots_data = []
+        self.snapshots_pred = []
+        self.snapshots_gt = []
 
-    def set_object_consistency(self, consistency):
-        self.object_usage_frequency = consistency
-        self.object_usage_frequency = self.object_usage_frequency.to('cuda')
 
     def combine_latents(self, pred=None, enc_graph=None, enc_activity=None, time_context=None):
         if pred is not None:
@@ -179,7 +175,7 @@ class MultiModalUserTrackingModule(LightningModule):
         latent_mask = batch['activity_mask_drop'][:,:-1]
         
         time_context = batch.get('time_features', torch.zeros((batch['edges'].size()[0],batch['edges'].size()[1], batch['edges'].size()[2], self.cfg.c_len)))
-        time_context = time_context[:,1:,:]
+        # time_context = time_context[:,1:,:]
         assert time_context.size()[2] <= self.cfg.c_len, f"Config of size {self.cfg.c_len} does not fit time context of size {time_context.size()[2]}"
         if time_context.size()[-1] > self.cfg.c_len:
             time_context = time_context[:,:,:self.cfg.c_len]
@@ -213,12 +209,9 @@ class MultiModalUserTrackingModule(LightningModule):
         cross_graph_pred_loss = torch.Tensor([0.]).to('cuda')
         graph_pred_loss_overshoot = torch.Tensor([0.]).to('cuda')
         activity_pred_loss_overshoot = torch.Tensor([0.]).to('cuda')
-        cross_accuracy_object = {'used':0, 'unused':0}
         cross_activity_pred_loss = torch.Tensor([0.]).to('cuda')
-        cross_accuracy_activity = torch.Tensor([0.]).to('cuda')
         combined_graph_pred_loss = torch.Tensor([0.]).to('cuda')
         combined_activity_pred_loss = torch.Tensor([0.]).to('cuda')
-        combined_accuracy_activity = torch.Tensor([0.]).to('cuda')
         graph_pred_loss = torch.Tensor([0.]).to('cuda')
         activity_pred_loss = torch.Tensor([0.]).to('cuda')
         accuracy_object = {'used':0, 'unused':0}
@@ -383,7 +376,6 @@ class MultiModalUserTrackingModule(LightningModule):
 
         graph_seq_nodes = batch.get('node_features').float()
         graph_seq_edges = batch.get('edges')
-        assert not EXTRACAREFUL or torch.allclose(graph_seq_edges.sum(-1), torch.ones_like(graph_seq_edges.sum(-1)), atol=0.1), "Edges are not normalized!"
         graph_dyn_edges = batch.get('dynamic_edges_mask')
         activity_seq = batch.get('activity_features')[:,:-1,:]
         activity_id_seq = batch['activity_ids'][:,:-1]
@@ -442,6 +434,8 @@ class MultiModalUserTrackingModule(LightningModule):
             pred_edges_thresh = pred_edges_original > 0.5
             pred_movements = pred_edges_thresh != reference_edges
             gt_movements = expected_edges != reference_edges
+            self.snapshots_pred.append(pred_edges_thresh.to(int) - reference_edges)
+            self.snapshots_gt.append(expected_edges - reference_edges)
             
             self.results['confusion_matrix']['tp'][step] += int((torch.bitwise_and(pred_movements, gt_movements)).sum())
             self.results['confusion_matrix']['fp'][step] += int((torch.bitwise_and(pred_movements, torch.bitwise_not(gt_movements))).sum())
@@ -512,6 +506,7 @@ class MultiModalUserTrackingModule(LightningModule):
         return 
 
     def test_step(self, batch, batch_idx):
+        print(f"Testing step {batch_idx}.........")
         batch['activity_features'].masked_fill_(batch['activity_mask_drop'], 0)
         if self.test_forward:
             results = self(batch)
@@ -521,7 +516,7 @@ class MultiModalUserTrackingModule(LightningModule):
         self.evaluate_prediction(batch, num_steps=self.cfg.lookahead_steps)
         return 
 
-    def write_results(self, output_dir, common_data, suffix=''):
+    def write_results(self, output_dir, common_data, prefix=''):
         
         node_classes=common_data['node_classes']
 
@@ -531,8 +526,30 @@ class MultiModalUserTrackingModule(LightningModule):
         self.results = get_metrics(self.results)
         results_torch = {k:v for k,v in self.results.items() if k in ['reference_locations', 'activity']}
         results_json = {k:v for k,v in self.results.items() if k not in results_torch}
-        torch.save(results_torch, os.path.join(output_dir,f'test_evaluation_splits.pt'))
-        json.dump(results_json, open(os.path.join(output_dir,f'test_evaluation_splits.json'),'w'), indent=4)
+        torch.save(results_torch, os.path.join(output_dir,f'{prefix}test_evaluation_splits.pt'))
+        json.dump(results_json, open(os.path.join(output_dir,f'{prefix}test_evaluation_splits.json'),'w'), indent=4)
+
+        for batchidx, (pred, gt) in enumerate(zip(self.snapshots_pred, self.snapshots_gt)):
+            pred = pred.squeeze(0)
+            gt = gt.squeeze(0)
+            fig, ax = plt.subplots(2,len(pred),figsize=(1.5*len(pred),10))
+            ax[0,0].set_yticks(np.arange(0, len(node_classes)), labels=node_classes, fontsize=10)
+            ax[1,0].set_yticks(np.arange(0, len(node_classes)), labels=node_classes, fontsize=10)
+            ax[1,0].set_xticks(np.arange(0, len(node_classes)), labels=node_classes, fontsize=10, rotation=90)
+            ax[0,0].set_ylabel('Predicted')
+            ax[1,0].set_ylabel('Ground Truth')
+            for i in range(len(pred)):
+                ax[0,i].imshow(pred[i].cpu().numpy(), cmap='viridis', vmin=-1, vmax=1)
+                ax[1,i].imshow(gt[i].cpu().numpy(), cmap='viridis', vmin=-1, vmax=1)
+                ax[0,i].set_xlim(common_data['active_edge_ranges'][0][0], common_data['active_edge_ranges'][0][1])
+                ax[0,i].set_ylim(common_data['active_edge_ranges'][1][0], common_data['active_edge_ranges'][1][1])
+                ax[1,i].set_xlim(common_data['active_edge_ranges'][0][0], common_data['active_edge_ranges'][0][1])
+                ax[1,i].set_ylim(common_data['active_edge_ranges'][1][0], common_data['active_edge_ranges'][1][1])
+            fig.set_tight_layout(True)
+            fig.set_dpi(300)
+            
+            plt.savefig(os.path.join(output_dir,f'{prefix}test_evaluation_splits_{batchidx}.png'))
+            plt.close()
         self.reset_validation()
 
     def configure_optimizers(self):

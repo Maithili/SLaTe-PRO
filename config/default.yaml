@@ -1,6 +1,6 @@
 name: null
 original_model: False
-epochs: 1
+epochs: [5,10,20,50,100,120]
 batch_size: 1
 activity_dropout_prob: 0.0
 activity_dropout_train: 0.2
@@ -12,8 +12,8 @@ learn_latent_magnitude: False
 movement_inertia: 0.0
 latent_evidence_weight: 1.0
 leniency: 0
-lookahead_steps: 3
-query_step: 3
+lookahead_steps: 1
+query_step: 1
 # query_types: ['object','activity','both']
 query_types: []
 query_thresh: 0.5

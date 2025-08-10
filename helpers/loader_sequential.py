@@ -37,8 +37,8 @@ class CustomObjectEmbedder():
         object_desc = json.load(open("object_desc.json"))
         assert set(object_list) == set(object_desc.keys()), f"Object list does not match object description. {set(object_list) - set(object_desc.keys())} and {set(object_desc.keys()) - set(object_list)}"
         for object_name in object_desc:
-            object_desc[object_name]['embedding_description'] = sentence_transformer.encode(object_desc[object_name]['description'])
-            object_desc[object_name]['embedding_action'] = sum([sentence_transformer.encode(a) for a in object_desc[object_name]['action_list']])/len(object_desc[object_name]['action_list'])
+            object_desc[object_name]['embedding_description'] = torch.tensor(sentence_transformer.encode(object_desc[object_name]['description']))
+            object_desc[object_name]['embedding_action'] = torch.tensor(sum([sentence_transformer.encode(a) for a in object_desc[object_name]['action_list']]))/len(object_desc[object_name]['action_list'])
             object_desc[object_name]['embedding_combined'] = object_desc[object_name]['embedding_description'] + object_desc[object_name]['embedding_action']
         self.embeddings = {object_list.index(object_name):object_desc[object_name]['embedding_combined'] for object_name in object_desc}
 
@@ -159,11 +159,6 @@ class DataSplit():
 
     def __getitem__(self, idx: int):
         data = torch.load(os.path.join(self.routines_dir, self.files[idx]))
-        if data['times'] is None:
-            data['times'] = torch.zeros((data['edges'].size()[0]-1, 1))
-        movements = (data['edges'][1:,:,:]-data['edges'][:-1,:,:]).max(-1).values
-        movements = movements.view(data['edges'].size()[0]-1, data['edges'].size()[1], 1)
-
         edges = data['edges']
         node_features = self.node_embedder(data['nodes']).unsqueeze(0).repeat(data['edges'].size()[0],1,1)
         node_ids = data['nodes'].unsqueeze(0).repeat(data['edges'].size()[0],1,1)
@@ -171,7 +166,7 @@ class DataSplit():
         activity_id = data['activity']
         time_feature = self.time_encoder(data['times'])
         time = data['times']
-        dynamic_edges_mask = data['active_edges'].unsqueeze(0).repeat(data['times'].size()[0],1,1).to(int)
+        dynamic_edges_mask = data['active_edges'].unsqueeze(0).repeat(data['edges'].size()[0],1,1).to(int)
 
         datapoint = {
             'edges': edges, 
