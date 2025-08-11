@@ -13,8 +13,9 @@ To train a model
 
 ## ToDos
 
-- Visualize each day's predictions and GT
-- Embeddings for objects
+- ~Visualize each day's predictions and GT~
+- ~Embeddings for objects~
+- Try pretraining on LLM-generated data
 - Split results by objects added/removed from table
 - Figure out layer and embedding sizes
 - Apply query mask for future predictions. Use Case: When someone refuses an object, the robot should use that for the next prediction

@@ -17,9 +17,12 @@ colors_table = {
 def time_hhmmss_to_seconds(time_hhmmss):
     return int(time_hhmmss[:2]) * 3600 + int(time_hhmmss[2:4]) * 60 + int(time_hhmmss[4:6])
 
-def time_seconds_to_hhmmss(time_seconds):
-    return f"{time_seconds//3600:02d}:{(time_seconds%3600)//60:02d}:{(time_seconds%3600)%60:02d}"
-
+def time_seconds_to_hhmmss(time_seconds, return_human_readable=False):
+    time_seconds = int(time_seconds)
+    if return_human_readable:
+        return f"{time_seconds//3600:02d}:{(time_seconds%3600)//60:02d}:{int((time_seconds%3600)%60):02d}"
+    else:
+        return f"{time_seconds//3600:02d}{(time_seconds%3600)//60:02d}{int((time_seconds%3600)%60):02d}"
 
 TIME_START_HHMMSS = "150000"
 TIME_END_HHMMSS = "180000"
