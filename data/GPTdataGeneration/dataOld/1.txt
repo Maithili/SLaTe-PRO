@@ -1,0 +1,22 @@
+Thought: Mia on tableA chooses a plantpot as the base object to paint.
+[00:10] tableA: Fetch plantpot
+Thought: Mia on tableA chooses Painting as the core crafting activity and will fetch paint and a paintbrush together (along with a palette and cup) to start painting the plantpot.
+[00:10] tableA: Fetch paint
+Thought: Mia needs a paintbrush to start painting and will also grab the palette and cup now at the same timestamp.
+[00:10] tableA: Fetch paintbrush
+Thought: Mia also needs a palette for mixing and a cup for rinsing; she’ll fetch both now at 00:10 as well.
+[00:10] tableA: Fetch palette
+Thought: Mia still needs the cup for rinsing while painting; she’ll fetch the cup now at 00:10.
+[00:10] tableA: Fetch cup
+Thought: Raj on tableD chooses a photoframe as the base object to etch and will fetch the photoframe and the etchpen together at 00:20.
+[00:20] tableD: Fetch photoframe
+Thought: Raj also needs the etchpen to start etching; he'll fetch it now at 00:20.
+[00:20] tableD: Fetch etchpen
+Thought: Nora on tableC chooses a suncatcher as the base object to paint and will fetch the suncatcher along with paint, paintbrush, palette, and cup together at 00:30.
+[00:30] tableC: Fetch suncatcher
+Thought: Nora also needs paint to start on the suncatcher and will fetch the paint now at 00:30, along with the paintbrush, palette, and cup.
+[00:30] tableC: Fetch paint
+Thought: Nora also needs a paintbrush to start painting the suncatcher; she’ll fetch the paintbrush now at 00:30, along with the palette and cup.
+[00:30] tableC: Fetch paintbrush
+Thought: Nora still needs a palette for mixing and a cup for rinsing; she’ll fetch the palette now at 00:30, along with the cup.
+[00:30] tableC: Fetch palette

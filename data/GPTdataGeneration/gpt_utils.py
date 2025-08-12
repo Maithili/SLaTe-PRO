@@ -2,8 +2,11 @@ import json
 import os
 import re
 import random
+from tracemalloc import stop
 from openai import OpenAI
 client = OpenAI()
+
+VERBOSE = True
 
 object_masterlist = [
 "coasters",
@@ -28,38 +31,80 @@ object_masterlist = [
 "varnish"
 ]
 
-def get_gpt_response(prompt, objects_masterlist, table_objects={}, model="gpt-5", grammar=""):
+def _call_gpt(prompt, model="gpt-5", grammar=None, stops=['\n']):
+    try:
+        if grammar is not None:
+            VERBOSE and print(f"Calling GPT with grammar with prompt: \n{prompt}\n"+"-----"*10)
+            response_mssql_thought = client.responses.create(
+                input=prompt,
+                model=model,
+                text={"format": {"type": "text"}},
+                tools=[
+                    {
+                        "type": "custom",
+                        "name": "movement_grammar",
+                        "description": "Saves a movement in the format [HH:MM] tableX: Action object_name",
+                        "format": {
+                            "type": "grammar",
+                            "syntax": "regex",
+                            "definition": grammar
+                        }
+                    },
+                ],
+                parallel_tool_calls=False,
+            )
+        else:
+            VERBOSE and print(f"Calling GPT withOUT grammar with prompt: \n{prompt}\n"+"-----"*10)
+            response_mssql_thought = client.responses.create(
+                input=prompt,
+                model=model,
+                text={"format": {"type": "text"}},
+                parallel_tool_calls=False,
+            )
+        try:
+            result = response_mssql_thought.output[1].content[0].text
+        except AttributeError as e:
+            result = response_mssql_thought.output[1].input
+        for stop in stops:
+            result = result.split(stop)[0]
+        return result
+    except Exception as e:
+        print(f"Error getting GPT response: {e}")
+        return None
+    
+
+def get_gpt_response(prompt, objects_masterlist, table_objects={}, model="gpt-5"):
     try:
         grammar = get_grammar_for_constraint(objects_masterlist, table_objects)
-        response_mssql = client.responses.create(
-            input=prompt,
-            model=model,
-            text={"format": {"type": "text"}},
-            tools=[
-                {
-                    "type": "custom",
-                    "name": "movement_grammar",
-                    "description": "Saves a movement in the format [HH:MM] tableX: Action object_name",
-                    "format": {
-                        "type": "grammar",
-                        "syntax": "regex",
-                        "definition": grammar
-                    }
-                },
-            ],
-            parallel_tool_calls=False   
-        )
-        try:
-            result = response_mssql.output[1].content[0].text
-        except AttributeError as e:
-            result = response_mssql.output[1].input
+        result_thought = _call_gpt(prompt + '\n\nGiven the above action history, predict the next thought. Start with "Thought:"\n', model)
+        VERBOSE and print(f"Thought prediction: {result_thought}")
+        
+        if 'DONE' in result_thought:
+            return {
+                'prompt_thought':prompt,
+                'prompt_action':None,
+                'thought':result_thought,
+                'action':'DONE'
+            }
+        
+        prompt_action = prompt + result_thought + '\n'
+        
+        result_action = _call_gpt(prompt_action + '\n\nGiven the above action history and thought, predict the next movement in the format [HH:MM] tableX: Action object_name.\n', model, grammar)
+        VERBOSE and print(f"Action prediction: {result_action}")
+            
         pattern = re.compile(grammar)
-        match = pattern.match(result)
+        match = pattern.match(result_action)
         if match:
-            print(f"✓ Valid GPT movement: {result}")
+            VERBOSE and print(f"✓ Valid GPT movement: {result_action}")
         else:
-            print(f"✗ Invalid GPT movement: {result}")
-        return result
+            VERBOSE and print(f"✗ Invalid GPT movement: {result_action}")
+        return {
+            'prompt_thought':prompt,
+            'prompt_action':prompt_action,
+            'thought':result_thought,
+            'action':result_action
+        }
+    
     except Exception as e:
         print(f"Error getting GPT response: {e}")
         return None
@@ -126,8 +171,8 @@ def decode_movement_jugaad(movement):
         table, action_object_name = movement.split(":")
         table = table.strip()
         action_object_name = action_object_name.strip()
-        action = action_object_name.split(" ")[0]
-        object_name = action_object_name.split(" ")[1]
+        action = action_object_name.split(" ")[0].strip()
+        object_name = action_object_name.split(" ")[1].strip()
         return timestamp, table, action, object_name
     except Exception as e:
         print(f"Error decoding movement: {e}")
