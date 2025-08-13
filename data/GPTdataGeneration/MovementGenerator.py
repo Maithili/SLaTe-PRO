@@ -110,17 +110,18 @@ class MovementGenerator:
         self.thought_history = []
         self.prompt = prompt
         
-    def make_prompt(self):
-        return prompt + '\n'.join([f"{thought}\n{movement}" for thought, movement in zip(self.thought_history, self.movement_history)])
-    
     def update_state(self, parsed_movement):
         timestamp, table, action, object_name = parsed_movement
         try:
             assert table in self.table_objects, f"Table {table} not found in table_objects"
             assert object_name in self.objects_masterlist, f"Object {object_name} not found in objects_masterlist"
             if action == "Fetch":
+                if object_name in self.table_objects[table]:
+                    return False
                 self.table_objects[table].add(object_name)
             elif action == "Return":
+                if object_name not in self.table_objects[table]:
+                    return False
                 self.table_objects[table].remove(object_name)
             else:
                 raise ValueError(f"Invalid action: {action}")
@@ -128,6 +129,7 @@ class MovementGenerator:
             print(f"Error updating state: {e}")
             print(f"Table: {table}, Object: {object_name}, Action: {action}")
             import pdb; pdb.set_trace()
+        return True
 
     def sample_movement(self):
         result = get_gpt_response(self.prompt, self.objects_masterlist, self.table_objects)
@@ -143,9 +145,10 @@ class MovementGenerator:
                 return True
             else:
                 assert(f"[{parsed_movement[0]}] {parsed_movement[1]}: {parsed_movement[2]} {parsed_movement[3]}") == movement, f"Movement {movement} not decoded correctly. Got {parsed_movement}."
+            if not self.update_state(parsed_movement):
+                return True
             self.movement_history.append(movement)
             self.thought_history.append(thought)
-            self.update_state(parsed_movement)
             self.prompt += f"{thought}\n{movement}\n"
             if int(parsed_movement[0][:2]) >= 3:
                 return False

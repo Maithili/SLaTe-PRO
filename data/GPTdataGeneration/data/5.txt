@@ -1,0 +1,142 @@
+Storyline:
+- Mia will use tableA from 00:00 to 02:00. She will paint a suncatcher and decorate it with gems.
+- Raj will use tableB from 00:20 to 02:30. He will etch a set of coasters, seal them with varnish, and add a few stones.
+- Lina will use tableC from 00:30 to 02:50. She will etch a mossframe border, then build a moss scene with foamballs, flowers, and stones.
+- Theo will use tableD from 00:40 to 02:40. He will paint a plantpot and add a moss trim.
+- Zoe will use tableE from 00:50 to 03:00. She will paint a photoframe and decorate it with flowers and gems.
+
+
+Thought: Mia on tableA chooses a suncatcher as the base object to decorate.
+[00:00] tableA: Fetch suncatcher
+Thought: Mia on tableA chooses Painting as the core crafting activity.
+[00:00] tableA: Fetch paint
+Thought: Mia needs a paintbrush to paint the suncatcher.
+[00:00] tableA: Fetch paintbrush
+Thought: Mia needs a palette to mix colors for the suncatcher.
+[00:00] tableA: Fetch palette
+Thought: Mia needs a cup to wash the paintbrush in between uses.
+[00:00] tableA: Fetch cup
+Thought: Mia is starting to paint and needs a tissuebox to clean the paintbrush in between.
+[00:00] tableA: Fetch tissuebox
+Thought: Raj on tableB chooses coasters as the base object to decorate.
+[00:20] tableB: Fetch coasters
+Thought: Raj on tableB chooses Etching as the core crafting activity.
+[00:20] tableB: Fetch etchpen
+Thought: Lina on tableC chooses a mossframe as the base object to decorate.
+[00:30] tableC: Fetch mossframe
+Thought: Lina on tableC chooses Etching as the core crafting activity.
+[00:30] tableC: Fetch etchpen
+Thought: Theo on tableD chooses a plantpot as the base object to decorate.
+[00:40] tableD: Fetch plantpot
+Thought: Theo on tableD chooses Painting as the core crafting activity.
+[00:40] tableD: Fetch paint
+Thought: Theo needs a paintbrush to paint the plantpot.
+[00:40] tableD: Fetch paintbrush
+Thought: Theo needs a palette to mix colors for the plantpot.
+[00:40] tableD: Fetch palette
+Thought: Theo needs a cup to wash the paintbrush in between uses.
+[00:40] tableD: Fetch cup
+Thought: Theo is starting to paint and needs a tissuebox to clean the paintbrush in between.
+[00:40] tableD: Fetch tissuebox
+Thought: Zoe on tableE chooses a photoframe as the base object to decorate.
+[00:50] tableE: Fetch photoframe
+Thought: Zoe on tableE chooses Painting as the core crafting activity.
+[00:50] tableE: Fetch paint
+Thought: Zoe needs a paintbrush to paint the photoframe.
+[00:50] tableE: Fetch paintbrush
+Thought: Zoe needs a palette to mix colors for the photoframe.
+[00:50] tableE: Fetch palette
+Thought: Zoe needs a cup to wash the paintbrush in between uses.
+[00:50] tableE: Fetch cup
+Thought: Zoe is starting to paint and needs a tissuebox to clean the paintbrush in between.
+[00:50] tableE: Fetch tissuebox
+Thought: Mia is done painting and wants to decorate the suncatcher with gems, so she will fetch a gemset and glue.
+[01:00] tableA: Fetch gemset
+Thought: Mia also needs glue to attach the gems to the suncatcher.
+[01:00] tableA: Fetch glue
+Thought: Raj is done etching the coasters and will return the etchpen, then fetch varnish to seal them.
+[01:10] tableB: Return etchpen
+Thought: Raj now needs to fetch varnish to seal the etched coasters.
+[01:20] tableB: Fetch varnish
+Thought: Raj also needs a paintbrush to apply the varnish to the coasters.
+[01:20] tableB: Fetch paintbrush
+Thought: Lina is done etching the mossframe border and will return the etchpen before starting the moss scene.
+[01:30] tableC: Return etchpen
+Thought: Lina is ready to start building the moss scene on the mossframe and will fetch moss, foamball, flower, stones, and glue.
+[01:30] tableC: Fetch moss
+Thought: Lina also needs a foamball to add height for the moss scene and will fetch it now.
+[01:30] tableC: Fetch foamball
+Thought: Lina also needs a flower, stones, and glue for the moss scene and will fetch them now.
+[01:30] tableC: Fetch flower
+Thought: Lina also needs stones and glue for the moss scene and will fetch them now.
+[01:30] tableC: Fetch stones
+Thought: Lina also needs glue for the moss scene and will fetch it now.
+[01:30] tableC: Fetch glue
+Thought: Raj is done sealing the coasters and will return the varnish and paintbrush, then fetch stones and glue to add accents.
+[01:40] tableB: Return varnish
+Thought: Raj also needs to return the paintbrush he used for varnish before fetching stones and glue for accents.
+[01:40] tableB: Return paintbrush
+Thought: Raj now wants to add accents to the coasters and will fetch stones and glue together.
+[01:40] tableB: Fetch stones
+Thought: Raj also needs glue to adhere the stones to the coasters and will fetch it now.
+[01:40] tableB: Fetch glue
+Thought: Mia is done attaching gems to the suncatcher and will tidy up by returning the glue and gemset.
+[01:50] tableA: Return glue
+Thought: Mia is done attaching gems to the suncatcher and will return the gemset.
+[01:50] tableA: Return gemset
+Thought: Mia’s session ends at 02:00; she should tidy up and return her painting supplies (paint, paintbrush, palette, cup, tissuebox) and then leave with the suncatcher.
+[02:00] tableA: Return tissuebox
+Thought: Mia continues tidying up her station and will return the palette next.
+[02:00] tableA: Return palette
+Thought: Mia continues tidying up her station and will return the cup next.
+[02:00] tableA: Return cup
+Thought: Mia continues tidying up her station and will return the paintbrush next.
+[02:00] tableA: Return paintbrush
+Thought: Mia continues tidying up her station and will return the paint next.
+[02:00] tableA: Return paint
+Thought: Mia is finished tidying up and will leave with the suncatcher, so she will return the suncatcher now.
+[02:00] tableA: Return suncatcher
+Thought: Theo is done painting the plantpot and wants to add a moss trim, so he will fetch moss and glue.
+[02:10] tableD: Fetch moss
+Thought: Theo also needs glue to attach the moss trim to the plantpot and will fetch it now.
+[02:10] tableD: Fetch glue
+Thought: Zoe is done painting the photoframe and wants to start decorating it, so she will fetch a flower, a gemset, and glue.
+[02:20] tableE: Fetch flower
+Thought: Zoe also needs a gemset and glue to decorate the photoframe and will fetch them now.
+[02:20] tableE: Fetch gemset
+Thought: Zoe also needs glue to decorate the photoframe and will fetch it now.
+[02:20] tableE: Fetch glue
+Thought: Raj is done adding stones to the coasters and, with his session ending at 02:30, will tidy up by returning the glue and stones, then return the coasters.
+[02:30] tableB: Return glue
+Thought: Raj is still tidying up and will return the stones next.
+[02:30] tableB: Return stones
+Thought: Raj is done tidying up and will leave with the coasters, so he will return the coasters now.
+[02:30] tableB: Return coasters
+Thought: Theo’s session ends at 02:40; he will return the glue and moss, then clean up by returning his tissuebox, palette, cup, paintbrush, and paint, and finally leave with the plantpot.
+[02:40] tableD: Return glue
+Thought: Theo continues tidying up his station and will return the moss next.
+[02:40] tableD: Return moss
+Thought: Theo continues tidying up his station and will return the tissuebox next.
+[02:40] tableD: Return tissuebox
+Thought: Theo continues tidying up his station and will return the palette next.
+[02:40] tableD: Return palette
+Thought: Theo continues tidying up his station and will return the cup next.
+[02:40] tableD: Return cup
+Thought: Theo continues tidying up his station and will return the paintbrush next.
+[02:40] tableD: Return paintbrush
+Thought: Theo continues tidying up his station and will return the paint next.
+[02:40] tableD: Return paint
+Thought: Theo is done tidying up and will leave with the plantpot, so he will return the plantpot now.
+[02:40] tableD: Return plantpot
+Thought: Lina’s session ends at 02:50; she will tidy up by returning the glue, stones, flower, foamball, and moss, then return the mossframe.
+[02:50] tableC: Return glue
+Thought: Lina continues tidying up and will return the stones next.
+[02:50] tableC: Return stones
+Thought: Lina continues tidying up and will return the flower next.
+[02:50] tableC: Return flower
+Thought: Lina continues tidying up and will return the foamball next.
+[02:50] tableC: Return foamball
+Thought: Lina continues tidying up and will return the moss next.
+[02:50] tableC: Return moss
+Thought: Lina is done tidying up and will leave with the mossframe, so she will return the mossframe now.
+[02:50] tableC: Return mossframe

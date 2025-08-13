@@ -1,0 +1,148 @@
+Storyline:
+- Maya will use tableA from 00:00 to 02:00. She will paint a suncatcher and decorate it with gems.
+- Leo will use tableB from 00:10 to 01:40. He will etch coasters and then varnish them.
+- Nina will use tableC from 00:20 to 02:20. She will etch a mossframe border, then build a moss and flower arrangement with foamballs and stones.
+- Omar will use tableD from 00:30 to 02:10. He will paint a plantpot and decorate it with moss and stones.
+- Priya will use tableE from 00:40 to 02:50. She will paint and varnish a photoframe, then decorate it with flowers, gems, and googlyeyes.
+
+
+Thought: Maya on tableA chooses a suncatcher as the base object to decorate.
+[00:00] tableA: Fetch suncatcher
+Thought: Maya on tableA chooses Painting as the core crafting activity.
+[00:00] tableA: Fetch paint
+Thought: Maya needs a paintbrush to paint the suncatcher.
+[00:00] tableA: Fetch paintbrush
+Thought: Maya needs a palette to mix colors for painting the suncatcher.
+[00:00] tableA: Fetch palette
+Thought: Maya needs a cup to rinse her paintbrush between colors while painting the suncatcher.
+[00:00] tableA: Fetch cup
+Thought: Maya needs a tissuebox to clean her paintbrush between colors while painting the suncatcher.
+[00:00] tableA: Fetch tissuebox
+Thought: Leo on tableB chooses coasters as the base objects to etch.
+[00:10] tableB: Fetch coasters
+Thought: Leo on tableB chooses Etching as the core crafting activity and needs an etchpen.
+[00:10] tableB: Fetch etchpen
+Thought: Nina on tableC chooses a mossframe as the base object and will start by etching the border.
+[00:20] tableC: Fetch mossframe
+Thought: Nina on tableC chooses Etching as the core crafting activity and needs an etchpen.
+[00:20] tableC: Fetch etchpen
+Thought: Omar on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Omar on tableD chooses Painting as the core crafting activity and needs paint to start on the plantpot.
+[00:30] tableD: Fetch paint
+Thought: Omar needs a paintbrush to paint the plantpot.
+[00:30] tableD: Fetch paintbrush
+Thought: Omar needs a palette to mix colors for painting the plantpot.
+[00:30] tableD: Fetch palette
+Thought: Omar needs a cup to rinse his paintbrush between colors while painting the plantpot.
+[00:30] tableD: Fetch cup
+Thought: Omar needs a tissuebox to clean his paintbrush between colors while painting the plantpot.
+[00:30] tableD: Fetch tissuebox
+Thought: Priya on tableE chooses a photoframe as the base object to decorate.
+[00:40] tableE: Fetch photoframe
+Thought: Priya on tableE chooses Painting as the core crafting activity and needs paint to begin the photoframe.
+[00:40] tableE: Fetch paint
+Thought: Priya needs a paintbrush to paint the photoframe.
+[00:40] tableE: Fetch paintbrush
+Thought: Priya needs a palette to mix colors for painting the photoframe.
+[00:40] tableE: Fetch palette
+Thought: Priya needs a cup to rinse her paintbrush between colors while painting the photoframe.
+[00:40] tableE: Fetch cup
+Thought: Priya needs a tissuebox to clean her paintbrush between colors while painting the photoframe.
+[00:50] tableA: Fetch gemset
+Thought: Maya now wants to decorate the suncatcher with gems and needs glue to attach them.
+[00:50] tableA: Fetch glue
+Thought: Priya on tableE still needs a tissuebox to clean and blot her paintbrush while painting the photoframe.
+[01:00] tableE: Fetch tissuebox
+Thought: Leo is finished etching the coasters and will return the etchpen, then fetch varnish to seal them.
+[01:10] tableB: Return etchpen
+Thought: Leo now needs varnish to seal the coasters and will fetch it.
+[01:10] tableB: Fetch varnish
+Thought: Maya is done painting the suncatcher and will clean and return her painting supplies before using glue to attach the gems.
+[01:20] tableA: Return tissuebox
+Thought: Maya is done painting and needs to clean and return the palette.
+[01:20] tableA: Return palette
+Thought: Maya is done painting and needs to clean and return the cup.
+[01:20] tableA: Return cup
+Thought: Leo is done varnishing the coasters and needs to return the varnish.
+[01:30] tableB: Return varnish
+Thought: Leo is wrapping up his session at tableB and will leave with the coasters.
+[01:40] tableB: Return coasters
+Thought: Nina is finished etching the mossframe border at tableC and will return the etchpen, then fetch moss, foamball, flower, stones, and glue to start building the arrangement.
+[01:50] tableC: Return etchpen
+Thought: Nina now needs materials to build the mossframe arrangement and will fetch moss, foamball, flower, stones, and glue to tableC.
+[01:50] tableC: Fetch moss
+Thought: Nina also needs a foamball to add height for the moss and flowers in the frame and will fetch it next.
+[01:50] tableC: Fetch foamball
+Thought: Nina also needs a flower for the mossframe arrangement and will fetch it next.
+[01:50] tableC: Fetch flower
+Thought: Nina also needs stones for the mossframe arrangement and will fetch them next.
+[01:50] tableC: Fetch stones
+Thought: Nina also needs glue to attach the moss, foamball, flower, and stones into the frame and will fetch it next.
+[01:50] tableC: Fetch glue
+Thought: Maya has finished attaching gems to the suncatcher and, with her session ending at 02:00, will return the glue and gemset, then return the remaining paint and paintbrush, and finally leave with the suncatcher.
+[02:00] tableA: Return glue
+Thought: Maya is done decorating the suncatcher and needs to return the gemset.
+[02:00] tableA: Return gemset
+Thought: Maya is done decorating the suncatcher and needs to clean and return the paintbrush.
+[02:00] tableA: Return paintbrush
+Thought: Maya is done decorating the suncatcher and needs to clean and return the paint.
+[02:00] tableA: Return paint
+Thought: Maya is done decorating and will leave with the suncatcher.
+[02:00] tableA: Return suncatcher
+Thought: Omar has finished painting and decorating the plantpot and will start returning his painting supplies, beginning with the tissuebox.
+[02:10] tableD: Return tissuebox
+Thought: Omar continues wrapping up at tableD and will clean and return the palette next.
+[02:10] tableD: Return palette
+Thought: Omar continues wrapping up at tableD and will clean and return the cup next.
+[02:10] tableD: Return cup
+Thought: Omar continues wrapping up at tableD and will clean and return the paintbrush next.
+[02:10] tableD: Return paintbrush
+Thought: Omar continues wrapping up at tableD and will clean and return the paint next.
+[02:10] tableD: Return paint
+Thought: Omar is done with his project and will leave with the plantpot, returning it now.
+[02:10] tableD: Return plantpot
+Thought: Nina has finished building the mossframe arrangement and will start wrapping up by returning the glue and leftover materials (moss, foamball, stones, flower), then leave with the completed mossframe at 02:20.
+[02:20] tableC: Return glue
+Thought: Nina continues wrapping up at tableC and will return the remaining materials (moss, foamball, stones, and flower) before returning the completed mossframe.
+[02:20] tableC: Return moss
+Thought: Nina continues wrapping up at tableC and will return the foamball next.
+[02:20] tableC: Return foamball
+Thought: Nina continues wrapping up at tableC and will return the stones next.
+[02:20] tableC: Return stones
+Thought: Nina continues wrapping up at tableC and will return the flower next.
+[02:20] tableC: Return flower
+Thought: Nina is finished at tableC and will leave with the completed mossframe, returning it now.
+[02:20] tableC: Return mossframe
+Thought: Priya on tableE has finished painting the photoframe and will return her painting supplies, then fetch varnish to seal it before decorating.
+[02:30] tableE: Return tissuebox
+Thought: Priya continues wrapping up at tableE and will clean and return the palette next.
+[02:30] tableE: Return palette
+Thought: Priya continues wrapping up at tableE and will clean and return the cup next.
+[02:30] tableE: Return cup
+Thought: Priya continues wrapping up at tableE and will clean and return the paintbrush next.
+[02:30] tableE: Return paintbrush
+Thought: Priya continues wrapping up at tableE and will clean and return the paint next.
+[02:30] tableE: Return paint
+Thought: Priya now needs varnish to seal the painted photoframe before decorating and will fetch varnish to tableE.
+[02:30] tableE: Fetch varnish
+Thought: Priya has finished sealing the photoframe with varnish and will return the varnish, then fetch flower, gemset, googlyeyes, and glue to begin decorating.
+[02:40] tableE: Return varnish
+Thought: Priya now needs to fetch flower, gemset, googlyeyes, and glue to tableE to begin decorating the photoframe.
+[02:40] tableE: Fetch glue
+Thought: Priya also needs a flower to decorate the photoframe and will fetch it next.
+[02:40] tableE: Fetch flower
+Thought: Priya also needs a gemset and googlyeyes to decorate the photoframe and will fetch them now.
+[02:40] tableE: Fetch gemset
+Thought: Priya also needs googlyeyes to decorate the photoframe and will fetch them now.
+[02:40] tableE: Fetch googlyeyes
+Thought: Priya has finished decorating the photoframe and, with her session ending at 02:50, will begin wrapping up by returning the glue first.
+[02:50] tableE: Return glue
+Thought: Priya continues wrapping up at tableE and will return the flower next.
+[02:50] tableE: Return flower
+Thought: Priya continues wrapping up at tableE and will return the gemset next.
+[02:50] tableE: Return gemset
+Thought: Priya continues wrapping up at tableE and will return the googlyeyes next.
+[02:50] tableE: Return googlyeyes
+Thought: Priya is finished decorating and will leave with the photoframe, returning it now.
+[02:50] tableE: Return photoframe

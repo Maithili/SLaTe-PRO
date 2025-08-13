@@ -1,0 +1,77 @@
+Storyline:
+- Nia will use tableE from 00:00 to 01:40. She will paint a set of coasters and finish them with a quick varnish coat.
+- Marco will use tableB from 00:20 to 02:00. He will etch a keychain and then decorate it with stones and googly eyes using glue.
+- Quinn will use tableC from 01:10 to 02:50. She will paint a photoframe and then add flowers and rhinestone gems.
+- Rosa will use tableA from 01:30 to 03:00. She will lightly etch a mossframe and then fill it with moss and flowers using foamballs for height.
+
+
+Thought: Nia on tableE chooses coasters as the base object to decorate.
+[00:00] tableE: Fetch coasters
+Thought: Nia on tableE chooses Painting as the core crafting activity.
+[00:00] tableE: Fetch paint
+Thought: Nia needs a paintbrush to paint the coasters.
+[00:00] tableE: Fetch paintbrush
+Thought: Nia needs a palette to mix colors for the coasters.
+[00:00] tableE: Fetch cup
+Thought: Nia still needs a palette to mix colors for the coasters and will fetch it now.
+[00:00] tableE: Fetch palette
+Thought: Nia is starting to paint and needs a tissuebox to clean the paintbrush in between.
+[00:10] tableE: Fetch tissuebox
+Thought: Marco on tableB chooses a keychain as the base object to decorate.
+[00:20] tableB: Fetch keychain
+Thought: Marco on tableB chooses Etching as the core crafting activity.
+[00:20] tableB: Fetch etchpen
+Thought: Nia is done with the initial coats and will return the tissuebox before continuing to paint.
+[00:30] tableE: Return tissuebox
+Thought: Nia is done painting the coasters and needs to clean and return the palette.
+[00:40] tableE: Return palette
+Thought: Nia is done painting the coasters and needs to clean and return the paintbrush.
+[00:50] tableE: Return paintbrush
+Thought: Nia is done painting the coasters and needs to clean and return the cup.
+[01:00] tableE: Return cup
+Thought: Nia is ready to finish the coasters with a varnish coat and will fetch varnish.
+[01:10] tableE: Fetch varnish
+Thought: Nia is done applying the varnish coat and needs to return the varnish.
+[01:20] tableE: Return varnish
+Thought: Rosa on tableA chooses a mossframe as the base object to decorate.
+[01:30] tableA: Fetch mossframe
+Thought: Rosa on tableA chooses Etching as the core crafting activity.
+[01:30] tableA: Fetch etchpen
+Thought: Nia is wrapping up and needs to clean and return the paint, then return the coasters as she leaves at 01:40.
+[01:40] tableE: Return paint
+Thought: Nia is wrapping up and will leave with the finished coasters, so she needs to return the coasters.
+[01:40] tableE: Return coasters
+Thought: Marco is done etching the keychain and needs to clean and return the etchpen before fetching decorations.
+[01:50] tableB: Return etchpen
+Thought: Marco is ready to decorate the keychain and will fetch stones, googlyeyes, and glue together to start embellishing.
+[01:50] tableB: Fetch stones
+Thought: Marco also needs googlyeyes to decorate the keychain and will fetch them now.
+[01:50] tableB: Fetch googlyeyes
+Thought: Marco also needs glue to attach the stones and googlyeyes to the keychain and will fetch it now.
+[01:50] tableB: Fetch glue
+Thought: Marco is done decorating the keychain and will return the glue, stones, and googlyeyes, then return the keychain as he leaves at 02:00.
+[02:00] tableB: Return glue
+Thought: Marco is done decorating the keychain and needs to return the stones next.
+[02:00] tableB: Return stones
+Thought: Marco is done decorating the keychain and needs to return the googlyeyes next, then hand back the keychain as he leaves at 02:00.
+[02:00] tableB: Return googlyeyes
+Thought: Marco is wrapping up and needs to return the keychain as he leaves at 02:00.
+[02:00] tableB: Return keychain
+Thought: Rosa is done lightly etching the mossframe and needs to return the etchpen before fetching moss, foamballs, and flowers for arranging.
+[02:10] tableA: Return etchpen
+Thought: Rosa is ready to fill the mossframe and will fetch moss, foamballs, flowers, and glue together to start arranging.
+[02:10] tableA: Fetch moss
+Thought: Rosa also needs foamballs to add height and will fetch them now.
+[02:10] tableA: Fetch foamball
+Thought: Rosa also needs flowers to arrange in the mossframe and will fetch them now.
+[02:10] tableA: Fetch flower
+Thought: Rosa also needs glue to secure the moss, foamballs, and flowers in the mossframe and will fetch it now.
+[02:10] tableA: Fetch glue
+Thought: Rosa has finished securing the moss, foamball, and flowers in the mossframe and should return the glue.
+[02:20] tableA: Return glue
+Thought: Rosa has finished arranging the mossframe and will return the moss, foamball, and flower next, then the mossframe as she leaves at 03:00.
+[02:40] tableA: Return moss
+Thought: Rosa is done returning the moss and needs to return the foamball next.
+[02:40] tableA: Return foamball
+Thought: Rosa is done returning the foamball and needs to return the flower next.
+[02:40] tableA: Return flower

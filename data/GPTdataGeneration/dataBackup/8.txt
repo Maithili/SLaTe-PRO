@@ -1,0 +1,184 @@
+Storyline:
+- Ava will use tableB from 00:00 to 02:20. She will paint a keychain and decorate it with flowers and gems.
+- Ben will use tableD from 00:10 to 02:50. He will etch a photoframe, then decorate it with flowers and gems.
+- Cara will use tableA from 00:20 to 02:40. She will fill a mossframe with moss, foamballs, flowers, and stones.
+- Diego will use tableC from 00:30 to 03:00. He will paint coasters and finish them with varnish.
+- Enzo will use tableE from 00:40 to 02:30. He will paint a suncatcher and decorate it with gems.
+
+
+Thought: Ava on tableB chooses a keychain as the base object to decorate.
+[00:00] tableB: Fetch keychain
+Thought: Ava on tableB chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:00] tableB: Fetch paint
+Thought: Ava also needs a paintbrush to paint the keychain and will fetch it now.
+[00:00] tableB: Fetch paintbrush
+Thought: Ava also needs a palette to paint the keychain and will fetch it now.
+[00:00] tableB: Fetch cup
+Thought: Ben on tableD chooses a photoframe as the base object to decorate.
+[00:10] tableD: Fetch photoframe
+Thought: Ben on tableD chooses Etching as the core crafting activity and will fetch an etchpen.
+[00:10] tableD: Fetch etchpen
+Thought: Cara on tableA chooses a mossframe as the base object to decorate.
+[00:20] tableA: Fetch mossframe
+Thought: Cara on tableA begins the moss-filling phase and will fetch moss, foamball, flower, stones, and glue together.
+[00:20] tableA: Fetch moss
+Thought: Cara also needs a foamball to create height in the mossframe and will fetch it now.
+[00:20] tableA: Fetch foamball
+Thought: Cara also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableA: Fetch stones
+Thought: Cara also needs glue to secure the moss, flowers, and stones in the mossframe and will fetch it now.
+[00:20] tableA: Fetch glue
+Thought: Diego on tableC chooses coasters as the base object to decorate.
+[00:30] tableC: Fetch coasters
+Thought: Diego on tableC chooses coasters as the base object to decorate.
+[00:30] tableC: Fetch coasters
+Thought: Diego on tableC chooses coasters as the base object to decorate.
+[00:30] tableC: Fetch coasters
+Thought: Diego on tableC chooses coasters as the base object to decorate.
+[00:30] tableC: Fetch coasters
+Thought: Diego on tableC chooses coasters as the base object to decorate.
+[00:30] tableC: Fetch coasters
+Thought: Diego on tableC chooses coasters as the base object to decorate.
+[00:30] tableC: Fetch coasters
+Thought: Diego on tableC chooses coasters as the base object to decorate.
+[00:30] tableC: Fetch coasters
+Thought: Diego on tableC chooses coasters as the base object to decorate.
+[00:30] tableC: Fetch coasters
+Thought: Diego on tableC chooses coasters as the base object to decorate.
+[00:30] tableC: Fetch coasters
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Diego on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:40] tableE: Fetch suncatcher
+Thought: Enzo on tableE chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:50] tableA: Fetch flower
+Thought: Ben is done etching his photoframe and needs to clean and return the etchpen.
+[01:00] tableD: Return etchpen
+Thought: Ben is moving on to decorate the photoframe and will fetch flower, gemset, and glue together.
+[01:00] tableD: Fetch flower
+Thought: Ben also needs a gemset to decorate the photoframe and will fetch it now.
+[01:00] tableD: Fetch gemset
+Thought: Ben also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[01:00] tableD: Fetch glue
+Thought: Ben also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[01:00] tableD: Fetch glue
+Thought: Ava realizes she forgot a palette for mixing colors and will fetch one now to continue painting the keychain.
+[01:10] tableB: Fetch palette
+Thought: Ava realizes she forgot a palette for mixing colors and will fetch one now to continue painting the keychain.
+[01:10] tableB: Fetch palette
+Thought: Ava realizes she forgot a palette for mixing colors and will fetch one now to continue painting the keychain.
+[01:10] tableB: Fetch palette
+Thought: Ava is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[01:20] tableB: Fetch tissuebox
+Thought: Ava is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[01:20] tableB: Fetch tissuebox
+Thought: Ava is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[01:20] tableB: Fetch tissuebox
+Thought: Ava is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[01:20] tableB: Fetch tissuebox
+Thought: Ava is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[01:20] tableB: Fetch tissuebox
+Thought: Ava is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[01:20] tableB: Fetch tissuebox
+Thought: Ava is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[01:20] tableB: Fetch tissuebox
+Thought: Ava is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[01:20] tableB: Fetch tissuebox
+Thought: Diego on tableC is ready to start painting his coasters and will fetch paint, paintbrush, palette, and a cup together.
+[01:30] tableD: Fetch paint
+Thought: Diego also needs a paintbrush to start painting his coasters and will fetch it now.
+[01:30] tableD: Fetch paintbrush
+Thought: Diego also needs a palette and a cup for painting his coasters and will fetch them now.
+[01:30] tableD: Fetch palette
+Thought: Diego still needs a cup for rinsing while painting on tableC and will fetch it now.
+[01:30] tableD: Fetch cup
+Thought: Diego still needs a cup for rinsing while painting on tableC and will fetch it now.
+[01:30] tableD: Fetch cup
+Thought: Diego still needs a cup for rinsing while painting on tableC and will fetch it now.
+[01:30] tableD: Fetch cup
+Thought: Diego still needs a cup for rinsing while painting on tableC and will fetch it now.
+[01:30] tableD: Fetch cup
+Thought: Ava is done painting her keychain and is ready to decorate it; she will fetch flower, gemset, and glue together.
+[01:40] tableB: Fetch flower
+Thought: Ava also needs a gemset to decorate the keychain and will fetch it now.
+[01:40] tableB: Fetch gemset
+Thought: Ava also needs glue to attach the flowers and gems to the keychain and will fetch it now.
+[01:40] tableB: Fetch glue
+Thought: Ava also needs glue to attach the flowers and gems to the keychain and will fetch it now.
+[01:40] tableB: Fetch glue
+Thought: Ava also needs glue to attach the flowers and gems to the keychain and will fetch it now.
+[01:40] tableB: Fetch glue
+Thought: Enzo on tableE is ready to start painting his suncatcher and will fetch paint, a paintbrush, a palette, and a cup together.
+[01:50] tableA: Fetch paint
+Thought: Enzo also needs a paintbrush to paint the suncatcher and will fetch it now.
+[01:50] tableA: Fetch paintbrush
+Thought: Enzo also needs a palette to paint the suncatcher and will fetch it now.
+[01:50] tableA: Fetch palette
+Thought: Enzo also needs a cup to rinse his paintbrush while painting the suncatcher and will fetch it now.
+[01:50] tableA: Fetch cup
+Thought: Ava is done decorating the keychain and needs to clean and return the glue, flower, and gemset.
+[02:00] tableB: Return glue
+Thought: Ava is done decorating the keychain and needs to clean and return the flower.
+[02:00] tableB: Return flower
+Thought: Ava is done decorating the keychain and needs to clean and return the gemset.
+[02:00] tableB: Return gemset
+Thought: Ava is wrapping up her session and will clean and return the paint, paintbrush, palette, cup, and tissuebox, then return the keychain at 02:20.
+[02:20] tableB: Return paint
+Thought: Ava has returned the paint and now needs to clean and return the paintbrush.
+[02:20] tableB: Return paintbrush
+Thought: Ava has returned the paintbrush and now needs to clean and return the palette.
+[02:20] tableB: Return palette
+Thought: Ava has returned the palette and now needs to clean and return the cup.
+[02:20] tableB: Return cup
+Thought: Ava has returned the cup and now needs to clean and return the tissuebox.
+[02:20] tableB: Return tissuebox
+Thought: Ava is done with her session and will return the keychain.
+[02:20] tableB: Return keychain
+Thought: Ava is done with her session and will return the keychain.
+[02:20] tableB: Return keychain
+Thought: Ben is done decorating his photoframe and needs to clean and return the glue, flower, and gemset.
+[02:30] tableD: Return glue
+Thought: Ben has returned the glue and now needs to return the flower.
+[02:30] tableD: Return flower
+Thought: Ben has returned the flower and now needs to return the gemset.
+[02:30] tableD: Return gemset
+Thought: Ben is done decorating his photoframe and will return the photoframe.
+[02:30] tableD: Return photoframe
+Thought: Cara is finishing her mossframe and needs to return the glue, moss, foamball, flower, and stones, then return the mossframe.
+[02:40] tableA: Return glue
+Thought: Cara has returned the glue and now needs to return the moss she used for the mossframe.
+[02:40] tableA: Return moss
+Thought: Cara has returned the moss and now needs to return the foamball.
+[02:40] tableA: Return foamball
+Thought: Cara has returned the foamball and now needs to return the flower.
+[02:40] tableA: Return flower
+Thought: Cara has returned the flower and now needs to return the stones.
+[02:40] tableA: Return stones
+Thought: Cara has returned the stones and now needs to return the mossframe.
+[02:40] tableA: Return mossframe
+Thought: Diego is done painting his coasters and needs to fetch varnish to finish them.
+[02:50] tableC: Fetch varnish

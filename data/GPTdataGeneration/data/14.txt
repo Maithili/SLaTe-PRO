@@ -1,0 +1,78 @@
+Storyline:
+- Harper will use tableA from 00:00 to 01:30. She will paint a set of coasters and finish them with a quick varnish coat.
+- Omar will use tableC from 00:20 to 02:20. He will etch a keychain and give it a playful finish with a flower and googly eyes using glue.
+- Sumi will use tableE from 01:40 to 02:50. She will paint a suncatcher and then add rhinestone gems.
+
+
+Thought: Harper on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Harper on tableA chooses Painting as the core crafting activity.
+[00:00] tableA: Fetch paint
+Thought: Harper needs a paintbrush to paint the coasters.
+[00:00] tableA: Fetch paintbrush
+Thought: Harper needs a palette to mix colors for the coasters.
+[00:00] tableA: Fetch palette
+Thought: Harper also needs a cup to rinse the paintbrush while painting the coasters.
+[00:00] tableA: Fetch cup
+Thought: Harper is starting to paint and needs a tissuebox to clean the paintbrush in between.
+[00:10] tableA: Fetch tissuebox
+Thought: Omar on tableC chooses a keychain as the base object to decorate.
+[00:20] tableC: Fetch keychain
+Thought: Omar on tableC chooses Etching as the core crafting activity.
+[00:20] tableC: Fetch etchpen
+Thought: Harper is done with the initial coats and will return the tissuebox before continuing to paint.
+[00:30] tableA: Return tissuebox
+Thought: Harper is done painting the coasters and needs to clean and return the palette.
+[00:40] tableA: Return palette
+Thought: Harper is done painting the coasters and needs to clean and return the paintbrush.
+[00:50] tableA: Return paintbrush
+Thought: Harper is done painting the coasters and needs to clean and return the cup.
+[01:00] tableA: Return cup
+Thought: Harper is ready to finish the coasters with a varnish coat and will fetch varnish.
+[01:10] tableA: Fetch varnish
+Thought: Harper is done applying the varnish coat and needs to return the varnish.
+[01:20] tableA: Return varnish
+Thought: Harper is wrapping up and needs to clean and return the paint, then return the coasters as she leaves at 01:30.
+[01:30] tableA: Return paint
+Thought: Harper is wrapping up and will leave with the finished coasters, so she needs to return the coasters.
+[01:30] tableA: Return coasters
+Thought: Sumi on tableE chooses a suncatcher as the base object to decorate.
+[01:40] tableE: Fetch suncatcher
+Thought: Sumi on tableE chooses Painting as the core crafting activity.
+[01:40] tableE: Fetch paint
+Thought: Sumi needs a paintbrush, palette, and cup to start painting the suncatcher and will fetch them together now.
+[01:40] tableE: Fetch paintbrush
+Thought: Sumi also needs a palette to start painting the suncatcher and will fetch it now.
+[01:40] tableE: Fetch palette
+Thought: Sumi also needs a cup to rinse her brush while painting the suncatcher and will fetch it now.
+[01:50] tableE: Fetch tissuebox
+Thought: Omar is done etching the keychain and needs to clean and return the etchpen.
+[02:00] tableC: Return etchpen
+Thought: Omar is ready to decorate the keychain and will fetch flower, googlyeyes, and glue together to start embellishing.
+[02:00] tableC: Fetch flower
+Thought: Omar also needs googlyeyes to decorate the keychain and will fetch them now.
+[02:00] tableC: Fetch googlyeyes
+Thought: Omar also needs glue to attach the flower and googlyeyes to the keychain and will fetch it now.
+[02:20] tableC: Return flower
+Thought: Omar is done decorating the keychain and needs to return the googlyeyes and glue, then return the keychain as he leaves.
+[02:20] tableC: Return googlyeyes
+Thought: Omar is done decorating the keychain and needs to return the glue, then return the keychain as he leaves.
+[02:20] tableC: Return keychain
+Thought: Sumi is done painting the suncatcher and should tidy up by returning the palette, paintbrush, tissuebox, and paint before fetching gemset and glue to add rhinestone gems.
+[02:30] tableE: Return palette
+Thought: Sumi is done painting and needs to clean and return the paintbrush.
+[02:30] tableE: Return paintbrush
+Thought: Sumi is done painting and needs to return the tissuebox next.
+[02:30] tableE: Return tissuebox
+Thought: Sumi is done painting and needs to clean and return the paint.
+[02:30] tableE: Return paint
+Thought: Sumi is ready to decorate the suncatcher and will fetch gemset and glue together to start adding rhinestone accents.
+[02:30] tableE: Fetch gemset
+Thought: Sumi also needs glue to attach the gems to the suncatcher and will fetch it now.
+[02:30] tableE: Fetch glue
+Thought: Sumi has finished adding rhinestone gems to the suncatcher and will return the glue and gemset, then return the suncatcher as she wraps up at 02:50.
+[02:50] tableE: Return glue
+Thought: Sumi is done decorating the suncatcher and will return the gemset next before handing back the suncatcher.
+[02:50] tableE: Return gemset
+Thought: Sumi is wrapping up and will return the suncatcher as she leaves at 02:50.
+[02:50] tableE: Return suncatcher

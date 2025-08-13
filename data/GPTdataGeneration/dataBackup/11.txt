@@ -1,0 +1,208 @@
+Storyline:
+- Iris will use tableA from 00:00 to 02:20. She will paint a set of coasters and finish them with varnish.
+- Jay will use tableB from 00:10 to 02:40. He will etch a photoframe, then decorate it with flowers and gems.
+- Kira will use tableC from 00:20 to 01:40. She will fill a mossframe with moss, foamballs, flowers, and stones.
+- Luis will use tableD from 00:30 to 03:00. He will paint a plantpot and decorate it with moss, stones, and googly eyes.
+- Mina will use tableE from 00:40 to 02:30. She will paint a suncatcher and decorate it with gems.
+
+
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses coasters as the base object to decorate.
+[00:00] tableA: Fetch coasters
+Thought: Iris on tableA chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:10] tableB: Fetch photoframe
+Thought: Jay on tableB chooses Etching as the core crafting activity and will fetch an etchpen.
+[00:10] tableB: Fetch etchpen
+Thought: Kira on tableC chooses a mossframe as the base object to decorate.
+[00:20] tableC: Fetch mossframe
+Thought: Kira on tableC begins the moss-filling phase and will fetch moss, foamball, flower, stones, and glue together.
+[00:20] tableC: Fetch moss
+Thought: Kira on tableC also needs a foamball to create height in the mossframe and will fetch it now.
+[00:20] tableC: Fetch foamball
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs a flower to decorate the mossframe and will fetch it now.
+[00:20] tableC: Fetch flower
+Thought: Kira also needs stones to decorate the mossframe and will fetch them now.
+[00:20] tableC: Fetch glue
+Thought: Kira also needs stones to decorate the mossframe and will fetch them now.
+[00:20] tableC: Fetch glue
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses a plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together.
+[00:30] tableD: Fetch tissuebox
+Thought: Luis on tableD still needs his core painting supplies; he will fetch paint, paintbrush, palette, and a cup together now.
+[01:00] tableB: Return etchpen
+Thought: Jay is moving on to decorate the photoframe and will fetch flower, gemset, and glue together.
+[01:00] tableB: Fetch flower
+Thought: Jay also needs a gemset to decorate the photoframe and will fetch it now.
+[01:00] tableB: Fetch gemset
+Thought: Jay also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[01:10] tableA: Fetch tissuebox
+Thought: Jay also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[01:10] tableA: Fetch tissuebox
+Thought: Jay also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[01:10] tableA: Fetch tissuebox
+Thought: Jay also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[01:10] tableA: Fetch tissuebox
+Thought: Jay also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[01:10] tableA: Fetch tissuebox
+Thought: Jay also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[01:10] tableA: Fetch tissuebox

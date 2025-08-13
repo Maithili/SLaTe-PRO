@@ -1,0 +1,208 @@
+Storyline:
+- Nora will use tableA from 00:00 to 02:20. She will paint a photoframe and decorate it with flowers and gems.
+- Omar will use tableB from 00:10 to 02:00. He will etch a keychain, then decorate it with flowers and gems.
+- Priya will use tableC from 00:20 to 02:10. She will etch a mossframe, then fill it with moss, foamballs, flowers, and stones.
+- Quinn will use tableD from 00:30 to 02:50. He will paint a set of coasters and finish them with varnish.
+- Ria will use tableE from 00:40 to 03:00. She will paint a plantpot and decorate it with moss, stones, and googly eyes.
+
+
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe
+Thought: Nora on tableA chooses a photoframe as the base object to decorate.
+[01:20] tableA: Fetch photoframe

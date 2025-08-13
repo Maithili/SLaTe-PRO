@@ -1,0 +1,109 @@
+Storyline:
+- Dana will use tableA from 00:00 to 01:50. She will paint a plantpot, then decorate it with moss and stones.
+- Evan will use tableC from 00:20 to 02:20. He will etch a photoframe and then decorate it with flowers and gems.
+- Priya will use tableD from 01:30 to 02:40. She will lightly etch a mossframe and then fill it with moss and flowers using foamballs for height.
+- Leo will use tableB from 01:40 to 03:00. He will paint a suncatcher and then add rhinestone gems.
+
+
+Thought: Dana on tableA chooses a plantpot as the base object to decorate.
+[00:00] tableA: Fetch plantpot
+Thought: Dana on tableA chooses Painting as the core crafting activity.
+[00:00] tableA: Fetch paint
+Thought: Dana needs a paintbrush to paint the plantpot.
+[00:00] tableA: Fetch paintbrush
+Thought: Dana needs a palette to paint the plantpot.
+[00:00] tableA: Fetch palette
+Thought: Dana needs a cup to paint the plantpot.
+[00:00] tableA: Fetch cup
+Thought: Dana is starting to paint and needs a tissuebox to clean the paintbrush in between.
+[00:10] tableA: Fetch tissuebox
+Thought: Evan on tableC chooses a photoframe as the base object to decorate.
+[00:20] tableC: Fetch photoframe
+Thought: Evan on tableC chooses Etching as the core crafting activity.
+[00:20] tableC: Fetch etchpen
+Thought: Dana is done painting for now and needs to return the tissuebox.
+[00:30] tableA: Return tissuebox
+Thought: Dana is done painting and needs to clean and return the palette.
+[00:40] tableA: Return palette
+Thought: Dana is done painting and needs to clean and return the paintbrush.
+[00:50] tableA: Return paintbrush
+Thought: Dana is done painting and needs to clean and return the cup.
+[01:00] tableA: Return cup
+Thought: Dana is done painting and needs to clean and return the paint.
+[01:10] tableA: Return paint
+Thought: Dana is ready to decorate the plantpot and will fetch moss, stones, and glue together to start arranging them.
+[01:10] tableA: Fetch moss
+Thought: Dana also needs stones and glue to decorate the plantpot and will fetch them together now.
+[01:10] tableA: Fetch stones
+Thought: Dana also needs glue to attach the moss and stones to the plantpot and will fetch it now.
+[01:10] tableA: Fetch glue
+Thought: Evan is done etching the photoframe and needs to clean and return the etchpen.
+[01:20] tableC: Return etchpen
+Thought: Priya on tableD chooses a mossframe as the base object to decorate.
+[01:30] tableD: Fetch mossframe
+Thought: Priya on tableD chooses Etching as the core crafting activity.
+[01:30] tableD: Fetch etchpen
+Thought: Leo on tableB chooses a suncatcher as the base object to decorate.
+[01:40] tableB: Fetch suncatcher
+Thought: Leo on tableB chooses Painting as the core crafting activity.
+[01:40] tableB: Fetch paint
+Thought: Leo needs a paintbrush, palette, and cup to start painting the suncatcher and will fetch them together now.
+[01:40] tableB: Fetch paintbrush
+Thought: Leo also needs a palette to start painting the suncatcher and will fetch it now.
+[01:40] tableB: Fetch palette
+Thought: Leo also needs a cup to rinse his brush while painting the suncatcher and will fetch it now.
+[01:40] tableB: Fetch cup
+Thought: Dana is done decorating the plantpot and needs to clean and return the glue, stones, and moss, then will leave with the finished plantpot.
+[01:50] tableA: Return glue
+Thought: Dana is done decorating the plantpot and needs to return the stones.
+[01:50] tableA: Return stones
+Thought: Dana is done decorating the plantpot and needs to return the moss.
+[01:50] tableA: Return moss
+Thought: Dana is done decorating and will leave with the finished plantpot, so she needs to return the plantpot.
+[01:50] tableA: Return plantpot
+Thought: Evan is ready to decorate the photoframe and will fetch flower, gemset, and glue together to start embellishing.
+[01:50] tableC: Fetch flower
+Thought: Evan also needs a gemset to decorate the photoframe and will fetch it now.
+[01:50] tableC: Fetch gemset
+Thought: Evan also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[01:50] tableC: Fetch glue
+Thought: Priya is done lightly etching the mossframe and needs to return the etchpen before moving on to add moss, foamballs, and flowers.
+[02:00] tableD: Return etchpen
+Thought: Priya is ready to fill the mossframe and will fetch moss, foamballs, and flowers together to start arranging.
+[02:00] tableD: Fetch moss
+Thought: Priya also needs foamballs to add height and will fetch them now.
+[02:00] tableD: Fetch foamball
+Thought: Priya also needs flowers to arrange in the mossframe and will fetch them now.
+[02:00] tableD: Fetch flower
+Thought: Priya needs glue to secure the moss, foamballs, and flowers in the mossframe.
+[02:00] tableD: Fetch glue
+Thought: Evan is finishing the decorations on the photoframe and will return the glue, flower, and gemset, then leave with the completed photoframe.
+[02:10] tableC: Return glue
+Thought: Evan is done decorating the photoframe and needs to return the flower.
+[02:10] tableC: Return flower
+Thought: Evan is done decorating the photoframe and needs to return the gemset.
+[02:10] tableC: Return gemset
+Thought: Evan is wrapping up and will leave with the completed photoframe, so he needs to return the photoframe.
+[02:10] tableC: Return photoframe
+Thought: Priya is done gluing elements into the mossframe and needs to return the glue.
+[02:20] tableD: Return glue
+Thought: Leo is done painting the suncatcher and should clean up by returning the palette, cup, paintbrush, and paint before fetching gemset and glue for decoration.
+[02:30] tableB: Return palette
+Thought: Leo is done painting and needs to clean and return the cup.
+[02:30] tableB: Return cup
+Thought: Leo is done painting and needs to clean and return the paintbrush.
+[02:30] tableB: Return paintbrush
+Thought: Leo is done painting and needs to clean and return the paint.
+[02:30] tableB: Return paint
+Thought: Leo is ready to decorate the suncatcher and will fetch gemset and glue together to start embellishing.
+[02:30] tableB: Fetch gemset
+Thought: Leo also needs glue to attach the gems to the suncatcher and will fetch it now.
+[02:30] tableB: Fetch glue
+Thought: Priya has finished arranging her mossframe and will return the moss, foamball, and flower, then return the mossframe as she leaves.
+[02:40] tableD: Return moss
+Thought: Priya is done returning the moss and needs to return the foamball next.
+[02:40] tableD: Return foamball
+Thought: Priya is done returning the foamball and needs to return the flower next.
+[02:40] tableD: Return flower
+Thought: Priya is done returning the flower and needs to return the mossframe as she leaves.
+[02:40] tableD: Return mossframe

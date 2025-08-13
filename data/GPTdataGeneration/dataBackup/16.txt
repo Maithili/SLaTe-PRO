@@ -1,0 +1,84 @@
+Storyline:
+- Tessa will use tableB from 00:00 to 01:30. She will paint a keychain and then add rhinestone gems.
+- Uri will use tableE from 00:20 to 02:00. He will etch a set of coasters and finish them with a clear varnish coat.
+- Maya will use tableA from 01:10 to 02:40. She will paint a photoframe, seal it with varnish, then decorate it with flowers and gems.
+- Jin will use tableC from 01:50 to 03:00. He will lightly etch a mossframe and then fill it with moss and flowers using foamballs for height.
+- Lila will use tableD from 01:30 to 03:00. She will paint a suncatcher and then add rhinestone gems.
+
+
+Thought: Tessa on tableB chooses a keychain as the base object to decorate.
+[00:00] tableB: Fetch keychain
+Thought: Tessa on tableB chooses Painting as the core crafting activity.
+[00:00] tableB: Fetch paint
+Thought: Tessa needs a paintbrush, palette, and cup to start painting the keychain and will fetch them together now.
+[00:00] tableB: Fetch paintbrush
+Thought: Tessa also needs a palette to start painting the keychain and will fetch it now.
+[00:00] tableB: Fetch cup
+Thought: Tessa still needs a palette to start painting the keychain and will fetch it now.
+[00:00] tableB: Fetch palette
+Thought: Tessa is starting to paint and needs a tissuebox to clean the paintbrush in between.
+[00:10] tableB: Fetch tissuebox
+Thought: Uri on tableE chooses coasters as the base object to decorate.
+[00:20] tableE: Fetch coasters
+Thought: Uri on tableE chooses Etching as the core crafting activity.
+[00:20] tableE: Fetch etchpen
+Thought: Tessa is done with the initial coats and will return the tissuebox before continuing to paint.
+[00:30] tableB: Return tissuebox
+Thought: Tessa is done painting the keychain and needs to clean and return the palette.
+[00:40] tableB: Return palette
+Thought: Tessa is done painting the keychain and needs to clean and return the paintbrush.
+[00:50] tableB: Return paintbrush
+Thought: Tessa is done painting the keychain and needs to clean and return the cup.
+[01:00] tableB: Return cup
+Thought: Tessa is done painting the keychain and needs to clean and return the paint before fetching gemset and glue to decorate.
+[01:10] tableB: Return paint
+Thought: Tessa is ready to decorate the keychain and will fetch gemset and glue together to start embellishing.
+[01:10] tableB: Fetch gemset
+Thought: Tessa also needs glue to attach the gems to the keychain and will fetch it now.
+[01:10] tableB: Fetch glue
+Thought: Maya on tableA chooses a photoframe as the base object to decorate.
+[01:10] tableA: Fetch photoframe
+Thought: Maya on tableA chooses Painting as the core crafting activity.
+[01:10] tableA: Fetch paint
+Thought: Maya needs a paintbrush, palette, and cup to start painting the photoframe and will fetch them together now.
+[01:10] tableA: Fetch paintbrush
+Thought: Maya also needs a palette to start painting the photoframe and will fetch it now.
+[01:10] tableA: Fetch palette
+Thought: Maya also needs a cup to rinse her brush while painting the photoframe and will fetch it now.
+[01:10] tableA: Fetch cup
+Thought: Maya is starting to paint the photoframe and needs a tissuebox to clean the paintbrush in between.
+[01:20] tableA: Fetch tissuebox
+Thought: Tessa has finished adding gems to the keychain and should return the glue and gemset, then return the keychain as she wraps up at 01:30.
+[01:30] tableB: Return glue
+Thought: Tessa is done decorating the keychain and needs to return the gemset next, then return the keychain to wrap up at 01:30.
+[01:30] tableB: Return gemset
+Thought: Tessa is wrapping up and will return the keychain to finish at 01:30.
+[01:30] tableB: Return keychain
+Thought: Uri is done etching the coasters and needs to return the etchpen before fetching varnish to seal them.
+[01:40] tableE: Return etchpen
+Thought: Uri is ready to seal the etched coasters and will fetch varnish to apply a clear coat.
+[01:50] tableE: Fetch varnish
+Thought: Uri is done sealing the coasters and needs to return the varnish before handing back the coasters as he wraps up at 02:00.
+[02:00] tableE: Return varnish
+Thought: Uri is wrapping up and needs to return the coasters as he leaves at 02:00.
+[02:00] tableE: Return coasters
+Thought: Maya is done painting the photoframe and needs to clean and return the palette.
+[02:10] tableA: Return palette
+Thought: Maya is done painting the photoframe and needs to clean and return the paintbrush.
+[02:20] tableA: Return paintbrush
+Thought: Maya is done painting the photoframe and needs to clean and return the cup, tissuebox, and paint before fetching varnish to seal it.
+[02:30] tableA: Return cup
+Thought: Maya is done painting the photoframe and needs to return the tissuebox before fetching varnish to seal it.
+[02:30] tableA: Return tissuebox
+Thought: Maya is done painting the photoframe and needs to clean and return the paint before fetching varnish to seal it.
+[02:30] tableA: Return paint
+Thought: Maya is ready to seal the photoframe and will fetch varnish to apply a clear coat.
+[02:40] tableA: Fetch varnish
+Thought: Maya has finished sealing the photoframe and should return the varnish before fetching flower, gemset, and glue to decorate.
+[02:50] tableA: Return varnish
+Thought: Maya is ready to decorate the photoframe and will fetch flower, gemset, and glue together to start embellishing.
+[02:50] tableA: Fetch flower
+Thought: Maya also needs a gemset to decorate the photoframe and will fetch it now.
+[02:50] tableA: Fetch gemset
+Thought: Maya also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[02:50] tableA: Fetch glue

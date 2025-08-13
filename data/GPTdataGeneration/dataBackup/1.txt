@@ -1,0 +1,84 @@
+Storyline:
+- Iris will use tableA from 00:10 to 01:50. She will paint a photoframe, then decorate it with flowers and gems.
+- Jamal will use tableB from 00:20 to 01:20. He will etch a keychain and then decorate it with a flower and gemset using glue.
+- Priya will use tableD from 00:30 to 02:40. She will paint a plantpot, then add moss and stones with glue.
+- Leo will use tableC from 01:10 to 02:00. He will etch a set of coasters and finish them with varnish.
+- Mei will use tableE from 01:30 to 02:20. She will paint a suncatcher and decorate it with gems and googly eyes.
+
+
+Thought: Iris on tableA chooses photoframe as the base object to decorate.
+[00:10] tableA: Fetch photoframe
+Thought: Iris on tableA chooses Painting as the core crafting activity.
+[00:10] tableA: Fetch paint
+Thought: Iris needs a paintbrush to paint the photoframe.
+[00:10] tableA: Fetch paintbrush
+Thought: Iris still needs a palette to mix colors and a cup and tissuebox to rinse and dry her brush; she'll fetch them now at tableA.
+[00:10] tableA: Fetch palette
+Thought: Iris still needs a cup and a tissuebox to rinse and dry her paintbrush; she'll fetch them now at tableA.
+[00:10] tableA: Fetch cup
+Thought: Iris still needs a tissuebox to rinse and dry her paintbrush; she'll fetch it now at tableA.
+[00:20] tableB: Fetch keychain
+Thought: Jamal on tableB chooses Etching as the core crafting activity and will fetch the etchpen.
+[00:20] tableB: Fetch etchpen
+Thought: Priya on tableD chooses plantpot as the base object to decorate.
+[00:30] tableD: Fetch plantpot
+Thought: Priya on tableD chooses Painting as the core crafting activity and will fetch paint.
+[00:30] tableD: Fetch paint
+Thought: Priya needs a paintbrush to paint the plantpot.
+[00:30] tableD: Fetch paintbrush
+Thought: Priya still needs a palette to mix colors and a cup and tissuebox to rinse and dry her brush; she'll fetch them now at tableD.
+[00:30] tableD: Fetch palette
+Thought: Priya still needs a cup and tissuebox to rinse and dry her brush; she'll fetch them together now at tableD.
+[00:30] tableD: Fetch cup
+Thought: Priya still needs a tissuebox to rinse and dry her brush; she'll fetch it now at tableD.
+[00:30] tableD: Fetch tissuebox
+Thought: Jamal is finished etching the keychain and will return the etchpen, then fetch a flower, gemset, and glue to start decorating.
+[00:40] tableB: Return etchpen
+Thought: Jamal now needs to fetch a flower, gemset, and glue together at tableB to start decorating the keychain.
+[00:40] tableB: Fetch flower
+Thought: Jamal still needs a gemset and glue to decorate the keychain; he'll fetch them now at tableB.
+[00:40] tableB: Fetch gemset
+Thought: Jamal still needs glue to attach the flower and gems to the keychain and will fetch it now at tableB.
+[00:40] tableB: Fetch glue
+Thought: Jamal is done decorating the keychain and needs to return the glue.
+[00:50] tableB: Return glue
+Thought: Jamal is done decorating the keychain and needs to return the flower and gemset.
+[00:50] tableB: Return flower
+Thought: Jamal is done decorating the keychain and needs to return the gemset.
+[00:50] tableB: Return gemset
+Thought: Iris is done painting and is ready to decorate the photoframe; she'll fetch flower, gemset, and glue together at tableA.
+[01:00] tableA: Fetch flower
+Thought: Iris still needs a gemset and glue to decorate the photoframe; she'll fetch them now at tableA.
+[01:00] tableA: Fetch gemset
+Thought: Iris still needs glue to attach the flowers and gems to the photoframe and will fetch it now at tableA.
+[01:00] tableA: Fetch glue
+Thought: Leo on tableC chooses coasters as the base object to etch and will fetch the coasters and etchpen at 01:10.
+[01:10] tableC: Fetch coasters
+Thought: Leo on tableC chooses Etching as the core crafting activity and will fetch the etchpen now to start etching the coasters.
+[01:10] tableC: Fetch etchpen
+Thought: Jamal is wrapping up his session and will return the finished keychain at tableB at 01:20.
+[01:20] tableB: Return keychain
+Thought: Mei on tableE chooses suncatcher as the base object to decorate.
+[01:30] tableE: Fetch suncatcher
+Thought: Mei on tableE chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, cup, and tissuebox together.
+[01:30] tableE: Fetch paint
+Thought: Mei still needs a paintbrush, palette, cup, and tissuebox to paint the suncatcher and will fetch them now at tableE.
+[01:30] tableE: Fetch paintbrush
+Thought: Mei still needs a palette, cup, and tissuebox to paint the suncatcher and will fetch them now at tableE.
+[01:30] tableE: Fetch palette
+Thought: Mei still needs a cup and tissuebox to paint the suncatcher and will fetch them now at tableE.
+[01:30] tableE: Fetch tissuebox
+Thought: Mei still needs a cup to rinse her paintbrush and will fetch it now at tableE.
+[01:30] tableE: Fetch cup
+Thought: Leo is done etching the coasters and needs to return the etchpen, then fetch varnish to finish them.
+[01:40] tableC: Return etchpen
+Thought: Leo is ready to finish the coasters and will fetch varnish at tableC to apply the top coat.
+[01:50] tableC: Fetch varnish
+Thought: Leo is finished applying varnish to the coasters and needs to return the varnish, then return the coasters as he wraps up at 02:00.
+[02:00] tableC: Return varnish
+Thought: Leo is wrapping up and will return the finished coasters at tableC now.
+[02:00] tableC: Return coasters
+Thought: Mei is done painting and is ready to decorate the suncatcher; she'll fetch gemset, googlyeyes, and glue together at tableE at 02:10.
+[02:10] tableE: Fetch gemset
+Thought: Mei still needs googlyeyes and glue to decorate the suncatcher and will fetch them now at tableE.
+[02:10] tableE: Fetch googlyeyes

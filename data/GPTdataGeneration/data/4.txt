@@ -1,0 +1,150 @@
+Storyline:
+- Aria will use tableA from 00:00 to 02:00. She will paint and varnish a photoframe, then decorate it with flowers and gems.
+- Blake will use tableB from 00:10 to 01:50. He will paint a set of coasters and finish them with varnish.
+- Chen will use tableC from 00:20 to 02:30. He will etch a keychain and then decorate it with googlyeyes and gems.
+- Divya will use tableD from 00:30 to 02:10. She will etch a mossframe border, then build a moss-and-flower arrangement with foamballs and stones.
+- Eli will use tableE from 00:40 to 02:30. He will paint a suncatcher and decorate it with gems.
+
+
+Thought: Aria on tableA chooses a photoframe as the base object to decorate.
+[00:00] tableA: Fetch photoframe
+Thought: Aria on tableA chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and cup to begin working on the photoframe.
+[00:00] tableA: Fetch paint
+Thought: Aria also needs a paintbrush to start painting the photoframe.
+[00:00] tableA: Fetch paintbrush
+Thought: Aria also needs a palette to mix colors for painting the photoframe.
+[00:00] tableA: Fetch palette
+Thought: Aria also needs a cup to rinse her paintbrush while painting the photoframe.
+[00:00] tableA: Fetch cup
+Thought: Aria also needs a tissuebox to clean her paintbrush between colors while painting the photoframe.
+[00:00] tableA: Fetch tissuebox
+Thought: Blake on tableB chooses coasters as the base objects to paint.
+[00:10] tableB: Fetch coasters
+Thought: Blake on tableB chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, cup, and tissuebox to begin painting the coasters.
+[00:10] tableB: Fetch paint
+Thought: Blake also needs a paintbrush to start painting the coasters.
+[00:10] tableB: Fetch paintbrush
+Thought: Blake also needs a palette to mix colors for painting the coasters.
+[00:10] tableB: Fetch cup
+Thought: Blake still needs a palette for mixing and a tissuebox to clean his brush; he'll fetch them now.
+[00:10] tableB: Fetch palette
+Thought: Blake still needs a tissuebox to clean his brush while painting and will fetch it now.
+[00:10] tableB: Fetch tissuebox
+Thought: Chen on tableC chooses a keychain as the base object to decorate.
+[00:20] tableC: Fetch keychain
+Thought: Chen on tableC chooses Etching as the core crafting activity and will fetch an etchpen to start etching the keychain.
+[00:20] tableC: Fetch etchpen
+Thought: Divya on tableD chooses a mossframe as the base object and will start by etching the border.
+[00:30] tableD: Fetch mossframe
+Thought: Divya on tableD chooses Etching as the core crafting activity and needs an etchpen to start etching the mossframe border.
+[00:30] tableD: Fetch etchpen
+Thought: Eli on tableE chooses a suncatcher as the base object to paint.
+[00:40] tableE: Fetch suncatcher
+Thought: Eli on tableE chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, cup, and tissuebox to begin painting the suncatcher.
+[00:40] tableE: Fetch paint
+Thought: Eli also needs a paintbrush to start painting the suncatcher and will fetch it now.
+[00:40] tableE: Fetch paintbrush
+Thought: Eli on tableE still needs a palette for mixing, a cup for rinsing, and a tissuebox for blotting while painting the suncatcher and will fetch them now.
+[00:40] tableE: Fetch palette
+Thought: Eli still needs a cup for rinsing while painting the suncatcher and will fetch it now.
+[00:40] tableE: Fetch cup
+Thought: Eli on tableE still needs a tissuebox to blot and clean his brush while painting the suncatcher and will fetch it now.
+[00:40] tableE: Fetch tissuebox
+Thought: Chen is finished etching the keychain and will return the etchpen, then fetch glue, gemset, and googlyeyes to start decorating.
+[00:50] tableC: Return etchpen
+Thought: Chen now needs decorating supplies and will fetch glue, gemset, and googlyeyes to tableC to start decorating the keychain.
+[00:50] tableC: Fetch glue
+Thought: Chen also needs a gemset and googlyeyes to decorate the keychain and will fetch them now.
+[00:50] tableC: Fetch gemset
+Thought: Chen also needs googlyeyes to decorate the keychain and will fetch them now.
+[01:00] tableA: Return tissuebox
+Thought: Aria is done painting the photoframe and needs to clean and return the palette next.
+[01:00] tableA: Return palette
+Thought: Aria continues wrapping up after painting and will clean and return the cup next.
+[01:00] tableA: Return cup
+Thought: Aria continues wrapping up after painting and will clean and return the paintbrush next.
+[01:00] tableA: Return paintbrush
+Thought: Aria is done painting the photoframe and needs to clean and return the paint next.
+[01:00] tableA: Return paint
+Thought: Aria now needs varnish to seal the painted photoframe before decorating and will fetch it next.
+[01:10] tableA: Fetch varnish
+Thought: Aria has finished sealing the photoframe and will return the varnish, then fetch flower and gemset to start planning her decoration.
+[01:20] tableA: Return varnish
+Thought: Aria now needs decorating supplies and will fetch a flower and a gemset to tableA to plan the layout on the photoframe.
+[01:20] tableA: Fetch flower
+Thought: Aria also needs a gemset to decorate the photoframe and will fetch it now.
+[01:20] tableA: Fetch gemset
+Thought: Aria now needs glue to attach the flower and gems to the photoframe.
+[01:20] tableA: Fetch glue
+Thought: Blake is finished painting the coasters and will start wrapping up by returning his painting supplies, then fetch varnish to seal them.
+[01:30] tableB: Return tissuebox
+Thought: Blake continues wrapping up at tableB and will clean and return the palette next.
+[01:30] tableB: Return palette
+Thought: Blake continues wrapping up at tableB and will clean and return the cup next.
+[01:30] tableB: Return paintbrush
+Thought: Blake continues wrapping up at tableB and will clean and return the cup next.
+[01:30] tableB: Return cup
+Thought: Blake continues wrapping up at tableB and will clean and return the paint next, then fetch varnish to seal the coasters.
+[01:30] tableB: Return paint
+Thought: Blake now needs varnish to seal the coasters and will fetch it to begin finishing them.
+[01:30] tableB: Fetch varnish
+Thought: Divya is finished etching the mossframe border and will return the etchpen, then fetch moss, foamball, flower, stones, and glue to start building the arrangement.
+[01:40] tableD: Return etchpen
+Thought: Divya now needs materials to build the mossframe arrangement and will fetch moss, foamball, flower, stones, and glue to tableD.
+[01:40] tableD: Fetch moss
+Thought: Divya also needs a foamball to add height in the mossframe and will fetch it next.
+[01:40] tableD: Fetch foamball
+Thought: Divya also needs a flower for the mossframe arrangement and will fetch it next.
+[01:40] tableD: Fetch flower
+Thought: Divya also needs stones for the mossframe arrangement and will fetch them next.
+[01:40] tableD: Fetch stones
+Thought: Divya also needs glue to attach the moss, foamball, flower, and stones into the mossframe and will fetch it now.
+[01:40] tableD: Fetch glue
+Thought: Blake has finished sealing the coasters and will return the varnish, then wrap up by returning the coasters at 01:50.
+[01:50] tableB: Return varnish
+Thought: Blake has finished sealing the coasters and, with his session ending now, will return the coasters to wrap up.
+[01:50] tableB: Return coasters
+Thought: Aria has finished decorating the photoframe and, with her session ending at 02:00, will return the glue, flower, and gemset, then return the photoframe.
+[02:00] tableA: Return glue
+Thought: Aria continues wrapping up at tableA and will return the flower next.
+[02:00] tableA: Return flower
+Thought: Aria continues wrapping up at tableA and will return the gemset next.
+[02:00] tableA: Return gemset
+Thought: Aria is finished decorating and, with her session ending now, will return the photoframe to wrap up at tableA.
+[02:00] tableA: Return photoframe
+Thought: Divya has finished building the mossframe arrangement and, with her session ending at 02:10, will start wrapping up by returning the glue and remaining materials, then the mossframe.
+[02:10] tableD: Return glue
+Thought: Divya continues wrapping up at tableD and will return the remaining materials, starting with the moss.
+[02:10] tableD: Return moss
+Thought: Divya continues wrapping up at tableD and will return the foamball next.
+[02:10] tableD: Return foamball
+Thought: Divya continues wrapping up at tableD and will return the stones next.
+[02:10] tableD: Return stones
+Thought: Divya continues wrapping up at tableD and will return the flower next.
+[02:10] tableD: Return flower
+Thought: Divya is finished at tableD and will leave with the completed mossframe, returning it now.
+[02:10] tableD: Return mossframe
+Thought: Eli on tableE has finished painting the suncatcher and will start wrapping up the painting phase by returning his tissuebox, palette, cup, paintbrush, and paint at 02:20, then fetch gemset and glue to decorate.
+[02:20] tableE: Return tissuebox
+Thought: Eli continues wrapping up at tableE and will return the palette next.
+[02:20] tableE: Return palette
+Thought: Eli continues wrapping up at tableE and will return the cup next.
+[02:20] tableE: Return cup
+Thought: Eli continues wrapping up at tableE and will return the paintbrush next.
+[02:20] tableE: Return paintbrush
+Thought: Eli continues wrapping up at tableE and will return the paint next before fetching gemset and glue to decorate the suncatcher.
+[02:20] tableE: Return paint
+Thought: Eli has finished cleaning up painting supplies and now needs decorating materials; he will fetch a gemset and glue to decorate the suncatcher at tableE.
+[02:20] tableE: Fetch gemset
+Thought: Eli also needs glue to attach the gems to the suncatcher and will fetch it now.
+[02:20] tableE: Fetch glue
+Thought: Eli has finished decorating the suncatcher and, with his session ending at 02:30, will return the glue and gemset, then return the suncatcher.
+[02:30] tableE: Return glue
+Thought: Eli continues wrapping up at tableE and will return the gemset next.
+[02:30] tableE: Return gemset
+Thought: Eli has finished decorating and will return the completed suncatcher to wrap up his session at 02:30.
+[02:30] tableE: Return suncatcher
+Thought: Chen has finished decorating the keychain and, with his session ending at 02:30, will return the glue, gemset, and googlyeyes, then return the keychain.
+[02:30] tableC: Return glue
+Thought: Chen continues wrapping up at tableC and will return the gemset next.
+[02:30] tableC: Return gemset

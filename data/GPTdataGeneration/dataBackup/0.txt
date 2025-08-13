@@ -1,0 +1,95 @@
+Storyline:
+- Ava will use tableA from 00:10 to 02:30. She will etch a set of coasters and finish them with varnish.
+- Diego will use tableD from 00:20 to 03:00. He will paint a plantpot, then add moss at the end.
+- Beatrice will use tableB from 00:40 to 01:50. She will etch a mossframe and then fill it with moss and flowers using foamballs and glue.
+- Colin will use tableC from 01:40 to 02:40. He will paint a suncatcher and decorate it with gems and googly eyes.
+
+
+Thought: Ava on tableA chooses coasters as the base object to etch.
+[00:10] tableA: Fetch coasters
+Thought: Ava on tableA chooses Etching as the core crafting activity.
+[00:10] tableA: Fetch etchpen
+Thought: Diego on tableD chooses plantpot as the base object to decorate.
+[00:20] tableD: Fetch plantpot
+Thought: Diego on tableD chooses Painting as the core crafting activity.
+[00:20] tableD: Fetch paint
+Thought: Diego needs a paintbrush to paint the plantpot.
+[00:20] tableD: Fetch paintbrush
+Thought: Diego needs a palette to mix colors while painting the plantpot.
+[00:20] tableD: Fetch palette
+Thought: Diego needs a cup to wash the paintbrush in between uses while painting the plantpot.
+[00:20] tableD: Fetch cup
+Thought: Diego is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[00:20] tableD: Fetch tissuebox
+Thought: Beatrice on tableB chooses mossframe as the base object to etch.
+[00:40] tableB: Fetch mossframe
+Thought: Beatrice on tableB chooses Etching as the core crafting activity.
+[00:40] tableB: Fetch etchpen
+Thought: Beatrice is done etching and needs to return the etchpen.
+[00:50] tableB: Return etchpen
+Thought: Beatrice is ready to fill the mossframe and needs to fetch moss, flower, foamball, and glue.
+[00:50] tableB: Fetch moss
+Thought: Beatrice also needs a flower to decorate the mossframe and will fetch it.
+[00:50] tableB: Fetch flower
+Thought: Beatrice still needs foamball for height and glue to secure the moss and flowers; she'll fetch both now at tableB.
+[00:50] tableB: Fetch foamball
+Thought: Beatrice still needs glue to secure the moss and flowers and will fetch it now at tableB.
+[00:50] tableB: Fetch glue
+Thought: Ava is done etching her coasters and needs to clean and return the etchpen.
+[01:00] tableA: Return etchpen
+Thought: Ava is ready to finish her coasters by applying varnish and will fetch varnish at tableA.
+[01:10] tableA: Fetch varnish
+Thought: Ava is done applying varnish to her coasters and needs to return the varnish.
+[01:20] tableA: Return varnish
+Thought: Colin on tableC chooses suncatcher as the base object to decorate.
+[01:40] tableC: Fetch suncatcher
+Thought: Colin on tableC chooses Painting as the core crafting activity.
+[01:40] tableC: Fetch paint
+Thought: Colin needs a paintbrush to paint the suncatcher.
+[01:40] tableC: Fetch paintbrush
+Thought: Colin also needs a palette to mix colors and a cup and tissuebox to rinse and dry his paintbrush while painting the suncatcher.
+[01:40] tableC: Fetch palette
+Thought: Colin still needs a cup and tissuebox to rinse and dry his paintbrush; he'll fetch them now at tableC.
+[01:40] tableC: Fetch tissuebox
+Thought: Colin still needs a cup to rinse his paintbrush and will fetch it now at tableC.
+[01:40] tableC: Fetch cup
+Thought: Beatrice is done filling and decorating the mossframe and needs to return the glue.
+[01:50] tableB: Return glue
+Thought: Beatrice is done filling and decorating the mossframe and needs to return the moss.
+[01:50] tableB: Return moss
+Thought: Beatrice is done filling and decorating the mossframe and needs to return the flower.
+[01:50] tableB: Return flower
+Thought: Beatrice is done filling and decorating the mossframe and needs to return the foamball.
+[01:50] tableB: Return foamball
+Thought: Beatrice is done decorating the mossframe and will leave with the mossframe.
+[01:50] tableB: Return mossframe
+Thought: Colin on tableC is done painting and is ready to decorate the suncatcher; he'll fetch gemset, googlyeyes, and glue together.
+[02:00] tableC: Fetch gemset
+Thought: Colin still needs googlyeyes and glue for decorating the suncatcher and will fetch them now at tableC.
+[02:00] tableC: Fetch googlyeyes
+Thought: Colin still needs glue to attach the gems and googlyeyes to the suncatcher and will fetch it now at tableC.
+[02:00] tableC: Fetch glue
+Thought: Colin is done attaching the gems and googly eyes to the suncatcher and needs to return the glue.
+[02:10] tableC: Return glue
+Thought: Colin is done decorating the suncatcher and needs to return the gemset and googlyeyes.
+[02:10] tableC: Return gemset
+Thought: Colin is done decorating the suncatcher and needs to return the googlyeyes.
+[02:10] tableC: Return googlyeyes
+Thought: Colin is done with his suncatcher and needs to clean up—return the paint, paintbrush, palette, cup, and tissuebox, then return the suncatcher.
+[02:10] tableC: Return paint
+Thought: Colin is continuing cleanup and needs to return the paintbrush.
+[02:10] tableC: Return paintbrush
+Thought: Colin is continuing cleanup and needs to return the palette.
+[02:10] tableC: Return palette
+Thought: Colin is continuing cleanup and needs to return the cup.
+[02:10] tableC: Return cup
+Thought: Colin is continuing cleanup and needs to return the tissuebox.
+[02:10] tableC: Return tissuebox
+Thought: Ava is done finishing her coasters and will leave with them; she needs to return the coasters next at tableA.
+[02:30] tableA: Return coasters
+Thought: Colin’s session ends at 02:40, so he’ll wrap up by returning the finished suncatcher at tableC.
+[02:40] tableC: Return suncatcher
+Thought: Diego on tableD is done painting the plantpot and is ready to add moss; he’ll fetch moss next.
+[02:50] tableD: Fetch moss
+Thought: Diego needs glue to secure the moss to the plantpot and will fetch it now at tableD.
+[02:50] tableD: Fetch glue

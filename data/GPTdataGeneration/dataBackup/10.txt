@@ -1,0 +1,110 @@
+Storyline:
+- Chloe will use tableA from 00:00 to 02:10. She will paint a plantpot, then decorate it with stones and googly eyes.
+- Diego will use tableD from 00:20 to 02:00. He will etch a set of coasters and finish them with varnish.
+- Emily will use tableB from 00:30 to 02:50. She will build a mossframe filled with moss, lifted with foamballs, and accented with flowers.
+- Farah will use tableC from 01:10 to 02:30. She will paint a suncatcher and decorate it with rhinestone gems.
+- Hamid will use tableE from 00:40 to 03:00. He will etch a photoframe and then paint it.
+
+
+Thought: Chloe on tableA chooses a plantpot as the base object to decorate.
+[00:00] tableA: Fetch plantpot
+Thought: Chloe on tableA chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together to start painting the plantpot.
+[00:00] tableA: Fetch paint
+Thought: Chloe needs a paintbrush to paint the plantpot.
+[00:00] tableA: Fetch paintbrush
+Thought: Chloe needs a palette to paint the plantpot.
+[00:00] tableA: Fetch palette
+Thought: Chloe needs a cup to wash the paintbrush while painting the plantpot.
+[00:00] tableA: Fetch cup
+Thought: Chloe is starting to paint and needs a tissuebox to clean the paintbrush in between.
+[00:10] tableA: Fetch tissuebox
+Thought: Diego on tableD chooses coasters as the base object to decorate.
+[00:20] tableD: Fetch coasters
+Thought: Diego on tableD chooses Etching as the core crafting activity and needs an etchpen to start etching the coasters.
+[00:20] tableD: Fetch etchpen
+Thought: Emily on tableB chooses a mossframe as the base object to build.
+[00:30] tableB: Fetch mossframe
+Thought: Emily on tableB chooses Moss as the core crafting activity and will fetch moss and foamballs together to start filling and lifting the mossframe.
+[00:30] tableB: Fetch moss
+Thought: Emily also needs foamball to lift the moss in the mossframe and will fetch it together with the moss.
+[00:30] tableB: Fetch foamball
+Thought: Hamid on tableE chooses a photoframe as the base object to decorate.
+[00:40] tableE: Fetch photoframe
+Thought: Hamid on tableE chooses Etching as the core crafting activity and needs an etchpen to start etching the photoframe.
+[00:40] tableE: Fetch etchpen
+Thought: Emily on tableB is ready to secure the moss and start adding accents to the mossframe and will fetch glue and flower together.
+[00:50] tableB: Fetch glue
+Thought: Emily also needs a flower to accent the mossframe and will fetch it together with the glue.
+[00:50] tableB: Fetch flower
+Thought: Chloe is finishing the messy painting phase on the plantpot and will return the tissuebox.
+[01:00] tableA: Return tissuebox
+Thought: Farah on tableC chooses a suncatcher as the base object to decorate.
+[01:10] tableC: Fetch suncatcher
+Thought: Farah on tableC chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together to start painting the suncatcher.
+[01:10] tableC: Fetch paint
+Thought: Farah needs a paintbrush to paint the suncatcher.
+[01:10] tableC: Fetch paintbrush
+Thought: Farah needs a palette to paint the suncatcher.
+[01:10] tableC: Fetch palette
+Thought: Farah needs a cup to wash the paintbrush while painting the suncatcher.
+[01:20] tableC: Fetch tissuebox
+Thought: Farah realizes she still needs a cup to wash the paintbrush while painting the suncatcher and will fetch it now.
+[01:20] tableC: Fetch cup
+Thought: Emily is done securing the moss and initial flower accents on the mossframe and will return the glue to free it up for others.
+[01:30] tableB: Return glue
+Thought: Chloe is ready to start decorating the plantpot and will fetch glue, stones, and googlyeyes together.
+[01:40] tableA: Fetch glue
+Thought: Chloe also needs stones and googlyeyes to decorate the plantpot and will fetch them now together with the glue.
+[01:40] tableA: Fetch stones
+Thought: Chloe still needs the googlyeyes to decorate the plantpot and will fetch them now together with the glue and stones.
+[01:40] tableA: Fetch googlyeyes
+Thought: Diego is done etching the coasters and will return the etchpen, then fetch varnish to finish them.
+[01:50] tableD: Return etchpen
+Thought: Diego will fetch varnish to finish the coasters.
+[02:00] tableD: Fetch varnish
+Thought: Chloe is wrapping up at tableA and, as her session ends at 02:10, will return the glue, stones, and googlyeyes, then clean and return the paint, palette, cup, and paintbrush, and leave with the plantpot.
+[02:10] tableA: Return glue
+Thought: Chloe will continue wrapping up by returning the stones at tableA.
+[02:10] tableA: Return stones
+Thought: Chloe will continue wrapping up by returning the googlyeyes at tableA.
+[02:10] tableA: Return googlyeyes
+Thought: Chloe will continue wrapping up by returning the paint at tableA.
+[02:10] tableA: Return paint
+Thought: Chloe will continue wrapping up by returning the palette at tableA.
+[02:10] tableA: Return palette
+Thought: Chloe will continue wrapping up by returning the cup at tableA.
+[02:10] tableA: Return cup
+Thought: Chloe will continue wrapping up by returning the paintbrush at tableA.
+[02:10] tableA: Return paintbrush
+Thought: Chloe is done at tableA and will leave with the plantpot.
+[02:10] tableA: Return plantpot
+Thought: Farah on tableC has finished painting and is ready to decorate the suncatcher; she will fetch gemset and glue together next.
+[02:20] tableC: Fetch gemset
+Thought: Farah also needs glue to attach the rhinestone gems to the suncatcher and will fetch it together with the gemset.
+[02:20] tableC: Fetch glue
+Thought: Farah on tableC is wrapping up her suncatcher at 02:30 and will return the glue and gemset, then clean and return the paint, palette, cup, tissuebox, and paintbrush, and leave with the suncatcher.
+[02:30] tableC: Return glue
+Thought: Farah will continue wrapping up at tableC by returning the gemset.
+[02:30] tableC: Return gemset
+Thought: Farah will continue wrapping up at tableC by returning the paint she used for the suncatcher.
+[02:30] tableC: Return paint
+Thought: Farah will continue wrapping up at tableC by returning the palette.
+[02:30] tableC: Return palette
+Thought: Farah will continue wrapping up at tableC by returning the cup.
+[02:30] tableC: Return cup
+Thought: Farah will continue wrapping up at tableC by returning the paintbrush.
+[02:30] tableC: Return paintbrush
+Thought: Farah will continue wrapping up at tableC by returning the tissuebox.
+[02:30] tableC: Return tissuebox
+Thought: Diego on tableD has finished applying varnish to the coasters and will return the varnish, then return the coasters.
+[02:40] tableD: Return varnish
+Thought: Diego will now return the coasters to finish up at tableD.
+[02:40] tableD: Return coasters
+Thought: Emily on tableB is wrapping up her mossframe at 02:50 and will return the flower, foamball, moss, and the mossframe.
+[02:50] tableB: Return flower
+Thought: Emily will continue wrapping up at tableB by returning the foamball.
+[02:50] tableB: Return foamball
+Thought: Emily will continue wrapping up at tableB by returning the moss.
+[02:50] tableB: Return moss
+Thought: Emily will continue wrapping up at tableB by returning the mossframe.
+[02:50] tableB: Return mossframe

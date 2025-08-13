@@ -1,0 +1,85 @@
+Storyline:
+- Rowan will use tableB from 00:00 to 01:30. He will paint a photoframe and finish it with a clear varnish coat.
+- Ivy will use tableC from 00:20 to 02:00. She will etch a keychain and then decorate it with a flower and googly eyes using glue.
+- Niko will use tableA from 01:50 to 03:00. He will paint a set of coasters and finish them with varnish.
+- Sera will use tableD from 02:10 to 02:50. She will lightly etch a mossframe and then fill it with moss and flowers using foamballs for height, securing with glue.
+
+
+Thought: Rowan on tableB chooses a photoframe as the base object to decorate.
+[00:00] tableB: Fetch photoframe
+Thought: Rowan on tableB chooses Painting as the core crafting activity.
+[00:00] tableB: Fetch paint
+Thought: Rowan needs a paintbrush, palette, and cup to start painting the photoframe and will fetch them together now.
+[00:00] tableB: Fetch paintbrush
+Thought: Rowan also needs a palette to start painting the photoframe and will fetch it now.
+[00:00] tableB: Fetch palette
+Thought: Rowan also needs a cup to rinse his brush while painting the photoframe and will fetch it now.
+[00:10] tableB: Fetch tissuebox
+Thought: Ivy on tableC chooses a keychain as the base object to decorate.
+[00:20] tableC: Fetch keychain
+Thought: Ivy on tableC chooses Etching as the core crafting activity.
+[00:20] tableC: Fetch etchpen
+Thought: Rowan is done with the initial coats and will return the tissuebox before continuing to paint.
+[00:30] tableB: Return tissuebox
+Thought: Rowan is done painting the photoframe and needs to clean and return the palette.
+[00:40] tableB: Return palette
+Thought: Rowan is done painting the photoframe and needs to clean and return the paintbrush.
+[00:50] tableB: Return paintbrush
+Thought: Rowan is done painting the photoframe and needs to clean and return the paint before fetching varnish to seal it.
+[01:00] tableB: Return paint
+Thought: Rowan is ready to seal the painted photoframe and will fetch varnish.
+[01:10] tableB: Fetch varnish
+Thought: Rowan has finished sealing the photoframe and should return the varnish.
+[01:20] tableB: Return varnish
+Thought: Rowan is wrapping up and will return the photoframe as he leaves at 01:30.
+[01:30] tableB: Return photoframe
+Thought: Ivy is done etching the keychain and needs to clean and return the etchpen before fetching flower, googlyeyes, and glue to decorate.
+[01:40] tableC: Return etchpen
+Thought: Ivy is ready to decorate the keychain and will fetch flower, googlyeyes, and glue together to start embellishing.
+[01:40] tableC: Fetch flower
+Thought: Ivy also needs googlyeyes to decorate the keychain and will fetch them now.
+[01:40] tableC: Fetch glue
+Thought: Ivy also needs googlyeyes to decorate the keychain and will fetch them now.
+[01:40] tableC: Fetch googlyeyes
+Thought: Niko on tableA chooses coasters as the base object to decorate.
+[01:50] tableA: Fetch coasters
+Thought: Niko on tableA chooses Painting as the core crafting activity.
+[01:50] tableA: Fetch paint
+Thought: Niko needs a paintbrush, palette, and cup to start painting the coasters and will fetch them together now.
+[01:50] tableA: Fetch paintbrush
+Thought: Niko also needs a palette to start painting the coasters and will fetch it now.
+[01:50] tableA: Fetch cup
+Thought: Niko is starting to paint the coasters and needs a tissuebox to clean the paintbrush in between.
+[02:00] tableA: Fetch tissuebox
+Thought: Sera on tableD chooses a mossframe as the base object to decorate.
+[02:10] tableD: Fetch mossframe
+Thought: Sera on tableD chooses Etching as the core crafting activity.
+[02:10] tableD: Fetch etchpen
+Thought: Ivy has finished decorating the keychain and should return the glue, flower, and googlyeyes, then return the keychain as she wraps up.
+[02:20] tableC: Return glue
+Thought: Ivy is done returning the glue and needs to return the flower next.
+[02:20] tableC: Return flower
+Thought: Ivy is done returning the glue and flower and should now return the googlyeyes.
+[02:20] tableC: Return googlyeyes
+Thought: Ivy is wrapping up and needs to return the keychain.
+[02:20] tableC: Return keychain
+Thought: Sera is done lightly etching the mossframe and needs to return the etchpen before fetching moss, foamballs, and flowers for arranging.
+[02:30] tableD: Return etchpen
+Thought: Sera is ready to fill the mossframe and will fetch moss, foamball, flower, and glue together to start arranging.
+[02:30] tableD: Fetch moss
+Thought: Sera also needs a foamball to add height and will fetch it now.
+[02:30] tableD: Fetch flower
+Thought: Sera also needs a foamball to add height and will fetch it now.
+[02:30] tableD: Fetch foamball
+Thought: Sera also needs glue to secure the moss, foamball, and flower in the mossframe and will fetch it now.
+[02:30] tableD: Fetch glue
+Thought: Sera has finished securing the moss, foamball, and flower in the mossframe and should return the glue.
+[02:40] tableD: Return glue
+Thought: Sera has finished arranging the mossframe and will return the moss, foamball, and flower next, then return the mossframe as she leaves at 02:50.
+[02:50] tableD: Return moss
+Thought: Sera is done returning the moss and needs to return the foamball next.
+[02:50] tableD: Return foamball
+Thought: Sera is done returning the foamball and needs to return the flower next.
+[02:50] tableD: Return flower
+Thought: Sera is wrapping up and needs to return the mossframe as she leaves at 02:50.
+[02:50] tableD: Return mossframe

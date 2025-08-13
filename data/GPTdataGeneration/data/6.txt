@@ -1,0 +1,116 @@
+Storyline:
+- Dana will use tableA from 00:00 to 02:20. She will paint a suncatcher and decorate it with gems.
+- Eli will use tableD from 00:10 to 02:40. He will etch a mossframe, then fill it with moss, flowers, foamballs, and stones.
+- Fatima will use tableB from 00:20 to 02:10. She will etch coasters and finish them with varnish.
+- Gus will use tableC from 00:30 to 02:50. He will paint a plantpot and decorate it with moss, stones, and googly eyes.
+- Hana will use tableE from 00:40 to 02:30. She will paint a photoframe and decorate it with flowers and gems.
+
+
+Thought: Dana on tableA chooses a suncatcher as the base object to decorate.
+[00:00] tableA: Fetch suncatcher
+Thought: Dana on tableA chooses Painting as the core crafting activity.
+[00:00] tableA: Fetch paint
+Thought: Dana needs a paintbrush to paint the suncatcher.
+[00:00] tableA: Fetch paintbrush
+Thought: Dana needs a palette to paint the suncatcher.
+[00:00] tableA: Fetch palette
+Thought: Dana needs a cup to wash the paintbrush in between uses.
+[00:00] tableA: Fetch cup
+Thought: Eli on tableD chooses a mossframe as the base object to decorate.
+[00:10] tableD: Fetch mossframe
+Thought: Eli on tableD chooses Etching as the core crafting activity.
+[00:10] tableD: Fetch etchpen
+Thought: Fatima on tableB chooses coasters as the base object to decorate.
+[00:20] tableB: Fetch coasters
+Thought: Fatima on tableB chooses Etching as the core crafting activity.
+[00:20] tableB: Fetch etchpen
+Thought: Gus on tableC chooses a plantpot as the base object to decorate.
+[00:30] tableC: Fetch plantpot
+Thought: Gus on tableC chooses Painting as the core crafting activity.
+[00:30] tableC: Fetch paint
+Thought: Gus needs a paintbrush to paint the plantpot.
+[00:30] tableC: Fetch paintbrush
+Thought: Gus needs a palette to paint the plantpot.
+[00:30] tableC: Fetch palette
+Thought: Gus needs a cup to wash the paintbrush in between uses.
+[00:30] tableC: Fetch cup
+Thought: Hana on tableE chooses a photoframe as the base object to decorate.
+[00:40] tableE: Fetch photoframe
+Thought: Hana on tableE chooses Painting as the core crafting activity.
+[00:40] tableE: Fetch paint
+Thought: Hana needs a paintbrush to paint the photoframe.
+[00:40] tableE: Fetch paintbrush
+Thought: Hana needs a palette to paint the photoframe.
+[00:40] tableE: Fetch palette
+Thought: Hana needs a cup to wash the paintbrush in between uses.
+[00:40] tableE: Fetch cup
+Thought: Dana is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[00:50] tableA: Fetch tissuebox
+Thought: Eli is done etching the mossframe and needs to clean and return the etchpen.
+[01:00] tableD: Return etchpen
+Thought: Eli is moving on from etching and will start filling the mossframe; he needs to fetch moss, foamball, flower, stones, and glue.
+[01:00] tableD: Fetch moss
+Thought: Eli also needs a foamball to create height in the mossframe and will fetch it now.
+[01:00] tableD: Fetch foamball
+Thought: Eli also needs a flower to decorate the mossframe and will fetch it now.
+[01:00] tableD: Fetch flower
+Thought: Eli also needs stones to decorate the mossframe and will fetch them now.
+[01:00] tableD: Fetch stones
+Thought: Eli also needs glue to secure the moss, flowers, and stones in the mossframe and will fetch it now.
+[01:00] tableD: Fetch glue
+Thought: Hana is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[01:10] tableE: Fetch tissuebox
+Thought: Gus is starting to paint and needs a tissuebox to clean the paintbrush in between uses.
+[01:20] tableC: Fetch tissuebox
+Thought: Dana is done painting her suncatcher and is ready to decorate it; she will fetch a gemset and glue to attach the gems.
+[01:30] tableA: Fetch gemset
+Thought: Dana also needs glue to attach the gems to the suncatcher and will fetch it now.
+[01:30] tableA: Fetch glue
+Thought: Fatima is done etching her coasters and needs to clean and return the etchpen.
+[01:40] tableB: Return etchpen
+Thought: Fatima is ready to finish her coasters with a protective coat and needs to fetch varnish.
+[01:50] tableB: Fetch varnish
+Thought: Dana is done decorating the suncatcher and needs to clean and return the glue and gemset.
+[02:00] tableA: Return glue
+Thought: Dana is done decorating the suncatcher and needs to clean and return the gemset.
+[02:00] tableA: Return gemset
+Thought: Fatima is finished varnishing her coasters and needs to return the varnish, then return the coasters.
+[02:10] tableB: Return varnish
+Thought: Fatima is done with her coasters after varnishing and will return the coasters now.
+[02:10] tableB: Return coasters
+Thought: Dana is finishing her session and needs to clean and return the paint, paintbrush, palette, cup, and tissuebox, then return the suncatcher.
+[02:20] tableA: Return paint
+Thought: Dana has returned the paint and now needs to clean and return the paintbrush.
+[02:20] tableA: Return paintbrush
+Thought: Dana has returned the paintbrush and now needs to clean and return the palette.
+[02:20] tableA: Return palette
+Thought: Dana has returned the palette and now needs to clean and return the cup.
+[02:20] tableA: Return cup
+Thought: Dana has returned the cup and now needs to clean and return the tissuebox.
+[02:20] tableA: Return tissuebox
+Thought: Hana is done painting her photoframe and is ready to decorate it; she will fetch flower, gemset, and glue together.
+[02:30] tableE: Fetch flower
+Thought: Hana also needs a gemset to decorate the photoframe and will fetch it now.
+[02:30] tableE: Fetch gemset
+Thought: Hana also needs glue to attach the flowers and gems to the photoframe and will fetch it now.
+[02:30] tableE: Fetch glue
+Thought: Eli is finishing his mossframe and needs to return the glue, moss, foamball, flower, and stones, then return the mossframe.
+[02:40] tableD: Return glue
+Thought: Eli has returned the glue and now needs to return the moss he used for the frame.
+[02:40] tableD: Return moss
+Thought: Eli has returned the moss and now needs to return the foamball.
+[02:40] tableD: Return foamball
+Thought: Eli has returned the foamball and now needs to return the flower.
+[02:40] tableD: Return flower
+Thought: Eli has returned the flower and now needs to return the stones.
+[02:40] tableD: Return stones
+Thought: Eli has returned the stones and now needs to return the mossframe.
+[02:40] tableD: Return mossframe
+Thought: Gus is done painting his plantpot and is ready to decorate it; he will fetch moss, stones, googlyeyes, and glue together.
+[02:50] tableC: Fetch moss
+Thought: Gus also needs stones to decorate the plantpot and will fetch them now.
+[02:50] tableC: Fetch stones
+Thought: Gus also needs googlyeyes to decorate the plantpot and will fetch them now.
+[02:50] tableC: Fetch googlyeyes
+Thought: Gus also needs glue to attach the moss, stones, and googlyeyes to the plantpot and will fetch it now.
+[02:50] tableC: Fetch glue

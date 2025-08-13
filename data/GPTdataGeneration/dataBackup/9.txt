@@ -1,0 +1,61 @@
+Storyline:
+- Aria will use tableA from 00:00 to 02:20. She will paint a plantpot, then decorate it with stones.
+- Bao will use tableC from 00:20 to 02:50. He will build a mossframe filled with moss, lifted with foamballs, and accented with flowers.
+- Cam will use tableD from 00:30 to 02:20. He will etch a set of coasters and finish them with varnish.
+- Devon will use tableB from 00:40 to 02:50. He will paint a suncatcher and decorate it with rhinestone gems.
+
+
+Thought: Aria on tableA chooses a plantpot as the base object to decorate.
+[00:00] tableA: Fetch plantpot
+Thought: Aria on tableA chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together to start painting the plantpot.
+[00:00] tableA: Fetch paint
+Thought: Aria needs a paintbrush to paint the plantpot.
+[00:00] tableA: Fetch paintbrush
+Thought: Aria needs a palette to paint the plantpot.
+[00:00] tableA: Fetch palette
+Thought: Aria needs a cup to wash the paintbrush while painting the plantpot.
+[00:00] tableA: Fetch cup
+Thought: Aria is starting to paint and needs a tissuebox to clean the paintbrush in between.
+[00:10] tableA: Fetch tissuebox
+Thought: Bao on tableC chooses a mossframe as the base object to build.
+[00:20] tableC: Fetch mossframe
+Thought: Bao on tableC chooses Moss as the core crafting activity and will fetch moss and foamball together to start filling and lifting the mossframe.
+[00:20] tableC: Fetch moss
+Thought: Bao also needs a foamball to lift the moss in the mossframe and will fetch it together with the moss.
+[00:30] tableD: Fetch coasters
+Thought: Cam on tableD chooses Etching as the core crafting activity and needs an etchpen to start etching the coasters.
+[00:30] tableD: Fetch etchpen
+Thought: Devon on tableB chooses a suncatcher as the base object to decorate.
+[00:40] tableB: Fetch suncatcher
+Thought: Devon on tableB chooses Painting as the core crafting activity and will fetch paint, paintbrush, palette, and a cup together to start painting the suncatcher.
+[00:40] tableB: Fetch paint
+Thought: Devon needs a paintbrush to paint the suncatcher.
+[00:40] tableB: Fetch paintbrush
+Thought: Devon on tableB still needs a palette and a cup to paint the suncatcher and will fetch them together now.
+[00:40] tableB: Fetch palette
+Thought: Devon still needs a cup to wash the paintbrush while painting the suncatcher and will fetch it now to complete his painting setup.
+[00:40] tableB: Fetch cup
+Thought: Devon is starting to paint the suncatcher and needs a tissuebox to clean the paintbrush in between.
+[00:50] tableB: Fetch tissuebox
+Thought: Bao on tableC realizes he still needs a foamball to lift the moss in the mossframe and will fetch it next.
+[01:00] tableC: Fetch foamball
+Thought: Bao on tableC is ready to secure the moss and add floral accents to the mossframe; he will fetch glue and flower together next.
+[01:10] tableC: Fetch glue
+Thought: Bao also needs a flower to accent the mossframe and will fetch it together with the glue.
+[01:10] tableC: Fetch flower
+Thought: Aria on tableA is transitioning from painting to decorating and will fetch stones next to plan the layout before gluing.
+[01:20] tableA: Fetch stones
+Thought: Bao on tableC is done securing the moss and flowers in the mossframe and will return the glue to free it up for others.
+[01:30] tableC: Return glue
+Thought: Aria on tableA is ready to attach the stones to the plantpot now that glue is available and will fetch glue next.
+[01:40] tableA: Fetch glue
+Thought: Aria on tableA has finished attaching the stones to her plantpot and will return the glue to free it up for others.
+[01:50] tableA: Return glue
+Thought: Cam on tableD is done etching the coasters and will return the etchpen next, then fetch varnish to finish them.
+[02:00] tableD: Return etchpen
+Thought: Cam on tableD will fetch varnish next to finish the coasters.
+[02:10] tableD: Fetch varnish
+Thought: Cam on tableD has finished applying varnish to the coasters and will return the varnish, then return the coasters to wrap up his session.
+[02:20] tableD: Return varnish
+Thought: Cam on tableD will now return the coasters to wrap up his session.
+[02:20] tableD: Return coasters
