@@ -200,6 +200,8 @@ class MultiModalUserTrackingModule(LightningModule):
         assert self.cfg.n_nodes == num_f_nodes, (str(self.cfg.n_nodes) +'!='+ str(num_f_nodes))
         assert self.cfg.n_nodes == num_t_nodes, (str(self.cfg.n_nodes) +'!='+ str(num_t_nodes))
 
+        assert graph_seq_edges.min() >= 0 and graph_seq_edges.max() <= 1, f"Edges are not normalized! {graph_seq_edges.min()} to {graph_seq_edges.max()}"
+
         # Results Initialization for when not populated
         graph_autoenc_loss = torch.Tensor([0.]).to('cuda')
         activity_autoenc_loss = torch.Tensor([0.]).to('cuda')

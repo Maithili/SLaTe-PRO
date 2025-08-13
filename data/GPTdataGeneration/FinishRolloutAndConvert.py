@@ -155,6 +155,9 @@ class FinisherAndConverter:
                         "object": parsed_movement[3],
                         "person": self.person_current,
                     })
+                    if time_hhmm_to_seconds(parsed_movement[0]) > self.person_times[self.person_current][2]:
+                        VERBOSE and print(f"Warning: {parsed_movement[0]} is after {self.person_times[self.person_current][2]}")
+                        self.person_times[self.person_current] = (self.person_times[self.person_current][0], self.person_times[self.person_current][1], time_hhmm_to_seconds(parsed_movement[0]), self.person_times[self.person_current][3])
                 else:
                     # print(f"Ignoring line: {line}")
                     continue
@@ -204,6 +207,7 @@ class FinisherAndConverter:
                 table_name = self.movements_parsed[movement_idx]['table']
                 change = -1 if self.movements_parsed[movement_idx]['action'] == "Return" else 1
                 new_sg[objects_masterlist.index(object_name), objects_masterlist.index(table_name)] += change
+                assert new_sg.min() >= 0 and new_sg.max() <= 1, f"Scene graph is not normalized! {new_sg.min()} to {new_sg.max()}; {self.movements_parsed[movement_idx]}"
                 movement_idx += 1
             for person in self.person_times.keys():
                 if self.person_times[person][1] < timestamp_slatepro*60 and self.person_times[person][2] >= timestamp_slatepro*60:

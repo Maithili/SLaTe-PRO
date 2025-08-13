@@ -160,6 +160,7 @@ class DataSplit():
     def __getitem__(self, idx: int):
         data = torch.load(os.path.join(self.routines_dir, self.files[idx]))
         edges = data['edges']
+        assert edges.min() >= 0 and edges.max() <= 1, f"Edges are not normalized! {edges.min()} to {edges.max()}"
         node_features = self.node_embedder(data['nodes']).unsqueeze(0).repeat(data['edges'].size()[0],1,1)
         node_ids = data['nodes'].unsqueeze(0).repeat(data['edges'].size()[0],1,1)
         activity_feature = self.activity_embedder(data['activity'])
