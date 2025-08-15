@@ -22,6 +22,7 @@ from ObjectActivityCoembedding import ObjectActivityCoembeddingModule
 from loader_sequential import RoutinesDataset
 from loader_object_activity import ActivitiesDataset
 from encoders import TimeEncodingOptions
+from visualize_results import visualize
 
 import random
 from numpy import random as nrandom
@@ -154,7 +155,6 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run model on routines.')
     parser.add_argument('--path', type=str, default='data/HouseholdVariations/persona1_', help='Path where the data lives. Must contain routines, info and classes json files.')
-    parser.add_argument('--datatype', type=str, default='Routines', help='Either Activity or Routines.')
     parser.add_argument('--cfg', type=str, help='Name of config file.')
     parser.add_argument('--train_days', type=int, help='Number of routines to train on.')
     parser.add_argument('--name', type=str, default='default_100', help='Name of run.')
@@ -223,28 +223,20 @@ if __name__ == '__main__':
     if cfg['NAME'] is None:
         cfg['NAME'] = os.path.basename(args.path)+'_trial'
 
-    if args.datatype.lower() == 'routines':
-        if 'processed_seqLM' not in args.path.split('/')[-1]: args.path = os.path.join(args.path, 'processed_seqLM')
-        if args.dt: args.path += f'_{args.dt}'
-        if args.coarse : args.path += '_coarse'
-        cfg['DATA_INFO'] = json.load(open(os.path.join(args.path, 'common_data.json')))
+    if 'processed_seqLM' not in args.path.split('/')[-1]: args.path = os.path.join(args.path, 'processed_seqLM')
+    if args.dt: args.path += f'_{args.dt}'
+    if args.coarse : args.path += '_coarse'
+    cfg['DATA_INFO'] = json.load(open(os.path.join(args.path, 'common_data.json')))
 
-        time_options = TimeEncodingOptions(cfg['DATA_INFO']['weeekend_days'] if 'weeekend_days' in cfg['DATA_INFO'].keys() else None)
-        time_encoding = time_options('sine_informed')
+    time_options = TimeEncodingOptions(cfg['DATA_INFO']['weeekend_days'] if 'weeekend_days' in cfg['DATA_INFO'].keys() else None)
+    time_encoding = time_options('sine_informed')
 
-        data = RoutinesDataset(data_path=args.path,
-                                time_encoder=time_encoding, 
-                                batch_size=cfg['batch_size'],
-                                activity_dropout=cfg['activity_dropout_prob'])
-        
-    elif args.datatype.lower() == 'activities':
-        if 'processed_obj_act' not in args.path.split('/')[-1]: args.path = os.path.join(args.path, 'processed_obj_act')
-        cfg['DATA_INFO'] = json.load(open(os.path.join(args.path, 'common_data.json')))
-        data = ActivitiesDataset(data_path=args.path)
-    else:
-        raise Exception(f"{args.datatype} is not a valid tye of dataset. Must be one of 'routines' or 'activities'!")
-
-    model_generator = MultiModalUserTrackingModule if args.datatype.lower() == 'routines' else ObjectActivityCoembeddingModule
+    data = RoutinesDataset(data_path=args.path,
+                            time_encoder=time_encoding, 
+                            batch_size=cfg['batch_size'],
+                            activity_dropout=cfg['activity_dropout_prob'])
+  
+    model_generator = MultiModalUserTrackingModule
 
     group = args.path.split('/')[-2]
     output_dir = os.path.join(args.logs_dir, group, cfg['NAME'])
@@ -253,3 +245,5 @@ if __name__ == '__main__':
 
     else:
         run(data, group=group, cfg=cfg, tags = args.tags, logs_dir=output_dir, original_model=cfg['original_model'], model_generator=model_generator, train_only=args.train_only)
+
+    visualize(output_dir, cfg)

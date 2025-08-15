@@ -1,6 +1,6 @@
 name: null
 original_model: False
-epochs: [5,10,20,50,100,120]
+epochs: [5,10,20,30,50,80,100,120,150]
 batch_size: 1
 activity_dropout_prob: 0.0
 activity_dropout_train: 0.2
