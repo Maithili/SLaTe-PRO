@@ -82,6 +82,7 @@ class MultiModalUserTrackingModule(LightningModule):
 
         self.snapshots_pred = []
         self.snapshots_gt = []
+        self.snapshots_reference = []
 
 
     def combine_latents(self, pred=None, enc_graph=None, enc_activity=None, time_context=None):
@@ -375,7 +376,6 @@ class MultiModalUserTrackingModule(LightningModule):
 
 
     def evaluate_prediction(self, batch, num_steps=1):
-
         graph_seq_nodes = batch.get('node_features').float()
         graph_seq_edges = batch.get('edges')
         graph_dyn_edges = batch.get('dynamic_edges_mask')
@@ -412,6 +412,7 @@ class MultiModalUserTrackingModule(LightningModule):
 
         self.num_test_batches += 1
 
+        reference_edges_initial = input_edges_forward.clone().detach()
 
         for step in range(num_steps):
             if not self.original_model:
@@ -436,8 +437,9 @@ class MultiModalUserTrackingModule(LightningModule):
             pred_edges_thresh = pred_edges_original > 0.5
             pred_movements = pred_edges_thresh != reference_edges
             gt_movements = expected_edges != reference_edges
-            self.snapshots_pred.append(pred_edges_thresh.to(int) - reference_edges)
-            self.snapshots_gt.append(expected_edges - reference_edges)
+            self.snapshots_pred.append(pred_edges_thresh.to(int))
+            self.snapshots_gt.append(expected_edges)
+            self.snapshots_reference.append(reference_edges)
             
             self.results['confusion_matrix']['tp'][step] += int((torch.bitwise_and(pred_movements, gt_movements)).sum())
             self.results['confusion_matrix']['fp'][step] += int((torch.bitwise_and(pred_movements, torch.bitwise_not(gt_movements))).sum())
@@ -453,6 +455,9 @@ class MultiModalUserTrackingModule(LightningModule):
 
             self.results['activity']['differences'][step] += (expected_activities - pred_activities).abs()
 
+
+        predicted_movements_probabilities = pred_edges_original - reference_edges_initial
+        return predicted_movements_probabilities
 
     def training_step(self, batch, batch_idx):
         batch_training_dropout = (torch.rand_like(batch['activity_ids'].float()) < self.cfg.activity_dropout_train).to(bool)
@@ -531,26 +536,47 @@ class MultiModalUserTrackingModule(LightningModule):
         torch.save(results_torch, os.path.join(output_dir,f'{prefix}test_evaluation_splits.pt'))
         json.dump(results_json, open(os.path.join(output_dir,f'{prefix}test_evaluation_splits.json'),'w'), indent=4)
 
-        for batchidx, (pred, gt) in enumerate(zip(self.snapshots_pred, self.snapshots_gt)):
+        # self.log('Final_F1', self.results['f1'][0])
+        # self.log('Final_Precision', self.results['precision'][0])
+        # self.log('Final_Recall', self.results['recall'][0])
+
+        for batchidx, (pred, gt, ref) in enumerate(zip(self.snapshots_pred, self.snapshots_gt, self.snapshots_reference)):
             pred = pred.squeeze(0)
             gt = gt.squeeze(0)
+            ref = ref.squeeze(0)
+            pred_diff = pred - ref
+            gt_diff = gt - ref
             fig, ax = plt.subplots(2,len(pred),figsize=(1.5*len(pred),10))
+            fig_diff, ax_diff = plt.subplots(2,len(pred),figsize=(1.5*len(pred),10))
             ax[0,0].set_yticks(np.arange(0, len(node_classes)), labels=node_classes, fontsize=10)
             ax[1,0].set_yticks(np.arange(0, len(node_classes)), labels=node_classes, fontsize=10)
             ax[1,0].set_xticks(np.arange(0, len(node_classes)), labels=node_classes, fontsize=10, rotation=90)
             ax[0,0].set_ylabel('Predicted')
             ax[1,0].set_ylabel('Ground Truth')
+            ax_diff[0,0].set_yticks(np.arange(0, len(node_classes)), labels=node_classes, fontsize=10)
+            ax_diff[1,0].set_yticks(np.arange(0, len(node_classes)), labels=node_classes, fontsize=10)
+            ax_diff[1,0].set_xticks(np.arange(0, len(node_classes)), labels=node_classes, fontsize=10, rotation=90)
+            ax_diff[0,0].set_ylabel('Predicted')
+            ax_diff[1,0].set_ylabel('Ground Truth')
             for i in range(len(pred)):
-                ax[0,i].imshow(pred[i].cpu().numpy(), cmap='viridis', vmin=-1, vmax=1)
-                ax[1,i].imshow(gt[i].cpu().numpy(), cmap='viridis', vmin=-1, vmax=1)
+                ax_diff[0,i].imshow(pred_diff[i].cpu().numpy(), cmap='viridis', vmin=-1, vmax=1)
+                ax_diff[1,i].imshow(gt_diff[i].cpu().numpy(), cmap='viridis', vmin=-1, vmax=1)
+                ax_diff[0,i].set_xlim(common_data['active_edge_ranges'][0][0], common_data['active_edge_ranges'][0][1])
+                ax_diff[0,i].set_ylim(common_data['active_edge_ranges'][1][0], common_data['active_edge_ranges'][1][1])
+                ax_diff[1,i].set_xlim(common_data['active_edge_ranges'][0][0], common_data['active_edge_ranges'][0][1])
+                ax_diff[1,i].set_ylim(common_data['active_edge_ranges'][1][0], common_data['active_edge_ranges'][1][1])
+                ax[0,i].imshow(pred[i].cpu().numpy(), cmap='viridis', vmin=0, vmax=1)
+                ax[1,i].imshow(gt[i].cpu().numpy(), cmap='viridis', vmin=0, vmax=1)
                 ax[0,i].set_xlim(common_data['active_edge_ranges'][0][0], common_data['active_edge_ranges'][0][1])
                 ax[0,i].set_ylim(common_data['active_edge_ranges'][1][0], common_data['active_edge_ranges'][1][1])
                 ax[1,i].set_xlim(common_data['active_edge_ranges'][0][0], common_data['active_edge_ranges'][0][1])
                 ax[1,i].set_ylim(common_data['active_edge_ranges'][1][0], common_data['active_edge_ranges'][1][1])
             fig.set_tight_layout(True)
             fig.set_dpi(300)
-            
-            plt.savefig(os.path.join(output_dir,f'{prefix}test_evaluation_splits_{batchidx}.png'))
+            fig_diff.set_tight_layout(True)
+            fig_diff.set_dpi(300)
+            plt.savefig(os.path.join(output_dir,f'{prefix}test_{batchidx}.png'))
+            plt.savefig(os.path.join(output_dir,f'{prefix}test_diff_{batchidx}.png'))
             plt.close()
         self.reset_validation()
 

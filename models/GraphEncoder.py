@@ -59,8 +59,8 @@ class GraphEncoderModule(LightningModule):
         nodes_and_locations = torch.cat([nodes_shortened, prev_loc, new_loc], dim=-1)
         assert nodes_and_locations.size()[0] == batch_size, nodes_and_locations.size()
         assert nodes_and_locations.size()[1] == sequence_len, nodes_and_locations.size()
-        assert nodes_and_locations.size()[2] == self.cfg.n_nodes, nodes_and_locations.size()
-        assert nodes_and_locations.size()[3] == self.cfg.n_len*3, nodes_and_locations.size()
+        assert nodes_and_locations.size()[2] == self.cfg.n_nodes, f"{nodes_and_locations.size()} vs {self.cfg.n_nodes}"
+        assert nodes_and_locations.size()[3] == self.cfg.n_len*3, f"{nodes_and_locations.size()} vs {self.cfg.n_len*3}"
 
         nodes_and_locations = self.embed_node_locations(nodes_and_locations)
         ## Try embedding node-location pairs per timestep and then passing through the encoder

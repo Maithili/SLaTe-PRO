@@ -52,6 +52,21 @@ class OneHotEmbedder():
     def __call__(self, idxs):
         return F.one_hot(idxs.to(int), num_classes=len(self.class_list))
 
+class OneHotEmbedder_tableInvariant():
+    def __init__(self, class_list):
+        self.class_list = class_list
+        self.table_invariant_classes = [t for t in class_list if t.startswith('table')]
+        table_indices = [i for i,c in enumerate(class_list) if c in self.table_invariant_classes]
+        self.class_list_table_invariant = ['table']+[c for i,c in enumerate(class_list) if i not in table_indices]
+        self.index_map = {i:self.class_list_table_invariant.index(c) for i,c in enumerate(class_list) if c not in self.table_invariant_classes}
+        for idx_tab in table_indices:
+            self.index_map[idx_tab] = self.class_list_table_invariant.index('table')
+
+    def __call__(self, idxs):
+        idxs_table_invariant = torch.tensor([self.index_map[i.to(int).item()] for i in idxs])
+        return F.one_hot(idxs_table_invariant, num_classes=len(self.class_list_table_invariant))
+    
+
 class IdentityEmbedder():
     def __call__(self, idxs):
         return idxs.float()
@@ -207,16 +222,18 @@ class RoutinesDataset():
         self.edge_keys = self.common_data['edge_keys']
         self.static_nodes = self.common_data.get('static_nodes', [None]*len(self.common_data['node_classes']))
 
-        node_embedder = CustomObjectEmbedder(self.node_classes)
+        node_embedder = OneHotEmbedder(self.node_classes)
+        # node_embedder = CustomObjectEmbedder(self.node_classes)
         activity_embedder = IdentityEmbedder()
         
         # Generate train and test loaders
-        self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,-1), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
-        self.val = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(-1,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
+        self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
+        self.val = DataSplit(os.path.join(data_path,'test'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
         self.test = DataSplit(os.path.join(data_path,'test'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout)
         print('Train split has ',len(self.train),' routines')
         print('Val split has ',len(self.val),' routines')
         print('Test split has ',len(self.test),' routines')
+        print('USING TEST AS VAL...')
 
         # Infer parameters for the model
         model_data = self.test.collate_fn([self.test[0]])

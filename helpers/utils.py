@@ -28,9 +28,9 @@ def get_metrics(results):
             tp = conf_mat_dict['tp'][lookahead_step]
             fp = conf_mat_dict['fp'][lookahead_step]
             fn = conf_mat_dict['fn'][lookahead_step]
-            stats['precision'].append(tp / (tp + fp))
-            stats['recall'].append(tp / (tp + fn))
-            stats['f1'].append(2 * tp / (2 * tp + fp + fn))
+            stats['precision'].append(tp / (tp + fp + 1e-10))
+            stats['recall'].append(tp / (tp + fn + 1e-10))
+            stats['f1'].append(2 * tp / (2 * tp + fp + fn + 1e-10))
         return stats
 
     results.update(stats_from_confusion_matrix(results['confusion_matrix']))
