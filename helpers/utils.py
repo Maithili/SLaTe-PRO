@@ -1,6 +1,7 @@
 import os
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 from adict import adict
 
 # color_red_to_green = ["#ffffff", "#bc4b51", "#fbc4ab", "#90a955", "#31572c"]
@@ -35,6 +36,8 @@ def get_metrics(results):
 
     results.update(stats_from_confusion_matrix(results['confusion_matrix']))
 
+    results['num_movements_fetched'] = [[{'mean':np.mean(data), 'std':np.std(data)} for data in lookahed_step_data] for lookahed_step_data in results['num_movements_fetched']]
+    results['num_movements_returned'] = [[{'mean':np.mean(data), 'std':np.std(data)} for data in lookahed_step_data] for lookahed_step_data in results['num_movements_returned']]
     ## TODO Maithili for MHC: Split metrics by object type. Add other metrics here.
 
     return results

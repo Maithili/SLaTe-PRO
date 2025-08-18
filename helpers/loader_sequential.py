@@ -39,7 +39,7 @@ class CustomObjectEmbedder():
         for object_name in object_desc:
             object_desc[object_name]['embedding_description'] = torch.tensor(sentence_transformer.encode(object_desc[object_name]['description']))
             object_desc[object_name]['embedding_action'] = torch.tensor(sum([sentence_transformer.encode(a) for a in object_desc[object_name]['action_list']]))/len(object_desc[object_name]['action_list'])
-            object_desc[object_name]['embedding_combined'] = object_desc[object_name]['embedding_description'] + object_desc[object_name]['embedding_action']
+            object_desc[object_name]['embedding_combined'] = torch.cat([object_desc[object_name]['embedding_description'], object_desc[object_name]['embedding_action']], dim=0)
         self.embeddings = {object_list.index(object_name):object_desc[object_name]['embedding_combined'] for object_name in object_desc}
 
     def __call__(self, object_name):
@@ -222,8 +222,9 @@ class RoutinesDataset():
         self.edge_keys = self.common_data['edge_keys']
         self.static_nodes = self.common_data.get('static_nodes', [None]*len(self.common_data['node_classes']))
 
-        node_embedder = OneHotEmbedder(self.node_classes)
-        # node_embedder = CustomObjectEmbedder(self.node_classes)
+        # node_embedder = OneHotEmbedder(self.node_classes)
+        # node_embedder = OneHotEmbedder_tableInvariant(self.node_classes)
+        node_embedder = CustomObjectEmbedder(self.node_classes)
         activity_embedder = IdentityEmbedder()
         
         # Generate train and test loaders

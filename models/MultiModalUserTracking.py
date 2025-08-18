@@ -75,6 +75,9 @@ class MultiModalUserTrackingModule(LightningModule):
                     'fp':[0 for _ in range(self.cfg.lookahead_steps)],
                     'fn':[0 for _ in range(self.cfg.lookahead_steps)],
                 },
+                'num_movements_fetched':[[] for _ in range(self.cfg.lookahead_steps)],
+                'num_movements_returned':[[] for _ in range(self.cfg.lookahead_steps)],
+                'num_predictions':[0 for _ in range(self.cfg.lookahead_steps)],
                 'activity':{
                     'differences':[0 for _ in range(self.cfg.lookahead_steps)], 
                 },
@@ -445,7 +448,10 @@ class MultiModalUserTrackingModule(LightningModule):
             self.results['confusion_matrix']['fp'][step] += int((torch.bitwise_and(pred_movements, torch.bitwise_not(gt_movements))).sum())
             self.results['confusion_matrix']['fn'][step] += int((torch.bitwise_and(torch.bitwise_not(pred_movements), gt_movements)).sum())
             self.results['confusion_matrix']['tn'][step] += int((torch.bitwise_and(torch.bitwise_not(pred_movements), torch.bitwise_not(gt_movements))).sum())
-
+            self.results['num_movements_fetched'][step].append(int((pred_edges_thresh > reference_edges).sum()))
+            self.results['num_movements_returned'][step].append(int((pred_edges_thresh < reference_edges).sum()))
+            self.results['num_predictions'][step] += 1
+            
             ## TODO Maithili for MHC: Reinstate lenient metric predictions by using 'n' extra steps for gt changes for precision and 'n' fewer steps for pred changes for recall
             # if step >= 2: 
             #     self.results['precision_lenient']['correct'][step] += int(torch.bitwise_and(correct, lenient_changes_pred).sum())

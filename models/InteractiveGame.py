@@ -504,8 +504,9 @@ class InteractiveGame:
 def main():
     """Main function to run the interactive game."""
     parser = argparse.ArgumentParser(description='Interactive RoboCraft Game')
-    parser.add_argument('--weights', type=str, required=True, 
-                       help='Path to model weights file (.pt)')
+    parser.add_argument('--weights', type=str, 
+        default="/coc/flash5/mpatel377/repos/SLaTe-PRO/logs_0816_emb_concat_variations_gpt_valid_all/gpt_valid_all/default_100/weights.pt", 
+        help='Path to model weights file (.pt)')
     
     args = parser.parse_args()
     

@@ -57,7 +57,7 @@ class GraphDecoderModule(LightningModule):
                                                     nn.ReLU(),
                                                     nn.Linear(self.hidden_influence_dim, 1)
                                                     )
-                                        
+                                    
         self.mlp_update_edges = nn.Sequential(nn.Linear(self.edges_update_input_dim, self.hidden_influence_dim),
                                                     nn.ReLU(),
                                                     nn.Linear(self.hidden_influence_dim, 1)
@@ -95,7 +95,7 @@ class GraphDecoderModule(LightningModule):
         batch_size_e, num_f_nodes, num_t_nodes = edges.size()
 
         if mask is None:
-            mask = torch.ones((batch_size, num_nodes), device=nodes.device)
+            mask = torch.ones((batch_size, num_nodes)).to('cuda')
         
         # Sanity check input dimensions
         assert batch_size == batch_size_e, "Different edge and node batch sizes"
@@ -150,8 +150,8 @@ class GraphDecoderModule(LightningModule):
 
         edges_inferred = xe
 
-        pred_activity = torch.ones((batch_size, self.n_nodes, 1), device=nodes.device)*0.5
-        pred_dynamic = torch.ones((batch_size, self.n_nodes, 1), device=nodes.device)*0.5
+        pred_activity = torch.ones((batch_size, self.n_nodes, 1)).to('cuda')*0.5
+        pred_dynamic = torch.ones((batch_size, self.n_nodes, 1)).to('cuda')*0.5
 
         return edges_inferred, pred_activity, pred_dynamic
 
