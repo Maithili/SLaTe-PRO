@@ -15,8 +15,9 @@ sys.path.append('models')
 
 from MultiModalUserTracking import MultiModalUserTrackingModule
 from encoders import TimeEncodingOptions
-from loader_sequential import OneHotEmbedder, IdentityEmbedder, CustomObjectEmbedder
+from loader_sequential import OneHotEmbedder, IdentityEmbedder, CustomObjectEmbedder, OneHotEmbedder_tableInvariant
 
+VERBOSE = os.environ.get('$MAITHILIS_CRAZY_ENV', 'not crazy').lower() == 'crazy'
 
 class InteractiveGame:
     def __init__(self, model_weights_path, config_path=None):
@@ -70,15 +71,30 @@ class InteractiveGame:
         self.time_options = TimeEncodingOptions()
         self.time_encoder = self.time_options('sine_informed')
         
-        # Node and activity embedders
-        # self.node_embedder = OneHotEmbedder(self.objects_masterlist)
-        self.node_embedder = CustomObjectEmbedder(self.objects_masterlist)
-        self.activity_embedder = IdentityEmbedder()
-        
         # Load model
         self.model = None
-        self.config = None
+        with open(self.config_path, 'r') as f:
+            print(f"Loading config from {self.config_path}")
+            if '.yaml' in self.config_path:
+                self.config = yaml.load(f, Loader=yaml.FullLoader)
+            else:
+                self.config = json.load(f)
+            self.config = adict(self.config)
         self.load_model()
+        
+        # Node and activity embedders
+        if self.config.node_embedder == 'one_hot':
+            self.node_embedder = OneHotEmbedder(self.objects_masterlist)
+        elif self.config.node_embedder == 'one_hot_table_invariant':
+            self.node_embedder = OneHotEmbedder_tableInvariant(self.objects_masterlist)
+        elif self.config.node_embedder == 'custom_object_concat':
+            self.node_embedder = CustomObjectEmbedder(self.objects_masterlist, aggregation='concat')
+        elif self.config.node_embedder == 'custom_object_sum':
+            self.node_embedder = CustomObjectEmbedder(self.objects_masterlist, aggregation='sum')
+        else:
+            raise ValueError(f"Invalid node embedder: {self.params['node_embedder']}")
+        self.activity_embedder = IdentityEmbedder()
+        
         
         # Game history
         self.action_history = []
@@ -86,15 +102,6 @@ class InteractiveGame:
     def load_model(self):
         """Load the trained model and configuration."""
         try:
-            if self.config is None:
-                with open(self.config_path, 'r') as f:
-                    print(f"Loading config from {self.config_path}")
-                    if '.yaml' in self.config_path:
-                        self.config = yaml.load(f, Loader=yaml.FullLoader)
-                    else:
-                        self.config = json.load(f)
-                    self.config = adict(self.config)
-            
             # Create model instance
             self.model = MultiModalUserTrackingModule(model_configs=self.config, original_model=False)
             
@@ -108,11 +115,11 @@ class InteractiveGame:
             self.model.load_state_dict(weights)
             self.model.eval()
             
-            print(f"✓ Model loaded successfully from {self.model_weights_path}")
-            print(f"✓ Configuration loaded from {self.config_path}")
+            VERBOSE and print(f"✓ Model loaded successfully from {self.model_weights_path}")
+            VERBOSE and print(f"✓ Configuration loaded from {self.config_path}")
             
         except Exception as e:
-            print(f"✗ Error loading model: {e}")
+            VERBOSE and print(f"✗ Error loading model: {e}")
             raise
     
     def get_default_config(self):
@@ -168,21 +175,21 @@ class InteractiveGame:
             
             # Validate components
             if table not in self.tables:
-                print(f"✗ Invalid table: {table}. Valid tables: {', '.join(self.tables)}")
+                VERBOSE and print(f"✗ Invalid table: {table}. Valid tables: {', '.join(self.tables)}")
                 return None, None, None, None
                 
             if action not in ["Fetch", "Return"]:
-                print(f"✗ Invalid action: {action}. Valid actions: Fetch, Return")
+                VERBOSE and print(f"✗ Invalid action: {action}. Valid actions: Fetch, Return")
                 return None, None, None, None
                 
             if object_name not in self.objects_masterlist:
-                print(f"✗ Invalid object: {object_name}. Valid objects: {', '.join(self.objects_masterlist)}")
+                VERBOSE and print(f"✗ Invalid object: {object_name}. Valid objects: {', '.join(self.objects_masterlist)}")
                 return None, None, None, None
             
             return timestamp, table, action, object_name
             
         except Exception as e:
-            print(f"✗ Error parsing movement: {e}")
+            VERBOSE and print(f"✗ Error parsing movement: {e}")
             return None, None, None, None
     
     def time_to_minutes(self, time_str):
@@ -220,24 +227,24 @@ class InteractiveGame:
             if action == "Fetch":
                 # Check if object can be fetched (not already on table)
                 if self.scene_graph[obj_idx, table_idx] == 1:
-                    print(f"✗ Cannot fetch {object_name} - it's already on {table}")
+                    VERBOSE and print(f"✗ Cannot fetch {object_name} - it's already on {table}")
                     return False
                 
                 # Add to table
                 self.scene_graph[obj_idx, table_idx] = 1
                 
-                print(f"✓ Fetched {object_name} to {table}")
+                VERBOSE and print(f"✓ Fetched {object_name} to {table}")
                 
             elif action == "Return":
                 # Check if object is on table
                 if self.scene_graph[obj_idx, table_idx] == 0:
-                    print(f"✗ Cannot return {object_name} - it's not on {table}")
+                    VERBOSE and print(f"✗ Cannot return {object_name} - it's not on {table}")
                     return False
                 
                 # Remove from table
                 self.scene_graph[obj_idx, table_idx] = 0
                 
-                print(f"✓ Returned {object_name} from {table}")
+                VERBOSE and print(f"✓ Returned {object_name} from {table}")
             
             # Record action
             self.action_history.append({
@@ -256,7 +263,7 @@ class InteractiveGame:
             return True
             
         except Exception as e:
-            print(f"✗ Error updating state: {e}")
+            VERBOSE and print(f"✗ Error updating state: {e}")
             return False
     
     def get_model_prediction(self, num_steps=1):
@@ -292,7 +299,7 @@ class InteractiveGame:
         return predictions[:,-1:,:,:]
                 
             # except Exception as e:
-            #     print(f"✗ Error getting model prediction: {e}")
+            #     VERBOSE and print(f"✗ Error getting model prediction: {e}")
             #     return None
     
     def prepare_batch_for_model(self):
@@ -400,13 +407,11 @@ class InteractiveGame:
         print("AI Suggestions:")
         if (predictions.cpu() > 0).any():
             aa, bb, obj_idxs, table_idxs = np.where(predictions.cpu() > 0)
-            print(f"{obj_idxs} and {table_idxs}")
             assert (aa==0).all() and (bb==0).all(), f"{aa} and {bb}"
             for obj_i, table_i in zip(obj_idxs, table_idxs):
                 suggestions.append(f"[{predictions.cpu()[0][0][obj_i, table_i]:0.2f}] {self.objects_masterlist[table_i]}: Fetch {self.objects_masterlist[obj_i]}")
         if (predictions.cpu() < 0).any():
             aa, bb, obj_idxs, table_idxs = np.where(predictions.cpu() < 0)
-            print(f"{obj_idxs} and {table_idxs} ({aa} and {bb})")
             assert (aa==0).all() and (bb==0).all(), f"{aa} and {bb}"
             for obj_i, table_i in zip(obj_idxs, table_idxs):
                 suggestions.append(f"[{-predictions.cpu()[0][0][obj_i, table_i]:0.2f}] {self.objects_masterlist[table_i]}: Return {self.objects_masterlist[obj_i]}")
@@ -416,10 +421,10 @@ class InteractiveGame:
             
     def run_game(self):
         """Main game loop."""
-        print("🎮 Welcome to the Interactive RoboCraft Game!")
-        print("This game simulates object movements across tables in a crafting environment.")
-        print("You can input actions like 'tableA: Fetch paint' or 'tableB: Return glue'")
-        print("The AI model will provide suggestions based on the current state.\n")
+        VERBOSE and print("🎮 Welcome to the Interactive RoboCraft Game!")
+        VERBOSE and print("This game simulates object movements across tables in a crafting environment.")
+        VERBOSE and print("You can input actions like 'tableA: Fetch paint' or 'tableB: Return glue'")
+        VERBOSE and print("The AI model will provide suggestions based on the current state.\n")
         
         while self.current_time <= self.max_time:
             # Display current state
@@ -428,27 +433,27 @@ class InteractiveGame:
             # Get AI suggestions
             suggestions = self.get_suggestions()
             if suggestions:
-                print(f"\n🤖 AI Suggestions:")
+                VERBOSE and print(f"\n🤖 AI Suggestions:")
                 for i, suggestion in enumerate(suggestions, 1):
                     print(f"  {i}. {suggestion}")
             
             # Get user input
-            print(f"\n⏰ Time: {self.minutes_to_time(self.current_time)}")
+            VERBOSE and print(f"\n⏰ Time: {self.minutes_to_time(self.current_time)}")
             print("Enter your action (or 'help' for instructions, 'quit' to exit, '' to move to next time step):")
             
             user_input = input("> ").strip()
             
             if user_input.lower() == 'quit':
-                print("👋 Thanks for playing!")
+                VERBOSE and print("👋 Thanks for playing!")
                 break
             elif user_input.lower() == 'help':
                 self.show_help()
                 continue
             elif user_input.lower() == 'skip':
-                print("⏭️  Skipping to next time step...")
+                VERBOSE and print("⏭️  Skipping to next time step...")
                 continue
             elif user_input.lower() == '':
-                print("⏭️  No input, moving to next time step...")
+                VERBOSE and print("⏭️  No input, moving to next time step...")
                 self.current_time += self.dt
                 continue
             
@@ -458,21 +463,18 @@ class InteractiveGame:
             
             # Update game state
             if self.update_state(timestamp, table, action, object_name):
-                # Move time forward
-                self.current_time = max(self.current_time, input_time) + self.dt
-                
                 if self.current_time > self.max_time:
-                    print(f"\n🏁 Game completed! Final time: {self.minutes_to_time(self.max_time)}")
+                    VERBOSE and print(f"\n🏁 Game completed! Final time: {self.minutes_to_time(self.max_time)}")
                     break
             else:
-                print("❌ Action failed. Please try again.")
+                (VERBOSE and print("❌ Action failed. Please try again.")) or print("❌ Action failed. Please try again.")
         
         # Game summary
         self.show_game_summary()
     
     def show_help(self):
         """Display help information."""
-        print("\n📖 Game Help:")
+        VERBOSE and print("\n📖 Game Help:")
         print("  Action Format: [HH:MM] tableX: Action object_name")
         print("  Examples:")
         print("    tableA: Fetch paint")
@@ -488,9 +490,9 @@ class InteractiveGame:
     
     def show_game_summary(self):
         """Display game summary at the end."""
-        print(f"\n{'='*60}")
-        print("🎯 Game Summary")
-        print(f"{'='*60}")
+        VERBOSE and print(f"\n{'='*60}")
+        VERBOSE and print("🎯 Game Summary")
+        VERBOSE and print(f"{'='*60}")
         print(f"Total Actions: {len(self.action_history)}")
         print(f"Final Time: {self.minutes_to_time(self.current_time)}")
         print(f"Total Timesteps: {len(self.scene_graph_history)}")
@@ -512,7 +514,7 @@ def main():
     
     # Validate weights file
     if not os.path.exists(args.weights):
-        print(f"❌ Error: Weights file not found: {args.weights}")
+        VERBOSE and print(f"❌ Error: Weights file not found: {args.weights}")
         return
     
     config = os.path.join(os.path.dirname(args.weights), 'config.json')
@@ -523,9 +525,9 @@ def main():
         game.run_game()
         
     except KeyboardInterrupt:
-        print("\n\n👋 Game interrupted. Thanks for playing!")
+        VERBOSE and print("\n\n👋 Game interrupted. Thanks for playing!")
     except Exception as e:
-        print(f"\n❌ Error running game: {e}")
+        VERBOSE and print(f"\n❌ Error running game: {e}")
         import traceback
         traceback.print_exc()
 

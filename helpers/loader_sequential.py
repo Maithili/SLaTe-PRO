@@ -33,13 +33,18 @@ def _sparsify(edges):
     return sparse_edges
 
 class CustomObjectEmbedder():
-    def __init__(self, object_list):
+    def __init__(self, object_list, aggregation='concat'):
         object_desc = json.load(open("object_desc.json"))
         assert set(object_list) == set(object_desc.keys()), f"Object list does not match object description. {set(object_list) - set(object_desc.keys())} and {set(object_desc.keys()) - set(object_list)}"
         for object_name in object_desc:
             object_desc[object_name]['embedding_description'] = torch.tensor(sentence_transformer.encode(object_desc[object_name]['description']))
             object_desc[object_name]['embedding_action'] = torch.tensor(sum([sentence_transformer.encode(a) for a in object_desc[object_name]['action_list']]))/len(object_desc[object_name]['action_list'])
-            object_desc[object_name]['embedding_combined'] = torch.cat([object_desc[object_name]['embedding_description'], object_desc[object_name]['embedding_action']], dim=0)
+            if aggregation == 'concat':
+                object_desc[object_name]['embedding_combined'] = torch.cat([object_desc[object_name]['embedding_description'], object_desc[object_name]['embedding_action']], dim=0)
+            elif aggregation == 'sum':
+                object_desc[object_name]['embedding_combined'] = object_desc[object_name]['embedding_description'] + object_desc[object_name]['embedding_action']
+            else:
+                raise ValueError(f"Invalid aggregation method: {aggregation}")
         self.embeddings = {object_list.index(object_name):object_desc[object_name]['embedding_combined'] for object_name in object_desc}
 
     def __call__(self, object_name):
@@ -214,6 +219,7 @@ class RoutinesDataset():
         
         self.params = {}
         self.params['dt'] = self.common_data.get('dt',None)
+        self.params['node_embedder'] = self.common_data.get('node_embedder', 'custom_object_sum')
         self.params['batch_size'] = batch_size
         self.params['multiple_activities'] = self.common_data.get('multiple_activities', False)
 
@@ -221,10 +227,19 @@ class RoutinesDataset():
         self.node_categories = self.common_data.get('node_categories', [None]*len(self.common_data['node_classes']))
         self.edge_keys = self.common_data['edge_keys']
         self.static_nodes = self.common_data.get('static_nodes', [None]*len(self.common_data['node_classes']))
+        
+        
+        if self.params['node_embedder'] == 'one_hot':
+            node_embedder = OneHotEmbedder(self.node_classes)
+        elif self.params['node_embedder'] == 'one_hot_table_invariant':
+            node_embedder = OneHotEmbedder_tableInvariant(self.node_classes)
+        elif self.params['node_embedder'] == 'custom_object_concat':
+            node_embedder = CustomObjectEmbedder(self.node_classes, aggregation='concat')
+        elif self.params['node_embedder'] == 'custom_object_sum':
+            node_embedder = CustomObjectEmbedder(self.node_classes, aggregation='sum')
+        else:
+            raise ValueError(f"Invalid node embedder: {self.params['node_embedder']}")
 
-        # node_embedder = OneHotEmbedder(self.node_classes)
-        # node_embedder = OneHotEmbedder_tableInvariant(self.node_classes)
-        node_embedder = CustomObjectEmbedder(self.node_classes)
         activity_embedder = IdentityEmbedder()
         
         # Generate train and test loaders
