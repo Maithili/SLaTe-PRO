@@ -62,7 +62,7 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
     json.dump(cfg, open(os.path.join(output_dir, f'config.json'), 'w'), indent=4)
 
     # wandb_logger = WandbLogger(name=cfg['NAME'], log_model=True, group = group, tags = tags)
-    wandb_logger = WandbLogger(name=cfg['NAME'], group = group, tags = tags, settings=wandb.Settings(start_method="fork"))  #, mode='disabled')
+    wandb_logger = WandbLogger(name=cfg['NAME'], group = group, tags = tags, settings=wandb.Settings(start_method="fork"))   #, mode='disabled')
     wandb_logger.experiment.config.update(cfg)
     
     def train_n_tries(trainer, model, train_loader, val_loader, n=15):
@@ -97,7 +97,7 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
     if checkpoint_dir is None:
     
         os.makedirs(output_dir, exist_ok=True)
-        ckpt_callback = ModelCheckpoint(dirpath=output_dir)
+        ckpt_callback = ModelCheckpoint(dirpath=output_dir, every_n_epochs=1)
 
         prev_epochs = 0
         model = model_generator(model_configs = model_configs, original_model = original_model)
@@ -108,22 +108,25 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
             val_loader = data.get_val_loader()        
 
             early_stop_callback = EarlyStopping(monitor="Val_ES_accuracy", patience=40, verbose=False, mode="max")
-            trainer = Trainer(accelerator='gpu', devices = torch.cuda.device_count(), logger=wandb_logger, max_epochs=epochs, log_every_n_steps=1, callbacks=[ckpt_callback, early_stop_callback], check_val_every_n_epoch=5)
+            trainer = Trainer(accelerator='gpu', devices = torch.cuda.device_count(), logger=wandb_logger, max_epochs=epochs, log_every_n_steps=1, callbacks=[ckpt_callback, early_stop_callback], check_val_every_n_epoch=1)
             train_n_tries(trainer, model, train_loader, val_loader, n=15)
 
-            torch.save(model.state_dict(), os.path.join(output_dir,'weights.pt'))
+            torch.save(model.state_dict(), os.path.join(output_dir,f'weights_epoch{epochs}.pt'))
             model_check = model_generator(model_configs = model_configs, original_model = original_model)
-            model_check.load_state_dict(torch.load(os.path.join(output_dir,'weights.pt')))
+            model_check.load_state_dict(torch.load(os.path.join(output_dir,f'weights_epoch{epochs}.pt')))
             compare_models(model, model_check, num_params_expected=sum(param.numel() for param in model.parameters()))
             print('Outputs saved at ',output_dir)
-            eval_dir = output_dir
-            model.test_forward = False
-            os.makedirs(eval_dir, exist_ok=True)
-            test_n_tries(trainer, model, data.get_test_loader())
-            model.write_results(eval_dir,
-                                common_data = data.common_data,
-                                prefix=f'Epoch{epochs}_',
-                                )
+            for checkpoint in os.listdir(output_dir):
+                if checkpoint.endswith('.ckpt'):
+                    print(f"Testing checkpoint {checkpoint}")
+                    model = MultiModalUserTrackingModule.load_from_checkpoint(os.path.join(output_dir, checkpoint), model_configs = model_configs)
+                    # model.test_forward = False
+                    os.makedirs(output_dir, exist_ok=True)
+                    trainer.test(model, data.get_test_loader())
+                    model.write_results(output_dir,
+                                        common_data = data.common_data,
+                                        prefix=f'epoch{epochs}_',
+                                        )
 
     else:
         assert not train_only, "Cannot train only with --read_ckpt"
@@ -137,16 +140,16 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
         model = model_generator.load_from_checkpoint(os.path.join(checkpoint_dir, checkpoint_file), model_configs = model_configs, original_model = original_model)
         json.dump(model_configs, open(os.path.join(output_dir, f'config_{timestr}.json'), 'w'), indent=4)
 
-    if not train_only:
-        # eval_dir = os.path.join(output_dir,'test_evals_'+timestr)
-        eval_dir = output_dir
-        model.test_forward = False
-        os.makedirs(eval_dir, exist_ok=True)
-        test_n_tries(trainer, model, data.get_test_loader())
-        model.write_results(eval_dir,
-                            common_data = data.common_data,
-                            prefix=f'Final_',
-                            )
+    # if not train_only:
+    #     # eval_dir = os.path.join(output_dir,'test_evals_'+timestr)
+    #     eval_dir = output_dir
+    #     # model.test_forward = False
+    #     os.makedirs(eval_dir, exist_ok=True)
+    #     test_n_tries(trainer, model, data.get_test_loader())
+    #     model.write_results(eval_dir,
+    #                         common_data = data.common_data,
+    #                         prefix=f'Final_',
+    #                         )
           
 
 
@@ -156,6 +159,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run model on routines.')
     parser.add_argument('--path', type=str, default='data/HouseholdVariations/persona1_', help='Path where the data lives. Must contain routines, info and classes json files.')
     parser.add_argument('--cfg', type=str, help='Name of config file.')
+    parser.add_argument('--node_embedder', type=str, help='Name of node embedder.')
     parser.add_argument('--train_days', type=int, help='Number of routines to train on.')
     parser.add_argument('--name', type=str, default='default_100', help='Name of run.')
     parser.add_argument('--tags', type=str, help='Tags for the run separated by a comma \',\'')

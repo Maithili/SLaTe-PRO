@@ -86,6 +86,10 @@ class MultiModalUserTrackingModule(LightningModule):
         self.snapshots_pred = []
         self.snapshots_gt = []
         self.snapshots_reference = []
+        self.snapshots_pred_human_readable = []
+        self.snapshots_gt_human_readable = []
+        self.snapshots_pred_human_readable_raw = []
+        self.snapshots_gt_human_readable_raw = []
 
 
     def combine_latents(self, pred=None, enc_graph=None, enc_activity=None, time_context=None):
@@ -385,7 +389,8 @@ class MultiModalUserTrackingModule(LightningModule):
         activity_seq = batch.get('activity_features')[:,:-1,:]
         activity_id_seq = batch['activity_ids'][:,:-1]
 
-        time_context = batch.get('time_features', torch.zeros((batch['edges'].size()[0],batch['edges'].size()[1], self.cfg.c_len)))[:,1:,:]
+        time_context = batch['time_features'][:,1:,:]
+        # time_context = batch.get('time_features', torch.zeros((batch['edges'].size()[0],batch['edges'].size()[1], self.cfg.c_len)))[:,1:,:]
         if time_context.size()[-1] > self.cfg.c_len:
             time_context = time_context[:,:,:self.cfg.c_len]
             print("Warning: time context is too long. Truncating it to the first {} values".format(self.cfg.c_len))
@@ -393,6 +398,7 @@ class MultiModalUserTrackingModule(LightningModule):
             print("THIS IS ONLY OKAY FOR DEBUGGING!!!!!! YOU ARE NOT TRAINING A MODEL THAT WILL WORK IN REALITY!!!!!")
             print()
         if time_context.size()[-1] < self.cfg.c_len:
+            print(f"Devices per tensor: time_context {time_context.device}")
             time_context = torch.cat([time_context, torch.zeros((time_context.size()[0], time_context.size()[1], self.cfg.c_len - time_context.size()[2])).to('cuda')], dim=-1)
 
         batch_size_act, sequence_len, num_act = activity_seq.size()
@@ -463,6 +469,9 @@ class MultiModalUserTrackingModule(LightningModule):
 
 
         predicted_movements_probabilities = pred_edges_original - reference_edges_initial
+        self.snapshots_pred_human_readable_raw.append(pred_edges_original - reference_edges_initial)
+        self.snapshots_gt_human_readable_raw.append(expected_edges - reference_edges_initial)
+        
         return predicted_movements_probabilities
 
     def training_step(self, batch, batch_idx):
@@ -537,10 +546,65 @@ class MultiModalUserTrackingModule(LightningModule):
         node_classes_in_order = [node_classes[n.item()] for n in self.node_idxs.int()]
         self.results['node_classes'] = node_classes_in_order
         self.results = get_metrics(self.results)
+        
+        for snapshots_pred_human_readable_raw_this_nothresh in self.snapshots_pred_human_readable_raw:
+            self.snapshots_pred_human_readable.append({})
+            snapshots_pred_human_readable_raw_this = snapshots_pred_human_readable_raw_this_nothresh.clone().detach().cpu()
+            snapshots_pred_human_readable_raw_this[snapshots_pred_human_readable_raw_this_nothresh.abs() < 0.5] = 0
+            if (snapshots_pred_human_readable_raw_this > 0).any():
+                aa, timesteps, obj_idxs, table_idxs = np.where(snapshots_pred_human_readable_raw_this > 0.5)
+                assert (aa==0).all(), f"{aa}"
+                for obj_i, table_i, timestep in zip(obj_idxs, table_idxs, timesteps):
+                    timestep = int(timestep.item())
+                    if timestep not in self.snapshots_pred_human_readable[-1]:
+                        self.snapshots_pred_human_readable[-1][timestep] = []
+                    if snapshots_pred_human_readable_raw_this[0][timestep, obj_i, table_i].abs() < 0.5:
+                        import pdb; pdb.set_trace()
+                    self.snapshots_pred_human_readable[-1][timestep].append(f"[{snapshots_pred_human_readable_raw_this[0][timestep, obj_i, table_i]:0.2f}] {common_data['node_classes'][table_i]}: Fetch {common_data['node_classes'][obj_i]}")
+            if (snapshots_pred_human_readable_raw_this < 0).any():
+                aa, timesteps, obj_idxs, table_idxs = np.where(snapshots_pred_human_readable_raw_this < -0.5)
+                assert (aa==0).all(), f"{aa}"
+                for obj_i, table_i, timestep in zip(obj_idxs, table_idxs, timesteps):
+                    timestep = int(timestep.item())
+                    if timestep not in self.snapshots_pred_human_readable[-1]:
+                        self.snapshots_pred_human_readable[-1][timestep] = []
+                    if snapshots_pred_human_readable_raw_this[0][timestep, obj_i, table_i].abs() < 0.5:
+                        import pdb; pdb.set_trace()
+                    self.snapshots_pred_human_readable[-1][timestep].append(f"[{-snapshots_pred_human_readable_raw_this[0][timestep, obj_i, table_i]:0.2f}] {common_data['node_classes'][table_i]}: Return {common_data['node_classes'][obj_i]}")
+            # self.snapshots_pred_human_readable[-1].sort()        
+            
+        for snapshots_gt_human_readable_raw_this in self.snapshots_gt_human_readable_raw:
+            self.snapshots_gt_human_readable.append({})
+            snapshots_gt_human_readable_raw_this = snapshots_gt_human_readable_raw_this.clone().detach().cpu()
+            if (snapshots_gt_human_readable_raw_this > 0).any():
+                aa, timesteps, obj_idxs, table_idxs = np.where(snapshots_gt_human_readable_raw_this > 0.5)
+                assert (aa==0).all(), f"{aa}"
+                for obj_i, table_i, timestep in zip(obj_idxs, table_idxs, timesteps):
+                    timestep = int(timestep.item())
+                    if timestep not in self.snapshots_gt_human_readable[-1]:
+                        self.snapshots_gt_human_readable[-1][timestep] = []
+                    if snapshots_gt_human_readable_raw_this[0][timestep, obj_i, table_i].abs() < 0.5:
+                        import pdb; pdb.set_trace()
+                    self.snapshots_gt_human_readable[-1][timestep].append(f"[{snapshots_gt_human_readable_raw_this[0][timestep, obj_i, table_i]:0.2f}] {common_data['node_classes'][table_i]}: Fetch {common_data['node_classes'][obj_i]}")
+            if (snapshots_gt_human_readable_raw_this < 0).any():
+                aa, timesteps, obj_idxs, table_idxs = np.where(snapshots_gt_human_readable_raw_this < -0.5)
+                assert (aa==0).all(), f"{aa}"
+                for obj_i, table_i, timestep in zip(obj_idxs, table_idxs, timesteps):
+                    timestep = int(timestep.item())
+                    if timestep not in self.snapshots_gt_human_readable[-1]:
+                        self.snapshots_gt_human_readable[-1][timestep] = []
+                    if snapshots_gt_human_readable_raw_this[0][timestep, obj_i, table_i].abs() < 0.5:
+                        import pdb; pdb.set_trace()
+                    self.snapshots_gt_human_readable[-1][timestep].append(f"[{-snapshots_gt_human_readable_raw_this[0][timestep, obj_i, table_i]:0.2f}] {common_data['node_classes'][table_i]}: Return {common_data['node_classes'][obj_i]}")
+            # self.snapshots_gt_human_readable[-1].sort()
+        
+        self.results['predictions_human_readable'] = self.snapshots_pred_human_readable
+        self.results['gt_human_readable'] = self.snapshots_gt_human_readable
         results_torch = {k:v for k,v in self.results.items() if k in ['reference_locations', 'activity']}
         results_json = {k:v for k,v in self.results.items() if k not in results_torch}
         torch.save(results_torch, os.path.join(output_dir,f'{prefix}test_evaluation_splits.pt'))
         json.dump(results_json, open(os.path.join(output_dir,f'{prefix}test_evaluation_splits.json'),'w'), indent=4)
+
 
         # self.log('Final_F1', self.results['f1'][0])
         # self.log('Final_Precision', self.results['precision'][0])

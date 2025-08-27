@@ -103,16 +103,12 @@ class InteractiveGame:
         """Load the trained model and configuration."""
         try:
             # Create model instance
-            self.model = MultiModalUserTrackingModule(model_configs=self.config, original_model=False)
-            
-            # Load weights
-            if torch.cuda.is_available():
-                weights = torch.load(self.model_weights_path, map_location='cuda')
-                self.model = self.model.cuda()
+            if '.ckpt' in self.model_weights_path:
+                self.model = MultiModalUserTrackingModule.load_from_checkpoint(self.model_weights_path, model_configs = self.config)
             else:
-                weights = torch.load(self.model_weights_path, map_location='cpu')
-            
-            self.model.load_state_dict(weights)
+                self.model = MultiModalUserTrackingModule(model_configs = self.config)
+                self.model.load_state_dict(torch.load(self.model_weights_path))
+            self.model.to('cuda')
             self.model.eval()
             
             VERBOSE and print(f"✓ Model loaded successfully from {self.model_weights_path}")
@@ -162,7 +158,7 @@ class InteractiveGame:
                 return None, None, None, None
                 
             table_part, action_object = rest.split(":", 1)
-            table = table_part.strip()
+            table = "table" + table_part.strip() if "table" not in table_part.strip() else table_part.strip()
             action_object = action_object.strip()
             
             # Parse action and object
@@ -178,9 +174,13 @@ class InteractiveGame:
                 VERBOSE and print(f"✗ Invalid table: {table}. Valid tables: {', '.join(self.tables)}")
                 return None, None, None, None
                 
-            if action not in ["Fetch", "Return"]:
-                VERBOSE and print(f"✗ Invalid action: {action}. Valid actions: Fetch, Return")
+            if action not in ["Fetch", "Return", "+", "-"]:
+                VERBOSE and print(f"✗ Invalid action: {action}. Valid actions: Fetch, Return, +, -")
                 return None, None, None, None
+            if action == "+":
+                action = "Fetch"
+            elif action == "-":
+                action = "Return"
                 
             if object_name not in self.objects_masterlist:
                 VERBOSE and print(f"✗ Invalid object: {object_name}. Valid objects: {', '.join(self.objects_masterlist)}")
@@ -284,10 +284,7 @@ class InteractiveGame:
         with torch.no_grad():
             # Prepare input data with full history
             batch = self.prepare_batch_for_model()
-            try:
-                device = next(self.model.parameters()).device
-            except StopIteration:
-                device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            device = torch.device('cuda')
             for k, v in list(batch.items()):
                 if isinstance(v, torch.Tensor):
                     batch[k] = v.to(device)
@@ -296,7 +293,7 @@ class InteractiveGame:
             self.model.eval()
             predictions = self.model.evaluate_prediction(batch, num_steps=num_steps)
         
-        return predictions[:,-1:,:,:]
+        return predictions[:,-1:,:,:].cpu()
                 
             # except Exception as e:
             #     VERBOSE and print(f"✗ Error getting model prediction: {e}")
@@ -318,33 +315,33 @@ class InteractiveGame:
             sequence_length = len(self.scene_graph_history)
         
         # Prepare edges (scene graph history) - batch x sequence x nodes x nodes
-        edges = torch.stack(self.scene_graph_history, dim=0).unsqueeze(0)
+        edges = torch.stack(self.scene_graph_history, dim=0).unsqueeze(0).to('cuda')
         
         # Prepare node features - batch x sequence x nodes x features
-        nodes = torch.arange(len(self.objects_masterlist), dtype=torch.float32)
+        nodes = torch.arange(len(self.objects_masterlist), dtype=torch.float32).to('cuda')
         node_features = self.node_embedder(nodes).unsqueeze(0).repeat(sequence_length, 1, 1)
-        node_features = node_features.unsqueeze(0)  # Add batch dimension
+        node_features = node_features.unsqueeze(0).to('cuda')  # Add batch dimension
         
-        # Prepare activity features - batch x sequence x activities
-        activity_features = torch.stack(self.activity_history, dim=0).unsqueeze(0)
+        # Prepare activity features - batch x sequence x activities 
+        activity_features = torch.stack(self.activity_history, dim=0).unsqueeze(0).to('cuda')
         
         # Prepare time features - batch x sequence x time_features
-        time_features = self.time_encoder(torch.tensor(self.time_history)).unsqueeze(0)
+        time_features = self.time_encoder(torch.tensor(self.time_history).to('cuda')).unsqueeze(0).to('cuda')
         
         # Prepare dynamic edges mask - batch x sequence x nodes x nodes
-        dynamic_edges_mask = self.active_edges_mask.unsqueeze(0).repeat(sequence_length, 1, 1).unsqueeze(0)
+        dynamic_edges_mask = self.active_edges_mask.unsqueeze(0).repeat(sequence_length, 1, 1).unsqueeze(0).to('cuda')
         
         # Prepare activity mask - batch x sequence x activities
-        activity_mask = torch.ones_like(activity_features).to(bool)
+        activity_mask = torch.ones_like(activity_features).to(bool).to('cuda')
         
         batch = {
             'edges': edges,
             'node_features': node_features,
-            'node_ids': nodes.unsqueeze(0).repeat(sequence_length, 1, 1).unsqueeze(0),
+            'node_ids': nodes.unsqueeze(0).repeat(sequence_length, 1, 1).unsqueeze(0).to('cuda'),
             'activity_features': activity_features,
-            'activity_ids': torch.stack(self.activity_history, dim=0).unsqueeze(0),
+            'activity_ids': torch.stack(self.activity_history, dim=0).unsqueeze(0).to('cuda'),
             'time_features': time_features,
-            'time': torch.tensor(self.time_history).unsqueeze(0),
+            'time': torch.tensor(self.time_history).unsqueeze(0).to('cuda'),
             'dynamic_edges_mask': dynamic_edges_mask,
             'activity_mask_drop': activity_mask,
             'node_embedder': self.node_embedder,
@@ -439,9 +436,9 @@ class InteractiveGame:
             
             # Get user input
             VERBOSE and print(f"\n⏰ Time: {self.minutes_to_time(self.current_time)}")
-            print("Enter your action (or 'help' for instructions, 'quit' to exit, '' to move to next time step):")
+            print(f"Enter your action (or 'help' for instructions, 'quit' to exit, 'skip' to move to next time step, 'time' to move to next time step):")
             
-            user_input = input("> ").strip()
+            user_input = input(f"> [{self.minutes_to_time(self.current_time)}] ").strip()
             
             if user_input.lower() == 'quit':
                 VERBOSE and print("👋 Thanks for playing!")

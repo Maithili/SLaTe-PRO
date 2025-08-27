@@ -15,7 +15,7 @@ To train a model
 
 - ~Visualize each day's predictions and GT~
 - ~Embeddings for objects~
-- Try pretraining on LLM-generated data
+- ~Try pretraining on LLM-generated data!
 - Split results by objects added/removed from table
 - Figure out layer and embedding sizes
 - Apply query mask for future predictions. Use Case: When someone refuses an object, the robot should use that for the next prediction
@@ -28,10 +28,3 @@ To train a model
 Repository for the model proposed in Patel et al. "Predicting Routine Object Usage for Proactive Robot Assistance", CoRL 2023
 
 `python models/InteractiveGame.py --weights /coc/flash5/mpatel377/repos/SLaTe-PRO/logs_0813_variations_gpt_valid_split_6/gpt_valid_split_6/default_100/weights.pt`
-
-tableA: Fetch paint
-tableA: Fetch cup
-tableA: Fetch photoframe
-tableB: Fetch paint
-tableB: Fetch cup
-tableB: Fetch photoframe
