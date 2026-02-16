@@ -13,7 +13,7 @@ from sklearn.manifold import TSNE
 import torch
 from torch.nn import functional as F
 from torch.optim import Adam
-from pytorch_lightning.core.lightning import LightningModule
+from pytorch_lightning.core.module import LightningModule
 from ObjectActivityCoembedding import ObjectActivityCoembeddingModule, Latent, LatentDeterministic, EXTRACAREFUL
 from utils import color_palette, get_metrics, wrap_str
 
@@ -1171,9 +1171,12 @@ class MultiModalUserTrackingModule(LightningModule):
         batch['activity_ids'].masked_fill_(batch['activity_mask_drop'], 0)
 
         results = self(batch)
-        self.log('Train loss',results['loss'])
-        self.log('Train accuracy',results['accuracies'])
-        self.log('Train latents',results['latents'])
+        self.log_dict({f"Train loss/{k}": v for k, v in results['loss'].items()})
+        self.log_dict({f"Train accuracy/{k}": v for k, v in results['accuracies'].items()})
+        if isinstance(results['latents'], dict):
+            self.log_dict({f"Train latents/{k}": v for k, v in results['latents'].items()})
+        else:
+            self.log('Train latents', results['latents'])
         try:
             self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
         except Exception as e:
@@ -1207,7 +1210,7 @@ class MultiModalUserTrackingModule(LightningModule):
     def validation_step(self, batch, batch_idx):
         batch['activity_features'].masked_fill_(batch['activity_mask_drop'].unsqueeze(-1).repeat(1,1,batch['activity_features'].size()[-1]), 0)
         results = self(batch)
-        self.log('Val accuracy',results['accuracies'])
+        self.log_dict({f"Val accuracy/{k}": v for k, v in results['accuracies'].items()})
         
         self.reset_validation()
         self.evaluate_prediction(batch, num_steps=self.cfg.lookahead_steps)
@@ -1227,8 +1230,8 @@ class MultiModalUserTrackingModule(LightningModule):
         batch['activity_features'].masked_fill_(batch['activity_mask_drop'].unsqueeze(-1).repeat(1,1,batch['activity_features'].size()[-1]), 0)
         if self.test_forward:
             results = self(batch)
-            self.log('Test loss',results['loss'])
-            self.log('Test accuracy',results['accuracies'])
+            self.log_dict({f"Test loss/{k}": v for k, v in results['loss'].items()})
+            self.log_dict({f"Test accuracy/{k}": v for k, v in results['accuracies'].items()})
         self.evaluate_prediction(batch, num_steps=self.cfg.lookahead_steps)
         return 
 

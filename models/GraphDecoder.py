@@ -7,7 +7,7 @@ import torch
 from torch.nn import functional as F
 from torch import nn
 from torch.optim import Adam
-from pytorch_lightning.core.lightning import LightningModule
+from pytorch_lightning.core.module import LightningModule
 
 
 
