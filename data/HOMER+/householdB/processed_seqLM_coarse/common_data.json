@@ -222,8 +222,8 @@
         "placable_objects"
     ],
     "activities": [
-        "Unknown",
-        "Idle",
+        "unknown",
+        "idle",
         "nap",
         "getting_dressed",
         "sleep",
