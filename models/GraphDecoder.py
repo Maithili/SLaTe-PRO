@@ -95,7 +95,7 @@ class GraphDecoderModule(LightningModule):
         batch_size_e, num_f_nodes, num_t_nodes = edges.size()
 
         if mask is None:
-            mask = torch.ones((batch_size, num_nodes)).to('cuda')
+            mask = torch.ones((batch_size, num_nodes)).to(nodes.device)
         
         # Sanity check input dimensions
         assert batch_size == batch_size_e, "Different edge and node batch sizes"
@@ -150,8 +150,8 @@ class GraphDecoderModule(LightningModule):
 
         edges_inferred = xe
 
-        pred_activity = torch.ones((batch_size, self.n_nodes, 1)).to('cuda')*0.5
-        pred_dynamic = torch.ones((batch_size, self.n_nodes, 1)).to('cuda')*0.5
+        pred_activity = torch.ones((batch_size, self.n_nodes, 1)).to(edges.device)*0.5
+        pred_dynamic = torch.ones((batch_size, self.n_nodes, 1)).to(edges.device)*0.5
 
         return edges_inferred, pred_activity, pred_dynamic
 
@@ -239,10 +239,10 @@ class GraphDecoderModule(LightningModule):
     def message_collection_edges(self, edge_influence, topology, context, mask):
         # context = batch_size x context_length
         # edge_influence : batch_size x from_nodes x to_nodes x hidden_influence_dim
-
+        
         edge_mask = torch.mul(mask.unsqueeze(1), mask.unsqueeze(2)).unsqueeze(-1)
         masked_edge_influence = torch.mul(torch.mul(edge_influence,topology), edge_mask)
-
+        
         # batch_size x nodes x 1 x hidden_influence_dim
         from_from_influence = (masked_edge_influence).sum(dim=2).unsqueeze(2).repeat([1,1,self.n_nodes,1])
         from_to_influence = (masked_edge_influence).sum(dim=1).unsqueeze(2).repeat([1,1,self.n_nodes,1])
@@ -253,7 +253,7 @@ class GraphDecoderModule(LightningModule):
         # all_influences : batch_size x from_nodes x to_nodes x hidden_influence_dim
         all_influences = torch.cat([from_from_influence, from_to_influence, to_to_influence, to_from_influence],dim=-1)
         context_repeated = context.unsqueeze(1).unsqueeze(1).repeat([1,self.n_nodes,self.n_nodes,1])
-
+        
         # batch_size x from_nodes x to_nodes x self.edges_update_input_dim
         message_to_edge = torch.cat([all_influences,edge_influence,context_repeated],dim=-1)
         

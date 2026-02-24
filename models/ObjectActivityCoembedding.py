@@ -215,7 +215,7 @@ class ObjectActivityCoembeddingModule(LightningModule):
         if self.cfg.learn_latent_magnitude:
             latents = F.normalize(latents, dim=-1)
         batch_size, sequence_len, _, _ = input_edges.size()
-
+        
         pred_edges, pred_activity, pred_dynamic = self.obj_seq_decoder(input_edges.view(batch_size*(sequence_len), self.cfg.n_nodes, self.cfg.n_nodes), 
                                                 input_nodes.view(batch_size*(sequence_len), self.cfg.n_nodes, self.cfg.n_len), 
                                                 latents.view(batch_size*(sequence_len), self.embedding_size))
@@ -249,7 +249,7 @@ class ObjectActivityCoembeddingModule(LightningModule):
                 obj_mask = torch.bitwise_or(obj_mask, activity_mask.unsqueeze(-1))
             graph_pred_loss = self.obj_graph_loss(logits, output_edges, obj_mask=obj_mask)
 
-            auxiliary_loss_activity = torch.Tensor([0.]).to('cuda')
+            auxiliary_loss_activity = torch.Tensor([0.]).to(logits.device)
             if activity_relevant_edges is not None:
                 pred_pos = pred_activity.squeeze(-1) > 0.5
                 if activity_mask is not None:

@@ -48,15 +48,15 @@ class MultiModalUserTrackingModule(LightningModule):
     def reset_validation(self):
 
         self.num_test_batches = 0
-        
+        _dev = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.results_with_clarification = {}
         self.result_data = {
-            'relocation_distributions':[torch.tensor([]).to('cuda') for _ in range(self.cfg.lookahead_steps)],
-            'relocation_locations_gt':[torch.tensor([]).to('cuda') for _ in range(self.cfg.lookahead_steps)],
-            'obj_mask':[torch.tensor([]).to('cuda') for _ in range(self.cfg.lookahead_steps)],
-            'reference_locations': torch.tensor([]).to('cuda'),
-            'activity_distributions':[torch.tensor([]).to('cuda') for _ in range(self.cfg.lookahead_steps )],
-            'activity_gt':[torch.tensor([]).to('cuda') for _ in range(self.cfg.lookahead_steps)],
+            'relocation_distributions':[torch.tensor([]).to(_dev) for _ in range(self.cfg.lookahead_steps)],
+            'relocation_locations_gt':[torch.tensor([]).to(_dev) for _ in range(self.cfg.lookahead_steps)],
+            'obj_mask':[torch.tensor([]).to(_dev) for _ in range(self.cfg.lookahead_steps)],
+            'reference_locations': torch.tensor([]).to(_dev),
+            'activity_distributions':[torch.tensor([]).to(_dev) for _ in range(self.cfg.lookahead_steps )],
+            'activity_gt':[torch.tensor([]).to(_dev) for _ in range(self.cfg.lookahead_steps)],
             'relocation_distributions_clarified':{},
             'activity_distributions_clarified':{},
             'num_queries':{},
