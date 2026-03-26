@@ -71,6 +71,7 @@ def run(data, group=None, cfg = {}, tags=[], logs_dir='logs', original_model=Fal
 
         early_stop_callback = EarlyStopping(monitor="Val_ES_accuracy", patience=40, verbose=False, mode="max")
         trainer = Trainer(accelerator='gpu', devices = torch.cuda.device_count(), logger=wandb_logger, max_epochs=epochs, log_every_n_steps=1, callbacks=[ckpt_callback, early_stop_callback], check_val_every_n_epoch=5)
+        json.dump(model_configs, open(os.path.join(output_dir, f'model_configs_{timestr}.json'), 'w'), indent=4)
         model = model_generator(model_configs = model_configs, original_model = original_model)
         model.set_object_consistency(data.get_object_consistency())
         model.cfg.query_types = []
@@ -144,6 +145,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     torch.cuda.empty_cache()
     torch.autograd.set_detect_anomaly(True)
+
+    print(f"Reading data from {args.path}")
+    print(f"Reading checkpoint from {args.ckpt_dir}")
+
     
     with open('config/default.yaml') as f:
         cfg = yaml.safe_load(f)

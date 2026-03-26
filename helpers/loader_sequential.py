@@ -36,7 +36,8 @@ class OneHotEmbedder():
         self.class_list = class_list
 
     def __call__(self, idxs):
-        return F.one_hot(idxs.to(int), num_classes=len(self.class_list))
+        num_classes = max(len(self.class_list), int(idxs.max().item()) + 1)
+        return F.one_hot(idxs.to(int), num_classes=num_classes)
 
 class BertEmbedder():
     def __init__(self, map_file, map_type):
@@ -145,10 +146,14 @@ class DataSplit():
         movements = (data['edges'][1:,:,:]-data['edges'][:-1,:,:]).max(-1).values
         movements = movements.view(data['edges'].size()[0]-1, data['edges'].size()[1], 1)
         activity = data['activity'][:-1].view(data['edges'].size()[0]-1,1).float()
-        node2idx = F.one_hot(data['nodes'].to(int), num_classes=self.objects_by_activity.size()[1]).permute(1,0)
+        num_classes = max(self.objects_by_activity.size()[1], int(data['nodes'].max().item()) + 1)
+        node2idx = F.one_hot(data['nodes'].to(int), num_classes=num_classes).permute(1,0)
 
-        activity_relevant_object_mask = F.one_hot(activity.squeeze(-1).to(int), num_classes=self.objects_by_activity.size()[0]) \
-                                            @ (self.objects_by_activity.to(int) @ node2idx)
+        oba = self.objects_by_activity
+        if num_classes > oba.size()[1]:
+            oba = F.pad(oba, (0, num_classes - oba.size()[1]))
+        activity_relevant_object_mask = F.one_hot(activity.squeeze(-1).to(int), num_classes=oba.size()[0]) \
+                                            @ (oba.to(int) @ node2idx)
         variation_relevant_object_mask = torch.zeros_like(movements)
         prev_act = None
         var_idxs = []
@@ -270,6 +275,10 @@ class RoutinesDataset():
     def get_objects_in_activity(self):
         obj_in_act = torch.zeros(len(self.activities), len(self.node_classes))
         for activity, obj_list in objects_by_activity.items():
+            if activity not in self.activities:
+                continue
             for obj in obj_list:
+                if obj not in self.node_classes:
+                    continue
                 obj_in_act[self.activities.index(activity), self.node_classes.index(obj)] = 1
         return obj_in_act

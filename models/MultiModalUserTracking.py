@@ -1177,10 +1177,10 @@ class MultiModalUserTrackingModule(LightningModule):
             self.log_dict({f"Train latents/{k}": v for k, v in results['latents'].items()})
         else:
             self.log('Train latents', results['latents'])
-        try:
-            self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
-        except Exception as e:
-            print(e)
+        # try:
+        #     self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
+        # except Exception as e:
+        #     print(e)
         res = torch.tensor([0.], requires_grad=True).to('cuda')
 
         if not self.original_model:   
@@ -1218,10 +1218,10 @@ class MultiModalUserTrackingModule(LightningModule):
         # Set early stopping metric
         self.log('Val_ES_accuracy',results['accuracies']['object_used'])
 
-        try:
-            self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
-        except Exception as e:
-            print(e)
+        # try:
+        #     self.log('Aux',self.object_activity_coembedding_module.auxiliary_accuracy)
+        # except Exception as e:
+        #     print(e)
 
         self.reset_validation()
         return 
@@ -1239,7 +1239,7 @@ class MultiModalUserTrackingModule(LightningModule):
         
         activity_names=common_data['activities']
         node_classes=common_data['node_classes']
-        std_for_activity = common_data['activity_stdev']
+        std_for_activity = common_data.get('activity_stdev', {})
 
         os.makedirs(output_dir, exist_ok=True)
         self.results['f1_score'] = [None for _ in range(self.cfg.lookahead_steps)]

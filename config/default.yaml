@@ -36,3 +36,4 @@ loss_latent_similarity: True
 loss_latent_pred: True
 loss_object_pred: True
 loss_activity_pred: True
+phased_training: False

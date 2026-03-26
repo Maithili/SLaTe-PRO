@@ -57,10 +57,10 @@ class GraphEncoderModule(LightningModule):
             new_loc = torch.matmul(edges[:,1:,:,:].float(), nodes_shortened)
         sequence_len = nodes_shortened.size()[1]
         nodes_and_locations = torch.cat([nodes_shortened, prev_loc, new_loc], dim=-1)
-        assert nodes_and_locations.size()[0] == batch_size, nodes_and_locations.size()
-        assert nodes_and_locations.size()[1] == sequence_len, nodes_and_locations.size()
-        assert nodes_and_locations.size()[2] == self.cfg.n_nodes, nodes_and_locations.size()
-        assert nodes_and_locations.size()[3] == self.cfg.n_len*3, nodes_and_locations.size()
+        assert nodes_and_locations.size()[0] == batch_size, str(nodes_and_locations.size())+"[0] is not the same as "+batch_size
+        assert nodes_and_locations.size()[1] == sequence_len, str(nodes_and_locations.size())+"[1] is not the same as "+sequence_len
+        assert nodes_and_locations.size()[2] == self.cfg.n_nodes, str(nodes_and_locations.size())+"[2] is not the same as "+str(self.cfg.n_nodes)
+        assert nodes_and_locations.size()[3] == self.cfg.n_len*3, str(nodes_and_locations.size())+"[3] is not the same as "+str(self.cfg.n_len*3)
 
         nodes_and_locations = self.embed_node_locations(nodes_and_locations)
         ## Try embedding node-location pairs per timestep and then passing through the encoder
