@@ -778,22 +778,22 @@ class MultiModalUserTrackingModule(LightningModule):
                     self.results['moved_by_activity'][act_num]['missed'] += int((used_and_activity_mask).sum() - (torch.bitwise_and(changes_pred, used_and_activity_mask)).sum())
                     self.results['moved_by_activity'][act_num]['total'] += int((used_and_activity_mask).sum())
                     self.results['moved_by_activity'][act_num]['fp'] += int(torch.bitwise_and(used_pred_and_not_gt, act_mask).sum())
-            if step == num_steps-1:
-                for object_usage_frequency in range(self.object_usage_frequency.max()):
-                    if len(self.results['moved_by_consistency']) <= object_usage_frequency:
-                        self.results['moved_by_consistency'].append({'correct':0,
-                                                                    'wrong':0,
-                                                                    'missed':0,
-                                                                    'total':0,
-                                                                    'fp':0,
-                                                                    })
-                    consistency_mask = (self.object_usage_frequency[:pred_seq_len,:] == object_usage_frequency).unsqueeze(0).to('cuda')
-                    used_and_consistency_mask = torch.bitwise_and(used_mask, consistency_mask)
-                    self.results['moved_by_consistency'][object_usage_frequency]['correct'] += int((torch.bitwise_and(correct, used_and_consistency_mask)).sum())
-                    self.results['moved_by_consistency'][object_usage_frequency]['wrong'] += int((torch.bitwise_and(wrong, used_and_consistency_mask)).sum())
-                    self.results['moved_by_consistency'][object_usage_frequency]['missed'] += int((used_and_consistency_mask).sum() - (torch.bitwise_and(changes_pred, used_and_consistency_mask)).sum())
-                    self.results['moved_by_consistency'][object_usage_frequency]['total'] += int((used_and_consistency_mask).sum())
-                    self.results['moved_by_consistency'][object_usage_frequency]['fp'] += int(torch.bitwise_and(used_pred_and_not_gt, consistency_mask).sum())
+            # if step == num_steps-1:
+                # for object_usage_frequency in range(self.object_usage_frequency.max()):
+                #     if len(self.results['moved_by_consistency']) <= object_usage_frequency:
+                #         self.results['moved_by_consistency'].append({'correct':0,
+                #                                                     'wrong':0,
+                #                                                     'missed':0,
+                #                                                     'total':0,
+                #                                                     'fp':0,
+                #                                                     })
+                #     consistency_mask = (self.object_usage_frequency[:pred_seq_len,:] == object_usage_frequency).unsqueeze(0).to('cuda')
+                #     used_and_consistency_mask = torch.bitwise_and(used_mask, consistency_mask)
+                #     self.results['moved_by_consistency'][object_usage_frequency]['correct'] += int((torch.bitwise_and(correct, used_and_consistency_mask)).sum())
+                #     self.results['moved_by_consistency'][object_usage_frequency]['wrong'] += int((torch.bitwise_and(wrong, used_and_consistency_mask)).sum())
+                #     self.results['moved_by_consistency'][object_usage_frequency]['missed'] += int((used_and_consistency_mask).sum() - (torch.bitwise_and(changes_pred, used_and_consistency_mask)).sum())
+                #     self.results['moved_by_consistency'][object_usage_frequency]['total'] += int((used_and_consistency_mask).sum())
+                #     self.results['moved_by_consistency'][object_usage_frequency]['fp'] += int(torch.bitwise_and(used_pred_and_not_gt, consistency_mask).sum())
 
             self.results['activity']['correct'][step] += int((expected_activities == pred_activities).sum())
             self.results['activity']['wrong'][step] += int((expected_activities != pred_activities).sum())

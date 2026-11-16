@@ -37,7 +37,7 @@ def time_sine_informed_many(t):
     return torch.Tensor(enc)
 
 def time_external(t):
-    in_t = t
+    in_t = torch.as_tensor(t, dtype=torch.float32)
     mins = in_t % 60
     in_t = in_t // 60
     hrs = in_t % 24
@@ -45,7 +45,7 @@ def time_external(t):
     days = in_t % 7
     in_t = in_t // 7
     weeks = in_t
-    return torch.Tensor([weeks, days, hrs, mins])
+    return torch.stack([weeks, days, hrs, mins], dim=-1)
 
 def time_linear(t):
     return torch.Tensor([t])
@@ -58,7 +58,7 @@ def time_semantic(t):
     return torch.Tensor([t, morning, aft, evening])
 
 def time_external_normalized(t):
-    in_t = t
+    in_t = torch.as_tensor(t, dtype=torch.float32)
     mins = in_t % 60
     in_t = in_t // 60
     hrs = in_t % 24
@@ -66,17 +66,20 @@ def time_external_normalized(t):
     days = in_t % 7
     in_t = in_t // 7
     weeks = in_t
-    return torch.Tensor([weeks, days/7, hrs/24, mins/60])
+    return torch.stack([weeks, days/7, hrs/24, mins/60], dim=-1)
 
 def clock_time_with_weekend_bit(t, weekend_days):
-    in_t = t
+    in_t = torch.as_tensor(t, dtype=torch.float32)
     mins = in_t % 60
     in_t = in_t // 60
     hrs = in_t % 24
     in_t = in_t // 24
     days = in_t % 7
-    weekend = 1 if days in weekend_days else 0
-    return torch.Tensor([weekend, hrs, mins])
+    weekend = torch.zeros_like(days)
+    for wd in weekend_days:
+        weekend = weekend + (days == wd).float()
+    weekend = weekend.clamp(max=1)
+    return torch.stack([weekend, hrs, mins], dim=-1)
 
 class TimeEncodingOptions():
     def __init__(self, weekend_days=None):

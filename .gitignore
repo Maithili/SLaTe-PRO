@@ -135,3 +135,4 @@ wandb/
 logs/
 slurm*
 logsWithMessyFilteredData/*
+*.pt

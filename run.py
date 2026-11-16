@@ -183,7 +183,8 @@ if __name__ == '__main__':
                             time_encoder=time_encoding, 
                             batch_size=cfg['batch_size'],
                             use_bert=args.use_bert,
-                            activity_dropout=cfg['activity_dropout_prob'])
+                            activity_dropout=cfg['activity_dropout_prob'],
+                            train_days=args.train_days)
 
     group = args.path.split('/')[-2]
     output_dir = os.path.join(args.logs_dir, group, cfg['NAME'])

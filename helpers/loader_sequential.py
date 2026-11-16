@@ -141,6 +141,7 @@ class DataSplit():
 
     def __getitem__(self, idx: int):
         data = torch.load(os.path.join(self.routines_dir, self.files[idx]))
+
         if data['times'] is None:
             data['times'] = torch.zeros((data['edges'].size()[0]-1, 1))
         movements = (data['edges'][1:,:,:]-data['edges'][:-1,:,:]).max(-1).values
@@ -200,13 +201,21 @@ class RoutinesDataset():
                  time_encoder = time_external, 
                  batch_size = 1,
                  use_bert = False,
-                 activity_dropout = 0.0):
+                 activity_dropout = 0.0,
+                 train_days = None,
+                 same_train_val = False):
 
-        with open(os.path.join(data_path, 'common_data.json')) as f:
+        common_data_path = os.path.join(data_path, 'common_data.json')
+        if not os.path.exists(common_data_path):
+            print(f'Common data file not found at {common_data_path}')
+            household = [h for h in ['HouseholdA', 'HouseholdB', 'HouseholdC'] if h in common_data_path][0]
+            common_data_path = f"/coc/flash5/mpatel377/repos/CoAdaptationSimulation/external/HOMER_PLUS/{household}/processed_seqLM_coarse/common_data.json"
+            print(f'Using common data file at {common_data_path}')
+        with open(common_data_path) as f:
             self.common_data = json.load(f)
 
         self.time_encoder = time_encoder
-        
+        self.train_days = train_days
         self.params = {}
         self.params['dt'] = self.common_data.get('dt',None)
         self.params['batch_size'] = batch_size
@@ -227,14 +236,30 @@ class RoutinesDataset():
             activity_embedder = OneHotEmbedder(self.activities)
         
         # Generate train and test loaders
-        self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,-5), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, objects_by_activity=self.get_objects_in_activity())
-        self.val = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(-5,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, objects_by_activity=self.get_objects_in_activity())
-        self.test = DataSplit(os.path.join(data_path,'test'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, objects_by_activity=self.get_objects_in_activity())
-        print('Train split has ',len(self.train),' routines')
-        print('Test split has ',len(self.test),' routines')
+        if os.path.exists(os.path.join(data_path,'train')):
+            if same_train_val:
+                self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, objects_by_activity=self.get_objects_in_activity())
+                self.val = self.train
+            else:
+                default_num_val_days = max(1, min(5, round(len(os.listdir(os.path.join(data_path,'train')))/4)))
+                self.train = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(None,-default_num_val_days if self.train_days is None else self.train_days), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, objects_by_activity=self.get_objects_in_activity())
+                self.val = DataSplit(os.path.join(data_path,'train'), self.time_encoder, filerange=(-default_num_val_days,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, objects_by_activity=self.get_objects_in_activity())
+            print('Train split has ',len(self.train),' routines')
+            print('Val split has ',len(self.val),' routines')
+        else:
+            self.train = None
+            self.val = None
+            print('No train split found')
+
+        if os.path.exists(os.path.join(data_path,'test')):
+            self.test = DataSplit(os.path.join(data_path,'test'), self.time_encoder, filerange=(None,None), node_embedder=node_embedder, activity_embedder=activity_embedder, activity_dropout=activity_dropout, objects_by_activity=self.get_objects_in_activity())
+            print('Test split has ',len(self.test),' routines')
+        else:
+            self.test = None
+            print('No test split found')
 
         # Infer parameters for the model
-        model_data = self.test.collate_fn([self.test[0]])
+        model_data = self.test.collate_fn([self.test[0]]) if self.test is not None else self.train.collate_fn([self.train[0]])
         self.params['n_nodes'] = model_data['node_features'].size()[-2]
         self.params['n_len'] = model_data['node_features'].size()[-1]
         self.params['act_len'] = model_data['activity_features'].size()[-1]
@@ -249,7 +274,7 @@ class RoutinesDataset():
         return DataLoader(self.test, num_workers=os.cpu_count(), batch_size=self.params['batch_size'], collate_fn=self.test.collate_fn)
 
     def get_val_loader(self):
-        return DataLoader(self.val, num_workers=os.cpu_count(), batch_size=self.params['batch_size'], collate_fn=self.test.collate_fn)
+        return DataLoader(self.val, num_workers=os.cpu_count(), batch_size=self.params['batch_size'], collate_fn=self.val.collate_fn)
 
     def get_test_split(self):
         return self.test
@@ -261,15 +286,14 @@ class RoutinesDataset():
         obj_moved = None
         kernel = torch.tensor([0,0,0,0,0,0,1,1,1,1,1,1,
                                1,1,1,1,1,1,1,1,1,1,1,1]).reshape(1,1,-1).float()
-        for datapoint in self.train: # + self.test + self.val:
+        data = self.train if self.train is not None else self.test
+        for datapoint in data:
             changes = (datapoint['edges'][1:].argmax(-1) != datapoint['edges'][:-1].argmax(-1)).to(int)
             obj_moved_around_now = (torch.nn.functional.conv1d(changes.unsqueeze(0).permute(2,0,1).float(), kernel, padding='same').permute(1,2,0).squeeze(0)>0).to(int)
-
             if obj_moved is None:
                 obj_moved = obj_moved_around_now
             else:
                 obj_moved += obj_moved_around_now
-
         return obj_moved
 
     def get_objects_in_activity(self):

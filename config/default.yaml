@@ -21,7 +21,7 @@ query_negative_at_all_steps: False
 query_trust: 0.8
 query_usefulness_metric: information_gain
 query_usefullness_thresh:
-  information_gain: [0.00001, 0.001, 0.01, 0.1, 0.5, 1.0, 10.0, 50.0]
+  information_gain: [500.0]
 consistency_thresholds: [10]
 aux_loss_weight: 0.0
 c_len: 16
